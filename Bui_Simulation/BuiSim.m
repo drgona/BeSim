@@ -1,4 +1,4 @@
-function outdata = BuiSim(model, estim, ctrl, dist, refs, sim, PlotParam)
+function outdata = BuiSim(model, estim, ctrl, dist, refs, SimParam, PlotParam)
 
 if nargin == 0  % model
    buildingType = 'Infrax';  
@@ -32,12 +32,12 @@ if nargin < 5   % references
    refs = BuiRefs();      % TODO FIX to be general
 end
 if nargin < 6   % simulation parameters
-    sim.run.start = 1;     % starting day
-%     sim.run.end = 13;       % finishing day
-    sim.run.end = 3;       % finishing day
-    sim.verbose = 1;
-    sim.flagSave = 0;
-    sim.comfortTol = 1e-1;
+    SimParam.run.start = 1;     % starting day
+%     SimParam.run.end = 13;       % finishing day
+    SimParam.run.end = 3;       % finishing day
+    SimParam.verbose = 1;
+    SimParam.flagSave = 0;
+    SimParam.comfortTol = 1e-1;
 end
 if nargin < 7   % plotting  
     PlotParam.flagPlot = 0;  % plot 0 - no 1 - yes
@@ -52,12 +52,12 @@ fprintf('\n------------------ Simulation Setup -----------------\n');
 
 fprintf('*** Building Type = %s\n' , model.buildingType);
 fprintf('*** Prediction model order = %d, \n',   size(model.pred.Ad,1))
-fprintf('*** Start day = %d , End day = %d \n', sim.run.start, sim.run.end);
+fprintf('*** Start day = %d , End day = %d \n', SimParam.run.start, SimParam.run.end);
 
 %% Simulation steps   
 % starting and finishing  second:  24h = 86400 sec
-SimStart_sec = (sim.run.start-1)*86400;
-SimStop_sec = (sim.run.end)*86400;
+SimStart_sec = (SimParam.run.start-1)*86400;
+SimStop_sec = (SimParam.run.end)*86400;
 % starting and finishing  step for simulation loop - MPC
 SimStart = floor(SimStart_sec/model.plant.Ts)+1;
 SimStop = ceil(SimStop_sec/model.plant.Ts);
@@ -176,7 +176,7 @@ for k = 1:Nsim
 
     
 %%  SIMULATION - plant model
-    if  sim.sumulate
+    if  SimParam.emulate
 %    State and Output update
         xn = model.plant.Ad*x0 + model.plant.Bd*uopt+ model.plant.Ed*d0 +model.plant.Gd*1;
         yn = model.plant.Cd*x0 + model.plant.Dd*uopt + model.plant.Fd*1;
@@ -190,7 +190,7 @@ for k = 1:Nsim
     
 %%   y measurements
     % TODO: implement real time measurement
-    if  not(sim.sumulate) 
+    if  not(SimParam.emulate) 
        yn = Y(:,k);         % current outputs               
     end
 
@@ -371,10 +371,10 @@ for k = 1:Nsim
     
     %     violation evaluation for j-th output
     for j = 1:model.plant.ny
-        if yn(j) > wa(j,k) + sim.comfortTol    % above viol. condition
+        if yn(j) > wa(j,k) + SimParam.comfortTol    % above viol. condition
             v(j) = yn(j) - wa(j,k);        % above viol. magnitude
             va(j) = v(j);
-        elseif yn(j)  <  wb(j,k) - sim.comfortTol  % below viol. condition
+        elseif yn(j)  <  wb(j,k) - SimParam.comfortTol  % below viol. condition
             v(j) = yn(j) - wb(j,k);           % below viol. magnitude
             vb(j) = v(j);
         end
@@ -503,8 +503,8 @@ outdata.estim = estim;    % estimator
 outdata.ctrl = ctrl;      %  controller
 % outdata.dist = dist;      %  disturbances
 % outdata.dist = refs;      %  references
-outdata.sim = sim;        %  simulation parameters
-outdata.sim.run.Nsim = Nsim;    % sim steps
+outdata.SimParam = SimParam;        %  simulation parameters
+outdata.SimParam.run.Nsim = Nsim;    % sim steps
 
 % plant simulation data 
 outdata.data.X = X;         %  state vector
@@ -565,7 +565,7 @@ outdata.info.cmp = etime(clock, start_t);
 
 
 % print verbose condition
-if sim.verbose
+if SimParam.verbose
         % -------- PRINT --------------
         fprintf('\n------------------ Simulation Results ---------------\n');
         
@@ -590,8 +590,8 @@ fprintf('*** Simulation finished at: %s \n',  outdata.info.date);
 
 
 %% save data - ADJUST THIS
-if sim.flagSave
-    str = sprintf('../Data/outData%s_from%d_to%d.mat', model.buildingType, sim.run.start, sim.run.end);
+if SimParam.flagSave
+    str = sprintf('../Data/outData%s_from%d_to%d.mat', model.buildingType, SimParam.run.start, SimParam.run.end);
     save(str,'outdata');
 end
 

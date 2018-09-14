@@ -1,4 +1,4 @@
-function controller = BuiCtrl(model, dist, CtrlParam)
+function controller = BuiCtrl(model, CtrlParam)
 
 if nargin == 0
    buildingType = 'Infrax';  

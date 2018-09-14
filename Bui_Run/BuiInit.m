@@ -27,12 +27,12 @@ addpath('../Bui_Simulation/')
 
 %% MODEL   emulator + predictor
 % available buildings  'Infrax',  'HollandschHuys', 'Reno', 'Old', 'RenoLight'
-% buildingType = 'Infrax';  
-buildingType = 'HollandschHuys';   
-ModelOrders.range = [100, 200, 600]; % orderds for INFRAX and HH - add any reduced order model you wish to have
-% ModelOrders.range = [4, 7, 10, 15, 20, 30, 40, 100];  % orderds for residential house
-ModelOrders.choice = 200;   
-% ModelOrders.choice = 100; 
+buildingType = 'Reno';  
+% buildingType = 'Infrax';   
+% ModelOrders.range = [100, 200, 600]; % orderds for INFRAX and HH - add any reduced order model you wish to have
+ModelOrders.range = [4, 7, 10, 15, 20, 30, 40, 100];  % orderds for residential house
+% ModelOrders.choice = 200;   
+ModelOrders.choice = 100; 
 % ModelOrders.choice = 'full';
 ModelOrders.off_free = 0;    %  augmented model
 reload = 0; 
@@ -81,7 +81,7 @@ CtrlParam.PID.use = 0;
 % TODO: finish implementation of RBC, MPC, PID, ML
 
 
-ctrl = BuiCtrl(model, dist, CtrlParam);
+ctrl = BuiCtrl(model, CtrlParam);
 
 % TODO higher level tuning params
 % PID coefficients
@@ -118,16 +118,16 @@ end
 
 
 %% Simulate
-sim.run.start = 1;
-% sim.run.end = 13; 
-sim.run.end = 2; 
-sim.verbose = 1;
-sim.flagSave = 0;
-sim.comfortTol = 1e-1;
+SimParam.run.start = 1;
+SimParam.run.end = 13; 
+% sim.run.end = 2; 
+SimParam.verbose = 1;
+SimParam.flagSave = 0;
+SimParam.comfortTol = 1e-1;
 % flag distinguishing emulation and real measurements
 %  0 - measurements
 %  1 - emulation
-sim.sumulate = 1;
+SimParam.emulate = 1;
 
 % TODO: modify plot option in BuiSim init
 PlotParam.flagPlot = 1;     % plot 0 - no 1 - yes
@@ -141,7 +141,7 @@ PlotParam.plotCtrl = 1;        % plot control
 % PlotParam.only_zone = 0;    %  plot only zone temperatures 0 - no 1 - yes  
 
 % %  simulation file with embedded plotting file
-outdata = BuiSim(model, estim, ctrl, dist, refs, sim, PlotParam);
+outdata = BuiSim(model, estim, ctrl, dist, refs, SimParam, PlotParam);
 
 
 

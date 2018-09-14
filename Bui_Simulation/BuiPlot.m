@@ -11,7 +11,7 @@ if nargin < 2
 end
 
 % init
-Nsim = outdata.sim.run.Nsim; 
+Nsim = outdata.SimParam.run.Nsim; 
 Time = (1:Nsim)*outdata.model.plant.Ts/3600/24;  % days
 
 
