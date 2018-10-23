@@ -107,8 +107,13 @@ end
                 AG(:, (N-k)*1+1:(N-k+1)*1 ) = model.pred.Ad* AG(:, (N-k+1)*1+1:(N-k+2)*1 );
             end  
         else
-            con = con + [ x(:, k+1) == model.pred.Ad*x(:, k) + model.pred.Bd*uk + model.pred.Ed*Dpreview + model.pred.Gd*1];
-            con = con + [ y(:, k) == model.pred.Cd*x(:, k)  + model.pred.Dd*uk + model.pred.Fd*1 ];
+            if nd == 0 % no disturbances formulation
+                con = con + [ x(:, k+1) == model.pred.Ad*x(:, k) + model.pred.Bd*uk + model.pred.Gd*1];
+                con = con + [ y(:, k) == model.pred.Cd*x(:, k)  + model.pred.Dd*uk + model.pred.Fd*1 ];
+            else
+                con = con + [ x(:, k+1) == model.pred.Ad*x(:, k) + model.pred.Bd*uk + model.pred.Ed*Dpreview + model.pred.Gd*1];
+                con = con + [ y(:, k) == model.pred.Cd*x(:, k)  + model.pred.Dd*uk + model.pred.Fd*1 ];
+            end
         end
 
         %         % comfort zone with  violation penalty - dynamic comfort zone
@@ -136,6 +141,10 @@ end
 % http://www.gurobi.com/documentation/7.5/refman/timelimit.html
 
     % optimizer for dynamic comfort zone
-    mpc = optimizer(con, obj, options,  { x(:, 1), d_prev, wa_prev, wb_prev }, {u(:,1); obj} );
+    if nd == 0  % no disturbances formulation
+        mpc = optimizer(con, obj, options,  { x(:, 1), wa_prev, wb_prev }, {u(:,1); obj} );
+    else
+        mpc = optimizer(con, obj, options,  { x(:, 1), d_prev, wa_prev, wb_prev }, {u(:,1); obj} );
+    end
 
 end

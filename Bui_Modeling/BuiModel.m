@@ -99,8 +99,8 @@ model.plant.Ed = plant_mod.B(:,d_index);
 model.plant.Cd = plant_mod.C(ym_index,:); 
 model.plant.Dd = plant_mod.D(ym_index,u_index);
 %  model initialization extension matrices
-model.plant.Gd = plant_mod.b(:,end);     % extension of original matrix Bd
-model.plant.Fd = plant_mod.d(ym_index,end);      % extension of original matrix Dd
+model.plant.Gd = plant_mod.b(:,end);             % extension of original matrix Bd - disturbances compensation matrix
+model.plant.Fd = plant_mod.d(ym_index,end);      % extension of original matrix Dd - kelvins to celsius compensation matrix
 % Overall sim. model dimensions
 model.plant.nx = size(model.plant.Ad, 2);
 model.plant.ny = size(model.plant.Cd, 1);

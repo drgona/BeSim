@@ -68,19 +68,18 @@ Nsim = length(SimStart:SimStop);
 
 % preview setup
 if ctrl.MPC.use
-    N = ctrl.MPC.N;
+        N = ctrl.MPC.N;
 else
-    N = 0;
+        N = 0;
 end
-
 
 X = zeros(model.plant.nx,Nsim+1);
 D = dist.d(SimStart:SimStop+N,:)';
 
 if  not(ctrl.use)  % precomputed inputs and outputs
     U = ctrl.precomputed.U(:,SimStart:SimStop);
-    Y = ctrl.precomputed.Y(:,SimStart:SimStop)+273.15;   % infrax - signal in deg C
-%     Y = ctrl.precomputed.Y(:,SimStart:SimStop);    
+%     Y = ctrl.precomputed.Y(:,SimStart:SimStop)+273.15;   % infrax - signal in deg C
+    Y = ctrl.precomputed.Y(:,SimStart:SimStop);    
     uopt = 0*U(:,1); % initialize controls
     
 else   % initialize matrices for closed loop control simulations
@@ -174,6 +173,76 @@ for k = 1:Nsim
 % 2, measured (fixed) u and y                                    - DONE
 % 3, measured (fixed) y - computed control and estimation        - TODO
 
+
+    
+%%  CONTROL - TODO standalone function       
+    if ctrl.use 
+        
+        if ctrl.RBC.use
+            %  heat curve control 
+            [uopt, heat] = BuiRBC(yn,R(:,k),heat,TSup(k),ctrl);
+            
+        elseif ctrl.PID.use
+            
+            
+        elseif ctrl.MPC.use
+                
+%             TODO: predictions as standalone function
+            % preview of disturbance signals on the prediction horizon
+            Dpreview = D(:, k:k+(ctrl.MPC.Ndp-1));   
+            % preview of thresholds on the prediction horizon - Dynamic comfort zone
+            wa_prev = wa(:, k:k+(ctrl.MPC.Nrp-1));
+            wb_prev = wb(:, k:k+(ctrl.MPC.Nrp-1));
+            
+%             TODO:  adapt Dpreview wa_prev wb_prev
+            if estim.use   % estimated states
+                if model.plant.nd == 0  %  no disturbnances option
+                     [opt_out, feasible, info1, info2] =  ctrl.MPC.optimizer{{xp, wa_prev, wb_prev}}; % optimizer with estimated states
+                else
+                     [opt_out, feasible, info1, info2] =  ctrl.MPC.optimizer{{xp, Dpreview, wa_prev, wb_prev}}; % optimizer with estimated states
+                end
+            else    % perfect state update
+                if model.plant.nd == 0  %  no disturbnances option
+                     [opt_out, feasible, info1, info2] =  ctrl.MPC.optimizer{{x0, wa_prev, wb_prev}}; % optimizer with estimated states
+                else
+                     [opt_out, feasible, info1, info2] =  ctrl.MPC.optimizer{{x0, Dpreview, wa_prev, wb_prev}}; % optimizer with measured states  
+                end
+                 
+            end
+            
+%             %     feasibility check
+%             if feasible == 3 %    3 Maximum iterations exceeded
+% %                 uopt = does not change value
+%                 obj = 0;
+            if ~ismember(feasible, [0 3 4 5])
+                k
+                error('infeasible')      
+            else
+                uopt = opt_out{1};   % optimal control action
+                obj =  opt_out{2};   %objective function value     
+            end
+               
+            
+%             % Objective function value increments in each sim. step
+%             J_v(k) = vb'*Qsb*vb + va'*Qsa*va;      % violations increments in objective
+%             J_u(k) = uopt'*Qu*uopt;                % inputs increments in objective
+%             J(k) =  J_v(k)+J_u(k);               % overalll increments in objective
+%             %     yalmip objective function increments vector
+%             OBJ(k) = obj;
+%                 
+        end
+            
+
+    end  
+   
+%% Pre-computed controls
+    if not(ctrl.use)
+       uopt = U(:,k);       % current controls 
+    end
+     
+
+
+%% TODO: wrap simulation and measurement in standalone function with standardized interface
     
 %%  SIMULATION - plant model
     if  SimParam.emulate
@@ -283,63 +352,6 @@ for k = 1:Nsim
     
     
     
-%%  CONTROL - TODO standalone function       
-    if ctrl.use 
-        
-        if ctrl.RBC.use
-            %  heat curve control 
-            [uopt, heat] = BuiRBC(yn,R(:,k),heat,TSup(k),ctrl);
-            
-        elseif ctrl.PID.use
-            
-            
-        elseif ctrl.MPC.use
-                
-            % preview of disturbance signals on the prediction horizon
-            Dpreview = D(:, k:k+(ctrl.MPC.Ndp-1));   
-
-            % preview of thresholds on the prediction horizon - Dynamic comfort zone
-            wa_prev = wa(:, k:k+(ctrl.MPC.Nrp-1));
-            wb_prev = wb(:, k:k+(ctrl.MPC.Nrp-1));
-            
-%             TODO:  adapt Dpreview wa_prev wb_prev
-            if estim.use
-                [opt_out, feasible, info1, info2] =  ctrl.MPC.optimizer{{xe, Dpreview, wa_prev, wb_prev}}; % optimizer with estimated states
-            else
-                [opt_out, feasible, info1, info2] =  ctrl.MPC.optimizer{{x0, Dpreview, wa_prev, wb_prev}}; % optimizer with measured states  
-            end
-            
-%             %     feasibility check
-%             if feasible == 3 %    3 Maximum iterations exceeded
-% %                 uopt = does not change value
-%                 obj = 0;
-            if ~ismember(feasible, [0 3 4 5])
-                k
-                error('infeasible')      
-            else
-                uopt = opt_out{1};   % optimal control action
-                obj =  opt_out{2};   %objective function value     
-            end
-               
-            
-%             % Objective function value increments in each sim. step
-%             J_v(k) = vb'*Qsb*vb + va'*Qsa*va;      % violations increments in objective
-%             J_u(k) = uopt'*Qu*uopt;                % inputs increments in objective
-%             J(k) =  J_v(k)+J_u(k);               % overalll increments in objective
-%             %     yalmip objective function increments vector
-%             OBJ(k) = obj;
-%                 
-        end
-            
-
-    end  
-   
-%% Pre-computed controls
-    if not(ctrl.use)
-       uopt = U(:,k);       % current controls 
-    end
-     
-    
 %% Control action post-processing
 % TODO - heat flows to valve positions
 
@@ -364,6 +376,8 @@ for k = 1:Nsim
     
     
 %% ---------- Comfort evaluation ----------
+
+if  ctrl.use
     % VIOLATIONS of the thermal comfort zones of individual outputs
     va = zeros(model.plant.ny,1); vb = zeros(model.plant.ny,1); v = zeros(model.plant.ny,1);
     % VIOLATIONS of the PMV zone of individual outputs
@@ -397,9 +411,8 @@ for k = 1:Nsim
     PMVViol(:,k) =  PMVv;
     PMVAboveViol(:,k) =  PMVva;
     PMVBelowViol(:,k) =  PMVvb;
-    
-  
-        
+end
+
     
     
             
@@ -425,24 +438,27 @@ end
 
 Ts = model.plant.Ts;
 
-% -------- ENERGY COSTS ----------
-Uheat = U(U>0);
-Ucool = U(U<0);
-Qheat = 1;   % heat coefficient
-Qcool = 1;   % cool coefficient
-%  ENERGY COSTS for individudal inputs
-    for j = 1:model.plant.ny
-        outdata.info.HeatingCost(j) = sum(Qheat*Uheat(j:model.plant.ny:size(Uheat,1)))*Ts/1000/3600;       % heating cost [kW hours]
-        outdata.info.CoolingCost(j) = sum(abs(Qcool*Ucool(j:model.plant.ny:size(Ucool,1))))*Ts/1000/3600;  % cooling cost [kW hours]
-        outdata.info.TotalCost(j) = outdata.info.HeatingCost(j)+outdata.info.CoolingCost(j);             % total cost [kW hours]
-    end
-% Overall ENERGY COST
-outdata.info.OverallHeatingCost = sum(outdata.info.HeatingCost);                           % heating cost [kW hours]
-outdata.info.OverallCoolingCost = sum(outdata.info.CoolingCost);                           % cooling cost [kW hours]
-outdata.info.OverallTotalCost = sum(outdata.info.OverallHeatingCost)+sum(outdata.info.OverallCoolingCost);     % total cost [kW hours]
+if  ctrl.use
+    % -------- ENERGY COSTS ----------
+    Uheat = U(U>0);
+    Ucool = U(U<0);
+    Qheat = 1;   % heat coefficient
+    Qcool = 1;   % cool coefficient
+    %  ENERGY COSTS for individudal inputs
+        for j = 1:model.plant.ny
+            outdata.info.HeatingCost(j) = sum(Qheat*Uheat(j:model.plant.ny:size(Uheat,1)))*Ts/1000/3600;       % heating cost [kW hours]
+            outdata.info.CoolingCost(j) = sum(abs(Qcool*Ucool(j:model.plant.ny:size(Ucool,1))))*Ts/1000/3600;  % cooling cost [kW hours]
+            outdata.info.TotalCost(j) = outdata.info.HeatingCost(j)+outdata.info.CoolingCost(j);             % total cost [kW hours]
+        end
+    % Overall ENERGY COST
+    outdata.info.OverallHeatingCost = sum(outdata.info.HeatingCost);                           % heating cost [kW hours]
+    outdata.info.OverallCoolingCost = sum(outdata.info.CoolingCost);                           % cooling cost [kW hours]
+    outdata.info.OverallTotalCost = sum(outdata.info.OverallHeatingCost)+sum(outdata.info.OverallCoolingCost);     % total cost [kW hours]
+end
 
 % ------------ COMFORT -----------------
 % COMFORT satisfaction for each output
+if  ctrl.use
     for j = 1:model.plant.ny
         %  comfort satisfacion
         outdata.info.PositiveComfortRate(j) = 100*(1-nnz(AboveViol(j,:))/length(AboveViol(j,:)));   %  PCR
@@ -493,7 +509,7 @@ outdata.info.Overall_PMV_TVS = sum(outdata.info.PMVTotalViolSum);     % sum of t
 outdata.info.Overall_PMV_PVM =  max(outdata.info.PMVPositiveViolMax);  % max of positive viol
 outdata.info.Overall_PMV_NVM =  max(outdata.info.PMVNegativeViolMax);  % max of negative viol
 outdata.info.Overall_PMV_TVM =  max(outdata.info.PMVTotalViolMax);     % max of total viol
-
+end
 
 % ------------ DATA -----------------
 
