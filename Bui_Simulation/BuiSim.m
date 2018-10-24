@@ -38,6 +38,7 @@ if nargin < 6   % simulation parameters
     SimParam.verbose = 1;
     SimParam.flagSave = 0;
     SimParam.comfortTol = 1e-1;
+    SimParam.profile = 0; 
 end
 if nargin < 7   % plotting  
     PlotParam.flagPlot = 0;  % plot 0 - no 1 - yes
@@ -46,6 +47,10 @@ if nargin < 7   % plotting
     PlotParam.only_zone = 0;    %  plot only zone temperatures 0 - no 1 - yes     
 end
 
+% matlab profiler function for CPU evaluation
+if SimParam.profile
+    profile on 
+end
 
 %% Simulation setup   
 fprintf('\n------------------ Simulation Setup -----------------\n');
@@ -54,7 +59,7 @@ fprintf('*** Building Type = %s\n' , model.buildingType);
 fprintf('*** Prediction model order = %d, \n',   size(model.pred.Ad,1))
 fprintf('*** Start day = %d , End day = %d \n', SimParam.run.start, SimParam.run.end);
 
-%% Simulation steps   
+% Simulation steps   
 % starting and finishing  second:  24h = 86400 sec
 SimStart_sec = (SimParam.run.start-1)*86400;
 SimStop_sec = (SimParam.run.end)*86400;
@@ -151,8 +156,6 @@ J_u =  zeros(1,Nsim);
 OBJ =  zeros(1,Nsim);
    
 
-
-
 %% ------ MAIN simulation loop ------
     % % ------ Verbose ------
 fprintf('\n---------------- Simulation Running -----------------');
@@ -175,18 +178,18 @@ for k = 1:Nsim
 
 
     
-%%  CONTROL - TODO standalone function       
-    if ctrl.use 
-        
+%%  CONTROL  
+% TODO standalone functions       
+    if ctrl.use   
         if ctrl.RBC.use
             %  heat curve control 
             [uopt, heat] = BuiRBC(yn,R(:,k),heat,TSup(k),ctrl);
+%             TODO - automatic tuning general case         
             
         elseif ctrl.PID.use
+%             TODO - implementation
             
-            
-        elseif ctrl.MPC.use
-                
+        elseif ctrl.MPC.use          
 %             TODO: predictions as standalone function
             % preview of disturbance signals on the prediction horizon
             Dpreview = D(:, k:k+(ctrl.MPC.Ndp-1));   
@@ -220,31 +223,27 @@ for k = 1:Nsim
             else
                 uopt = opt_out{1};   % optimal control action
                 obj =  opt_out{2};   %objective function value     
-            end
-               
+            end           
             
 %             % Objective function value increments in each sim. step
 %             J_v(k) = vb'*Qsb*vb + va'*Qsa*va;      % violations increments in objective
 %             J_u(k) = uopt'*Qu*uopt;                % inputs increments in objective
 %             J(k) =  J_v(k)+J_u(k);               % overalll increments in objective
 %             %     yalmip objective function increments vector
-%             OBJ(k) = obj;
-%                 
+%             OBJ(k) = obj;             
         end
-            
-
     end  
    
-%% Pre-computed controls
+    
+%% Controlled Sytem Dynamics
+% TODO: wrap simulation and measurement in standalone function with standardized interface
+    
+% 1, Pre-computed controls
     if not(ctrl.use)
        uopt = U(:,k);       % current controls 
     end
-     
-
-
-%% TODO: wrap simulation and measurement in standalone function with standardized interface
-    
-%%  SIMULATION - plant model
+         
+% 2, EMULATOR - plant model
     if  SimParam.emulate
 %    State and Output update
         xn = model.plant.Ad*x0 + model.plant.Bd*uopt+ model.plant.Ed*d0 +model.plant.Gd*1;
@@ -255,20 +254,18 @@ for k = 1:Nsim
         Y(:,k) = yn;
         U(:,k) = uopt;       
     end   
+%     TODO: dymola co-simulation
     
     
-%%   y measurements
+% 3, Output measurements - real plant
     % TODO: implement real time measurement
     if  not(SimParam.emulate) 
        yn = Y(:,k);         % current outputs               
     end
 
-%     %% Pre-computed controls
-%     if not(ctrl.use)
-%        uopt = U(:,k);       % current controls 
-%     end
-       
-%%   ESTIMATION  - TODO standalone function?
+
+%%   ESTIMATION  
+% TODO standalone functions?
     if estim.use 
         if estim.SKF.use  % stationary KF
             
@@ -350,8 +347,6 @@ for k = 1:Nsim
     end
     
     
-    
-    
 %% Control action post-processing
 % TODO - heat flows to valve positions
 
@@ -376,6 +371,9 @@ for k = 1:Nsim
     
     
 %% ---------- Comfort evaluation ----------
+
+% move this to post-processing
+% adapt computations to vector format to avoid loops
 
 if  ctrl.use
     % VIOLATIONS of the thermal comfort zones of individual outputs
@@ -412,9 +410,6 @@ if  ctrl.use
     PMVAboveViol(:,k) =  PMVva;
     PMVBelowViol(:,k) =  PMVvb;
 end
-
-    
-    
             
 %     REMAINING simulation time computation
     step_time = etime(clock, start_t);                  %  elapsed time of one sim. step
@@ -427,14 +422,8 @@ end
         
 end
 
-
-
-%% ---------- Output Data + verbose ------------
-
+%% ---------- Simulation Output Data  ------------
 % TODO: modify to be general
-
-
-%% ---------- Output Data + verbose ------------
 
 Ts = model.plant.Ts;
 
@@ -575,10 +564,10 @@ if ctrl.use
 %     end
 end
 
-
 %  elapsed time of simulation
 outdata.info.cmp = etime(clock, start_t);
 
+%% Simulation results reports and plots
 
 % print verbose condition
 if SimParam.verbose
@@ -598,25 +587,26 @@ if SimParam.verbose
         fprintf('*** Simulation Time: %.1f secs\n', outdata.info.cmp);
     
 end
-
-
-%% Simulation ends  
+% Simulation ends  
 outdata.info.date =  datestr(now);
 fprintf('*** Simulation finished at: %s \n',  outdata.info.date);
 
-
-%% save data - ADJUST THIS
+% SAVE data 
 if SimParam.flagSave
     str = sprintf('../Data/outData%s_from%d_to%d.mat', model.buildingType, SimParam.run.start, SimParam.run.end);
     save(str,'outdata');
 end
 
-
-%% plotting the outut data - TODO adapt
+% PLOT the outut data 
 if PlotParam.flagPlot
     BuiPlot(outdata,PlotParam)
 end
 
+% PROFILE CPU load
+if SimParam.profile
+    outdata.profile = profile('info');
+    profile viewer
+end
 
 
 end

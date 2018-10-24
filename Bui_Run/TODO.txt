@@ -81,3 +81,31 @@
 % TODO: embedd profiles into BuiSim with flag option
 
 
+% TODO: wrap simulation and measurement in standalone function with standardized interface
+
+% TODO: Emulator dymola co-simulation
+
+
+-------------------------------------
+%% Control action post-processing
+% TODO - heat flows to valve positions
+
+% Q = m*cp*p*(T_sup - T_return)
+% Q - 12 heat flows to zones computed by MPC
+% m - prescribed nominal mass flow
+% cp - thermal capcity of the water known
+% p - all valve postition in pipe system to be computed by post-processing
+% T_sup - supply water temperature to be measured
+% T_return - return temperature to be measured
+% % ALARM - CVUT used instead of T_return, T_concrete - why?
+
+% 1, select only heat flows to zones as controls
+% 2, compute necessary mass flows to individual zones based on given measurements
+% 3, compute valve positions based on the mass balance of flows in whole pipe system  
+% 4, consider variable mass flow rates
+% 5, automate the process based on pipe topology
+
+% problem: control input mismatch and measurements accuracy - minimized by
+% extra state observer or lower level controller?
+
+
