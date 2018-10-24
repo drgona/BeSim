@@ -1,0 +1,80 @@
+
+
+
+
+
+% TODO long term:
+% API for end user
+% communication with BMS integrate
+% code generation integrate, so implementation is matlab free and matlab is
+% used only during design phase
+
+
+-------------------------------------
+%% MODEL   emulator + predictor
+% TODO:
+% HVAC time delays modeling and incporporation into prediction model
+% TODO: issue with low order??
+
+-------------------------------------
+%% disturbacnes 
+% TODO: HH buidling mismatch in Ed matrix and d0
+
+-------------------------------------
+%% References 
+% TODO:  fix to be universal for all models, add multiple options
+% TODO: error with the path to common files - fix that
+% TODO: works only with Reno, adapt to Infrax
+
+-------------------------------------
+%%  estimator 
+% TODO: flag for using estimation, if not use perfect state update from plant model
+
+-------------------------------------
+%% controller 
+
+% TODO: error with the path to common files - fix that
+% TODO: flag for controller use, if not perform open loop simulations 
+
+% TODO: finish implementation of RBC, MPC, PID, ML
+
+% TODO higher level tuning params
+% PID coefficients
+% MPC - just magnutide of weight on comfort and energy 
+
+% if CtrlParam.RBC.use
+%     % TODO: mismatch with ny and nu for RBC!!!
+%     % TODO: implement this sythematically
+%     ctrl.umax = 2000*ones(model.pred.nu,1);
+%     ctrl.umax(1:4) = 10;
+%     ctrl.umax(25:28) = 0;
+%     ctrl.umax([17,16,8,5,11,12]) = 0;
+% 
+%     ctrl.umin = -2000*ones(model.pred.nu,1);
+%     ctrl.umax(1:4) = -5;
+%     ctrl.uin(25:28) = 0;
+%     ctrl.umin([17,16,8,5,11,12]) = 0;
+% end
+
+% TODO:
+% implement different levels control
+% primary slow control RBC - floors TABS inputs
+% secondary fast control RBC - room temperatures direct feedback
+% VAVs
+
+% TODO RBC:
+% implement heating curve for supply water temp for infrax for RBC
+% ctrl and move it to the control block
+% identify ambient temp signal from outside and based on that compute T sup
+
+% TODO
+% implement original RBC for each model as a part of the model itself
+% instead of that implement generic Model structures for development
+
+
+
+
+-------------------------------------
+%% Simulate
+%TODO: add open loop (fast results), closed loop (RHC) - done 
+% TODO: modify plot option in BuiSim init
