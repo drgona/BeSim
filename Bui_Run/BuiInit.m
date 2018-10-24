@@ -56,9 +56,6 @@ ctrl = BuiCtrl(model, CtrlParam);
 %% Simulate
 SimParam.run.start = 1;
 SimParam.run.end = 13; 
-% SimParam.run.start = 1;
-% SimParam.run.end = 183; 
-% sim.run.end = 2; 
 SimParam.verbose = 1;
 SimParam.flagSave = 0;
 SimParam.comfortTol = 1e-1;
@@ -66,6 +63,7 @@ SimParam.comfortTol = 1e-1;
 %  0 - measurements
 %  1 - emulation
 SimParam.emulate = 1;
+SimParam.profile = 0;  % profiler function for CPU evaluation
 
 PlotParam.flagPlot = 1;     % plot 0 - no 1 - yes
 PlotParam.plotStates = 0;        % plot states
@@ -77,11 +75,9 @@ PlotParam.plotCtrl = 1;        % plot control
 % PlotParam.zone = 2;     % choose zone if reduced
 % PlotParam.only_zone = 0;    %  plot only zone temperatures 0 - no 1 - yes  
 
-profile on 
 % %  simulation file with embedded plotting file
 outdata = BuiSim(model, estim, ctrl, dist, refs, SimParam, PlotParam);
-p = profile('info')
-profile viewer
+
 
 
  

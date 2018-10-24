@@ -78,3 +78,6 @@
 %% Simulate
 %TODO: add open loop (fast results), closed loop (RHC) - done 
 % TODO: modify plot option in BuiSim init
+% TODO: embedd profiles into BuiSim with flag option
+
+
