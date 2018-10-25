@@ -1,4 +1,4 @@
-function traindata = BuiFeatures(outdata, MLagent, FeaturesParam)
+function [traindata, MLagent] = BuiFeatures(outdata, MLagent, FeaturesParam)
 
 % todo: finish
 
@@ -15,6 +15,10 @@ if nargin < 3
     FeaturesParam.reduce.flagPlot = 1;
 end
     
+fprintf('\n------------------ Constructing Features -----------------\n');
+fprintf('*** Use PCA reduction = %d\n', FeaturesParam.reduce.PCA.use);
+fprintf('*** Use disturbance model reduction = %d\n', FeaturesParam.reduce.D_model.use);
+fprintf('*** Use linearly dependent columns reduction = %d\n', FeaturesParam.reduce.lincols.use);
 
 
 %% prepare data
@@ -35,7 +39,7 @@ wb_pred = outdata.data.wb(1,1+MLagent.numDelays:end-(outdata.ctrl.MPC.Ndp-MLagen
 
 %% ====== FEATURES elimination ======
 % elimination of disturbance variables
-[D_use, D_discard, MLagent.use_disturb] = FeatureReduce(D,outdata,FeaturesParam.reduce);
+[D_use, D_discard, MLagent.use_D] = FeatureReduce(D,outdata,FeaturesParam.reduce);
 % [D_pred_use, D_pred_discard, MLagent.use_disturb] = FeatureSelect(D_pred,model,PrecisionParam,plotFlag,UseParam);
 
 % TODO: elimination of state variables
@@ -63,7 +67,7 @@ elseif MLagent.regNN.use
     %  XX4 suitable for regNN with predictive behavior 
     flipFlag = false;
     % create delayed features
-    D_pred_delay = delayData(D_pred(:,MLagent.use_disturb),MLagent.numDelays,flipFlag);
+    D_pred_delay = delayData(D_pred(:,MLagent.use_D),MLagent.numDelays,flipFlag);
     wb_pred_delay = delayData(wb_pred,MLagent.numDelays,flipFlag);
     % TODO: check pefrormance with delayed Y for  NN reg
     Y_delay = delayData(Y,MLagent.numDelays,flipFlag);
@@ -76,9 +80,14 @@ elseif MLagent.regNN.use
 elseif MLagent.TDNN.use
     %  suitable for delayed TS NN with predictive behavior 
     % features with laged predictions for D and w  
-    traindata.features = [Y D_pred(:,MLagent.use_disturb)  wb_pred]; 
+    traindata.features = [Y D_pred(:,MLagent.use_D)  wb_pred]; 
     traindata.targets = U; 
 end
+
+fprintf('*** Done.\n') 
+
+% TODO: generate index vector for feature selection from parametric space
+% for MPC???
 
 
 end

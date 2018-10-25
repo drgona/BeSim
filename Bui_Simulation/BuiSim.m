@@ -71,12 +71,19 @@ Nsim = length(SimStart:SimStop);
 
 %% Initial values  
 
+% if not(exist('ctrl.MLagent'))
+%     ctrl.MLagent.use = 0;
+% end
+
 % preview setup
 if ctrl.MPC.use
-        N = ctrl.MPC.N;
+            N = ctrl.MPC.N;
+elseif ctrl.MLagent.use
+            N = ctrl.MLagent.numDelays;
 else
-        N = 0;
+            N = 0;
 end
+
 
 X = zeros(model.plant.nx,Nsim+1);
 D = dist.d(SimStart:SimStop+N,:)';
@@ -230,7 +237,62 @@ for k = 1:Nsim
 %             J_u(k) = uopt'*Qu*uopt;                % inputs increments in objective
 %             J(k) =  J_v(k)+J_u(k);               % overalll increments in objective
 %             %     yalmip objective function increments vector
-%             OBJ(k) = obj;             
+%             OBJ(k) = obj;      
+
+
+        
+        elseif ctrl.MLagent.use   % machine learning controller
+%             TODO: finish implementation of all ML ctrls
+            if ctrl.MLagent.TDNN.use    % Time delay neural network           
+                InputDelays = ctrl.MLagent.TDNN.net_apply.numInputDelays;
+                
+                if k > InputDelays
+                    % features for TDNN             
+                    Dpreview = D(ctrl.MLagent.use_D, k:k+InputDelays);   
+                    wa_prev = wa(1, k:k+InputDelays);
+                    wb_prev = wb(1, k:k+InputDelays);
+                    y_past = Y(:,k-InputDelays:k-1);
+                    
+                    
+                    
+                     uopt =  TDNN_ctrl([yn; Dpreview(:,end); wb_prev(:,end)],...                              
+                     [ y_past; Dpreview(:,1:end-1); wb_prev(:,1:end-1)]);
+%                      
+                    
+%                     TODO: automatic generation of feature index -
+%                     standardized format
+%                     Features = [y_past, yn; Dpreview; wb_prev];                   
+%                     FeaturesTS = con2seq(Features);  
+%                     
+%                     [inputs,inputStates] = preparets(ctrl.MLagent.TDNN.net_apply,FeaturesTS);
+%                     outputs = ctrl.MLagent.TDNN.net_apply(inputs,inputStates);
+%                     uopt = outputs{1}; 
+%                     % TDNN evaluation
+                    
+                    
+%                       tdnn_out =  ctrl.MLagent.TDNN.net_apply([y_past, yn; Dpreview;wb_prev]);                          
+%                       uopt = tdnn_out(:,end); 
+%                     uopt =  ctrl.MLagent.TDNN.net_apply([yn; Dpreview(:,end);wb_prev(:,end)],...                              
+%                      [ y_past; Dpreview(:,1:end-1); wb_prev(:,1:end-1)]);             
+%                   uopt =  ctrl.MLagent.TDNN.net_apply(ones(11,10)); 
+
+%                 uopt =  NN_TS_ctrl([yn; dist_mpc(model.ml.use_disturb, k+ctrl.numInputDelays);...
+%                          wb(1,k+ctrl.numInputDelays)],...                              
+%                      [ Y(:,k-ctrl.numInputDelays:k-1); dist_mpc(model.ml.use_disturb, k:k+(ctrl.numInputDelays-1)); ...
+%                          wb(1,k:k+(ctrl.numInputDelays-1))]);
+%                      
+
+                    
+                else
+                    uopt = zeros(model.pred.nu,1);
+                end
+                
+            elseif ctrl.MLagent.RT.use
+    
+                
+            end
+
+     
         end
     end  
    

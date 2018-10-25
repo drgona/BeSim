@@ -2,9 +2,14 @@
 %% BuiSim 
 % Matlab toolbox for fast developlent, simulation and deployment of
 % advanced building climate controllers 
-% Model Predictive Control (MPC)
+
 % functionality intended for automatic construction of controls and
 % estimation for a given linear building model
+
+% Main control strategies
+% 1, Model Predictive Control (MPC) 
+% 2, deep learning control supervised by MPC
+
 
 yalmip('clear');
 addpath('../Bui_Modeling/')
@@ -55,7 +60,8 @@ ctrl = BuiCtrl(model, CtrlParam);
 
 %% Simulate - generate learning data
 SimParam.run.start = 1;
-SimParam.run.end = 13; 
+% SimParam.run.end = 13; 
+SimParam.run.end = 30; 
 SimParam.verbose = 1;
 SimParam.flagSave = 0;
 SimParam.comfortTol = 1e-1;
@@ -67,7 +73,7 @@ SimParam.profile = 0;  % profiler function for CPU evaluation
 
 PlotParam.flagPlot = 1;     % plot 0 - no 1 - yes
 PlotParam.plotStates = 0;        % plot states
-PlotParam.plotDist = 1;        % plot disturbances
+PlotParam.plotDist = 0;        % plot disturbances
 PlotParam.plotEstim = 1;        % plot estimation
 PlotParam.plotCtrl = 1;        % plot control
 % PlotParam.Transitions = 1;      % pot dynamic transitions of Ax matrix
@@ -122,15 +128,17 @@ FeaturesParam.reduce.lincols.use = 1;
 FeaturesParam.reduce.flagPlot = 1;
 
 
+% TODO: verify features selection with previous implementation
+
 % generate training data for a given agent from simulation data
-traindata = BuiFeatures(outdata, MLagent, FeaturesParam);
+[traindata, MLagent] = BuiFeatures(outdata, MLagent, FeaturesParam);
 
 
 %% ====== MLagent training ======
 % TrainParam ???
 
 % train ML agent
-MLagent = BuiLearn(MLagent,traindata)
+MLagent = BuiLearn(MLagent,traindata);
 
 % TODO: create new network construction functions based on MLAgent and
 % train data params
@@ -145,11 +153,18 @@ MLagent = BuiLearn(MLagent,traindata)
 % standalone evaluation function for each MLagent 
 % automatic feature selection from measurements and d predictions 
 
-return
-MLoutdata = BuiSim(model, estim, MLagent, dist, refs, SimParam, PlotParam);
 
+% integrate MLagent into controller structure
+ctrl.use = 1;
+ctrl.MLagent = MLagent;
+ctrl.MLagent.use = 1;
+ctrl.MPC.use = 0;
+ctrl.RBC.use = 0;
+ctrl.PID.use = 0;
 
-
+% TODO: nn eval FIX
+% results plots
+MLoutdata = BuiSim(model, estim, ctrl, dist, refs, SimParam, PlotParam);
 
 
 

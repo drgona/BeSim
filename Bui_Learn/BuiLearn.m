@@ -2,10 +2,16 @@ function MLagent = BuiLearn(MLagent,traindata)
 
 
 
+% TODOO: if batch size for TDNN limited use consecutive batches of smaller
+% size to update the network
+
+
+fprintf('\n------------------ Training ML Agent -----------------\n');
+
 if MLagent.TDNN.use
     fprintf('\n%s\n', repmat('-', 1, 40));
-    fprintf('Time delayed neural network:\n');
-    
+    fprintf('*** Time delayed neural network:\n');
+    fprintf('*** Training in progress\n');
     
 %     end_time = 1000; %  NN works only with maximum 10000 samples 
     start_t = clock;
@@ -18,47 +24,41 @@ if MLagent.TDNN.use
     % data for regression
     x = traindata.features';  % features
     t = traindata.targets';   % regression outputs
-    % data for time series
-    X = con2seq(x);
+    % data for time series - vector of cells with rows as cell elements
+    X = con2seq(x);          
     T = con2seq(t);
-% Learning parameters
+    % Learning parameters
     MLagent.TDNN.net.divideFcn = '';
     MLagent.TDNN.net.trainParam.showWindow = true;
-    %             net.trainParam.showWindow = 0;
-    %             net.trainParam.showCommandLine = 1;
-    % % % % nr of iterations
-    MLagent.TDNN.net.trainParam.epochs = 4000;
-    % % % % nr of validation checks
-    MLagent.TDNN.net.trainParam.max_fail = 100;
+    MLagent.TDNN.net.trainParam.epochs = 4000; % nr of iterations
+    MLagent.TDNN.net.trainParam.max_fail = 100;  % nr of validation checks
+    %  prepare time series data via preparets 
     [inputs,inputStates,layerStates,targets] = preparets(MLagent.TDNN.net,X,T);   % delay setup 
-    % [net,tr] = train(net,inputs,targets);
-    % [net,tr] = train(net,inputs,targets,inputStates,layerStates,'reduction',100);  % memory reduction option
+%     https://www.mathworks.com/help/deeplearning/ref/preparets.html
+    % [MLagent.TDNN.net,tr] = train(MLagent.TDNN.net,inputs,targets,inputStates,layerStates,'reduction',100);  % memory reduction option
     [MLagent.TDNN.net,tr] = train(MLagent.TDNN.net,inputs,targets,inputStates,layerStates);
-    % CHECKPOINTS
     % http://www.mathworks.com/help/nnet/ug/checkpoint-saves-during-neural-network-training.html
     outputs = MLagent.TDNN.net(inputs,inputStates);
-    errors = gsubtract(targets,outputs);
-    performance = perform(MLagent.TDNN.net,targets,outputs)
+    MLagent.TDNN.errors = gsubtract(targets,outputs);  % training set errors
+    MLagent.TDNN.performance = perform(MLagent.TDNN.net,targets,outputs);   % mse metric
+    
+%     TODO: make this non-recursive, do it only once before implementation
     % Remove a delay from the network, to get the prediction one time step earlier.
     MLagent.TDNN.net = removedelay(MLagent.TDNN.net);
-    % make net for simulations = closed-loop (parallel) configuration
-    net_cl = closeloop(MLagent.TDNN.net);
+%     % make net for simulations = closed-loop (parallel) configuration
+    MLagent.TDNN.net_apply = closeloop(MLagent.TDNN.net);
+    % training finisher
+    MLagent.TDNN.train_time = etime(clock, start_t);  
+    fprintf('*** Training time: %.2f sec:\n',MLagent.TDNN.train_time);
 
-    
-    
-    
-    
-    
-    train_time = etime(clock, start_t);  
-    fprintf('\nTime delayed neural network training time: %.2f sec:\n',train_time);
+    genFunction(MLagent.TDNN.net_apply,'../Bui_Learn/TDNN_ctrl.m','MatrixOnly','yes')  % evaluation function generation
 
-    
     
 elseif MLagent.RT
     
     
 end
 
-
+fprintf('*** Done.\n')
 
 end

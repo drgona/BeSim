@@ -57,10 +57,15 @@ elseif CtrlParam.MPC.use
     fprintf('*** Create MPC controller ... \n')
 
     % horizons
-    controller.MPC.N = 10;
-    controller.MPC.Nc = 10;
-    controller.MPC.Nrp = 10;
-    controller.MPC.Ndp = 10;
+%     controller.MPC.N = 10;
+%     controller.MPC.Nc = 10;
+%     controller.MPC.Nrp = 10;
+%     controller.MPC.Ndp = 10;
+
+    controller.MPC.N = 22;
+    controller.MPC.Nc = 22;
+    controller.MPC.Nrp = 22;
+    controller.MPC.Ndp = 22;
     
     % weight diagonal matrices 
     controller.MPC.Qsb = 1e8*eye(model.pred.ny);
