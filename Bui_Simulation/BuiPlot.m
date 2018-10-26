@@ -18,6 +18,8 @@ Time = (1:Nsim)*outdata.model.plant.Ts/3600/24;  % days
 % preview setup
 if outdata.ctrl.MPC.use
     N = outdata.ctrl.MPC.N;
+elseif outdata.ctrl.MLagent.use
+    N = outdata.ctrl.MLagent.numDelays;
 else
     N = 0;
 end

@@ -1,4 +1,4 @@
-function [traindata, MLagent] = BuiFeatures(outdata, MLagent, FeaturesParam)
+function [traindata, MLagent] = BuiFeatures(outdata, dist, MLagent, FeaturesParam)
 
 % todo: finish
 
@@ -32,18 +32,20 @@ wb = outdata.data.wb(1,1:end-outdata.ctrl.MPC.Nrp)';  % wa - feature (below thre
 
 % ====== FEATURES FOR predictive regressions ======
 % disturbances and thresholds are shifted N steps back to be suitable for time delayed NN and TS regressions
-D_pred = outdata.data.D(:,1+MLagent.numDelays:end-(outdata.ctrl.MPC.Ndp-MLagent.numDelays))';
-wa_pred = outdata.data.wa(1,1+MLagent.numDelays:end-(outdata.ctrl.MPC.Ndp-MLagent.numDelays))';
-wb_pred = outdata.data.wb(1,1+MLagent.numDelays:end-(outdata.ctrl.MPC.Ndp-MLagent.numDelays))';
+D_pred = outdata.data.D(:,1+(MLagent.numDelays-1):end-(outdata.ctrl.MPC.Ndp-MLagent.numDelays+1))';
+wa_pred = outdata.data.wa(1,1+(MLagent.numDelays-1):end-(outdata.ctrl.MPC.Ndp-MLagent.numDelays+1))';
+wb_pred = outdata.data.wb(1,1+(MLagent.numDelays-1):end-(outdata.ctrl.MPC.Ndp-MLagent.numDelays+1))';
+% D_pred = outdata.data.D(:,1+MLagent.numDelays:end-(outdata.ctrl.MPC.Ndp-MLagent.numDelays))';
+% wa_pred = outdata.data.wa(1,1+MLagent.numDelays:end-(outdata.ctrl.MPC.Ndp-MLagent.numDelays))';
+% wb_pred = outdata.data.wb(1,1+MLagent.numDelays:end-(outdata.ctrl.MPC.Ndp-MLagent.numDelays))';
 
 
 %% ====== FEATURES elimination ======
 % elimination of disturbance variables
-[D_use, D_discard, MLagent.use_D] = FeatureReduce(D,outdata,FeaturesParam.reduce);
+[D_use, D_discard, MLagent.use_D] = FeatureReduce(D,outdata,dist,FeaturesParam.reduce);
 % [D_pred_use, D_pred_discard, MLagent.use_disturb] = FeatureSelect(D_pred,model,PrecisionParam,plotFlag,UseParam);
 
 % TODO: elimination of state variables
-
 
 %% Datasets construction
 % rows = samples,  columns = feature variables

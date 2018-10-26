@@ -1,78 +1,74 @@
-function [Xreduced, Xdiscard, use_feature] = FeatureReduce(X,outdata,dist,ReduceParam)
+function [Xreduced, Xdiscard, use_feature] = FeatureSelect(X,model,dist,PrecisionParam,plotFlag,UseParam)
 
-% [Xreduced, Xdiscard, use_feature] = FeatureSelect(X,model,PrecisionParam,ReduceParam.flagPlot,UseParam)
+% [Xreduced, Xdiscard, use_feature] = FeatureSelect(X,model,PrecisionParam,plotFlag,UseParam)
 % -----------INPUTS-------------------------------
 %     X     - features matrix,  rows = samples,  columns = features
-%     outdata - output data from simulation
+%     model - model structure generated via function b_model.m
 % -----------PRECISIONS----------------------------
 %     PrecisionParam.prec_pca           - PCA precision
 %     PrecisionParam.prec_pcafeature    - influence of the features on PCA
 %     PrecisionParam.prec_model         - influcene of the disturnances on the model dynamics
 % -----------METHODS-------------------------------
-%     1, ReduceParam.PCA.use       - Principal component analysis
-%     2, ReduceParam.model.use   - disturbance effect on model dynamics via E matrix
-%     3, ReduceParam.lincols.use   - linear dependency of the features
+%     1, UseParam.PCA       - Principal component analysis
+%     2, UseParam.disturb   - disturbance effect on model dynamics via E matrix
+%     3, UseParam.lincols   - linear dependency of the features
 % -----------USE--------------------------------------
-%     if input data X are disturbances than ReduceParam.model.use = true
-%     otherwise, for more general data ReduceParam.model.use = false
+%     if input data X are disturbances than UseParam.disturb = true
+%     otherwise, for more general data UseParam.disturb = false
 % ---------------------------------------------
 
 if nargin < 3
 %   normalized  precisions on principal components and features  0 to 1
-    % parameters for feature refuction function
-    ReduceParam.PCA.use = 1;
-    ReduceParam.PCA.component = 0.999;   % principal component weight threshold
-    ReduceParam.PCA.feature = 0.95;      % PCA features weight threshold
-    ReduceParam.D_model.use = 1;
-    ReduceParam.D_model.feature = 0.99;   % model features weight threshold
-    ReduceParam.lincols.use = 1;
-    ReduceParam.flagPlot = 1;
+    PrecisionParam.PCAcomponent = 0.999;
+    PrecisionParam.PCAfeature = 0.99;
+    PrecisionParam.model = 0.999;
+%     plotting flag
+    plotFlag = false;
+%     methods
+    UseParam.PCA = true;
+    UseParam.lincols = true;
+    UseParam.disturb = true; 
 end
     
+if nargin < 2 
+    UseParam.disturb = false;  % if there is no model info we can not perform disturbance analysis
+end
+
 nx = size(X,2); % number of features
 
  
-%% Discard LINEARLY DEPENDENT COLUMNS
-if ReduceParam.lincols.use
+%% USE EXCTRACTION OF LINEARLY INDEPENDENT COLUMNS
+if UseParam.lincols
      [~,index_lincols]=licols(X);   
      use_feature_lincols = ismember(1:nx,index_lincols); % index of choosen features from lincols
 else
      use_feature_lincols = ones(1,nx); % no features have been discarded
 end
  
-%% PRINCIPAL COMPONENT ANALYSIS
+%% USE PRINCIPAL COMPONENT ANALYSIS
 % http://stackoverflow.com/questions/19723993/which-variables-combine-to-form-most-of-the-variance-for-a-principal-component-i
 % https://www.mathworks.com/matlabcentral/answers/49134-determining-variables-that-contribute-to-principal-components
  % http://www.mathworks.com/help/stats/pca.html
-if ReduceParam.PCA.use
+if UseParam.PCA
     [coeff,~,~,~,explained] = pca(X);  % Each column of coeff contains coefficients for one principal component.
-    nu_pca = sum(explained > 100*(1-ReduceParam.PCA.component)); % number of relevant principal components
+    nu_pca = sum(explained > 100*(1-PrecisionParam.PCAcomponent)); % number of relevant principal components
     var_weight = sum(abs(coeff(:, 1:nu_pca)')); % weight of the features
     var_weight = var_weight/max(var_weight);    % normalized weight of the features
-    use_feature_PCA = var_weight >= 1-ReduceParam.PCA.feature; % indexdes of choosen features from PCA
+    use_feature_PCA = var_weight >= 1-PrecisionParam.PCAfeature; % indexdes of choosen features from PCA
 else
     use_feature_PCA = ones(1,nx); % no features have been discarded
 end
 
-%% disturbance dynamics analysis  
-%% TODO: rework disturbance dynamics analysis based on elementwise operations on A,E matrix and max(abs) of X,D or max(abs(diff)) of X,D
+%% USE disturbance dinamics analysis in the model
    % coefficients in E MATRIX show which disturbances are most influtential
    % max(model.dist.d,[],1)  = largest elements in disturbances or maybe use average values in the disturbances vector
-if ReduceParam.D_model.use       
-        influecneD = (sum(abs(outdata.model.plant.Ed),1).*max(dist.d,[],1));
+if UseParam.disturb       
+        influecneD = (sum(abs(model.plant.Ed),1).*max(dist.d,[],1));
         influecneD = influecneD/max(influecneD);  % normalized influecne of each disturbance in model dynamics  
-        use_feature_D_model = influecneD > 1-ReduceParam.D_model.feature;   % index of choosen features from model dynamics  
+        use_feature_model = influecneD > 1-PrecisionParam.model;   % index of choosen features from model dynamics  
 else
-        use_feature_D_model = ones(1,nx); % no features have been discarded
+        use_feature_model = ones(1,nx); % no features have been discarded
 end
-
-% if ReduceParam.X_model.use       
-%         influecneX = (sum(abs(outdata.model.plant.Ad),1).*max(outdata.data.X',[],1));
-%         influecneX = influecneX/max(influecneX);  % normalized influecne of each disturbance in model dynamics  
-%         use_feature_X_model = influecneD > 1-ReduceParam.X_model.feature;   % index of choosen features from model dynamics  
-% else
-%         use_feature_X_model = ones(1,nx); % no features have been discarded
-% end
         
 
 % % if onlyPCA
@@ -97,16 +93,12 @@ end
 %         Xdiscard = X(:,setdiff(1:size(X,2), use_feature)); % discarded features  
 
 %% OUTPUTS 
-use_feature = use_feature_D_model + use_feature_PCA + use_feature_lincols > 2; % index of choosen features
+use_feature = use_feature_model + use_feature_PCA + use_feature_lincols > 2; % index of choosen features
 Xreduced = X(:,use_feature); % choosen features
 Xdiscard = X(:,not(use_feature)); % discarded features
 
 %% PLOTS     
-
-% %  TODO: visualize thresholds
-%  visualize A, E matrix coefficients
-
-if ReduceParam.flagPlot
+if plotFlag
 
             figure         
             subplot(2,2,1)
@@ -125,7 +117,7 @@ if ReduceParam.flagPlot
             % figure      % effect of the each variable on first nu_pca principal components 
             % bar(coeff(:, 1:nu_pca)) 
      
-          if ReduceParam.PCA.use
+          if UseParam.PCA
             subplot(2,2,3)
             bar(var_weight)
             title('Importance of the original features on principal components')
@@ -133,7 +125,7 @@ if ReduceParam.flagPlot
             ylabel('Relative importance [0-1]')
           end         
 
-          if ReduceParam.D_model.use
+          if UseParam.disturb
             subplot(2,2,4)
             bar(influecneD)
             title('Importance of the disturbances in the model')
@@ -175,7 +167,7 @@ end
 
 % 
 % figure
-% imagesc((outdata.model.plant.Ed))
+% imagesc((model.sim.Ed))
 % colorbar
 % title('Disturbance matrix E')
 % xlabel('Disturbances')
@@ -201,9 +193,9 @@ end
 
 % % % %  ============ model comments ==============
         % % which states are influenced most by the disturbances?
-        % bar(sum(abs(outdata.model.plant.Ed),2))
+        % bar(sum(abs(model.sim.Ed),2))
         % % what is the effect of states on states?
-        % bar(sum(abs(outdata.model.plant.Ad),1))
+        % bar(sum(abs(model.sim.Ad),1))
         % todo: select the states which are affected  at most most by the disturbances
     
 

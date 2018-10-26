@@ -109,3 +109,35 @@
 % extra state observer or lower level controller?
 
 
+
+-------------------------------------
+MACHINE LEARNING
+% TODO:
+% 1, structure
+% 2, training data processing - outdata
+% 3, selection of ML model: MLagent = BuiMLAgent(MLParam,outdata)
+% 4, automated feature selection for given model via: traindata = BuiFeatures(MLagent,outdata)
+% 5, automated training via MLagent = BuiLearn(MLAgent,traindata)
+% 6, simulation with MLagent: outdata = BuiSim(model, estim, MLagent, dist, refs, SimParam, PlotParam);
+
+
+Features
+% 1, feature selection - OK
+% 2, feature transformations
+% TODO: elimination of state variables
+
+
+% TODO training
+% TrainParam ???
+
+
+% TODO simulation:
+% standalone evaluation function for each MLagent 
+% automatic feature selection from measurements and d predictions 
+
+
+%                     TODO: automatic generation of feature index -
+%                     standardized format
+%                     Features = [y_past, yn; Dpreview; wb_prev];                   
+%                     FeaturesTS = con2seq(Features);  
+%                     

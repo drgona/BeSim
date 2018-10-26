@@ -33,7 +33,7 @@ elseif AgentParam.TDNN.use
     MLagent.TDNN.trainFcn =  'trainscg';  
     MLagent.TDNN.net = timedelaynet([1:MLagent.numDelays],MLagent.TDNN.hiddenLayerSize,MLagent.TDNN.trainFcn);  
     % change hidden layer activation functions to ReLU  
-    MLagent.TDNN.net.layers{1:end-1}.transferFcn =  'poslin';
+%     MLagent.TDNN.net.layers{1:end-1}.transferFcn =  'poslin';
     MLagent.type = 'Time delay neural network'; 
 end
 

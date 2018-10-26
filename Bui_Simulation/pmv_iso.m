@@ -10,6 +10,7 @@ FNPS = exp(16.6536 - 4030.183 / (TA + 235));
 PA = RH * 10 * FNPS;
 ICL = 0.155 * CLO;
 M = MET * 58.15;
+HC = 0;
 
 if ICL < 0.078
     FCL = 1 + 1.29 * ICL;

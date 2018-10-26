@@ -28,6 +28,7 @@ if MLagent.TDNN.use
     X = con2seq(x);          
     T = con2seq(t);
     % Learning parameters
+    MLagent.TDNN.trainFcn =  'trainscg';  
     MLagent.TDNN.net.divideFcn = '';
     MLagent.TDNN.net.trainParam.showWindow = true;
     MLagent.TDNN.net.trainParam.epochs = 4000; % nr of iterations
@@ -52,6 +53,7 @@ if MLagent.TDNN.use
     fprintf('*** Training time: %.2f sec:\n',MLagent.TDNN.train_time);
 
     genFunction(MLagent.TDNN.net_apply,'../Bui_Learn/TDNN_ctrl.m','MatrixOnly','yes')  % evaluation function generation
+%     genFunction(MLagent.TDNN.net_apply,'../Bui_Learn/TDNN_ctrl.m','MatrixOnly','yes')  % evaluation function generation
 
     
 elseif MLagent.RT
