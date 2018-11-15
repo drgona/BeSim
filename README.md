@@ -17,16 +17,16 @@ For quick start and more details check out the presentation about algorithms and
 
 **Repository Structure:**
 List of repository folders with associated functionality.
-- Bui_Run (run files)
-- Bui_Modeling (model loading, discretization, model order reduction)
-- Bui_Disturbances (disturbance trajectories loading)
-- Bui_References (reference trajectories loading)
-- Bui_Estimation (estimator design)
-- Bui_Control (controller design)
-- Bui_Simulation (main simulation and plotting functions)
-- Bui_Learn (machine learning functions, synthesis of approximate MPC)
-- buildings (building models files)
-- Data (stored results)
+- [Bui_Run](https://github.com/drgona/BuiSim/tree/master/Bui_Run) (run files)
+- [Bui_Modeling](https://github.com/drgona/BuiSim/tree/master/Bui_Modeling) (model loading, discretization, model order reduction)
+- [Bui_Disturbances](https://github.com/drgona/BuiSim/tree/master/Bui_Disturbances) (disturbance trajectories loading)
+- [Bui_References](https://github.com/drgona/BuiSim/tree/master/Bui_References) (reference trajectories loading)
+- [Bui_Estimation](https://github.com/drgona/BuiSim/tree/master/Bui_Estimation) (estimator design)
+- [Bui_Control](https://github.com/drgona/BuiSim/tree/master/Bui_Control) (controller design)
+- [Bui_Simulation](https://github.com/drgona/BuiSim/tree/master/Bui_Simulation) (main simulation and plotting functions)
+- [Bui_Learn](https://github.com/drgona/BuiSim/tree/master/Bui_Learn) (machine learning functions, synthesis of approximate MPC)
+- [buildings](https://github.com/drgona/BuiSim/tree/master/buildings) (building models files)
+- [Data](https://github.com/drgona/BuiSim/tree/master/Data) (stored results)
 
 ## Algorithms 
 List of key enabling algorithms implemented in BuiSim.
