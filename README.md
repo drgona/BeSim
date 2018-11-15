@@ -29,7 +29,7 @@ List of key enabling algorithms and models implemented in BuiSim.
 **Functional Structure**
 ![BuiSim structure](/Data/Page/BuiSim_structure2.png)
 
-**Repository Structure**
+**Repository Structure:**
 List of repository folders with associated functionality.
 - Bui_Run (run files)
 - Bui_Modeling (model loading, discretization, model order reduction)
@@ -43,9 +43,9 @@ List of repository folders with associated functionality.
 - Data (stored results)
 
 ## Prerequisities
-- [Yalmip](https://yalmip.github.io/)
-- Advanced optimization solver, e.g. [Gurobi](http://www.gurobi.com/)
-- Matlab toolboxes: Deep Learning, Machine learning
+- [Yalmip](https://yalmip.github.io/) mathematical modeling and optimization toolbox: BuiSim's backbone.
+- Advanced optimization solver, e.g. [Gurobi](http://www.gurobi.com/): for solution of implicit MPC, MHE problems.
+- Matlab toolboxes, mainly Deep Learning, Machine learning: for approximate MPC functionality
 
 
 
