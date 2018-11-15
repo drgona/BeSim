@@ -10,6 +10,10 @@ For quick start and more details check out the presentation about algorithms and
 - [Approximate MPC via machine learning](https://www.sciencedirect.com/science/article/pii/S0306261918302903) (deep lerarning in particular)
 - FMI interface for Modelica emulator models (comming soon)
 
+## Getting Started
+clone the repository and just run following scripts in Matlab to get quick results:
+- [BuiInit.m](https://github.com/drgona/BuiSim/blob/master/Bui_Run/BuiInit.m): design and simulation of optimization-based MPC and state estimator for selected building model
+- [BuiInitML.m](https://github.com/drgona/BuiSim/blob/master/Bui_Run/BuiInitML.m): design and simulation of approximate MPC via machine learning for selected buiding model
 
 ## Structure
 **Functional Structure**
