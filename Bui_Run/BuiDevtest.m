@@ -723,6 +723,27 @@ plot(UUU')
 % TODO: change d and compute u based on surface algebra BU = dAX - ED - G
 
 
+
+%% eigenvalues
+return
+
+
+[A_eig_vec, A_eig_val] = eig(outdata.model.pred.Ad);
+
+figure
+subplot(3,1,1)
+imagesc(outdata.model.pred.Ad)
+    colorbar
+subplot(3,1,2)
+imagesc(A_eig_vec)
+    colorbar
+subplot(3,1,3)
+imagesc(A_eig_val)
+    colorbar
+    
+    
+% todo: plot eigenvectors in 3D    
+    
 return
     %% dynamic plots
     figure(1)
@@ -746,7 +767,7 @@ return
  subplot(2,1,1)
  imagesc(outdata.model.pred.Ed)
  subplot(2,1,2)
-
+ 
 
 for i = 2:length(outdata.data.X)
 
