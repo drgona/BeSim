@@ -1,33 +1,38 @@
-# BuiSim Toolbox
 
-## Algorithms
+## Algorithms and Models
 
-# Optimal Control
-1. Model predictive Control (MPC)
-2. Approximate MPC via machine learning
+###  Building Models
+- Linearized white-box building envelope models in state space format
 
-# State Estimation
-1. Kalman Filters
-2. Moving Horizon estimation
+###  Optimal Control
+- Model predictive control (MPC)
+- [Approximate MPC via machine learning](https://www.sciencedirect.com/science/article/pii/S0306261918302903)
 
-# Machine Learning Models
-1. Deep learning
-2. Regression trees
+###  State Estimation
+- Kalman filters
+- Moving horizon estimation
 
+###  Machine Learning Models
+- Deep learning
+- Regression trees
 
 ## Features
-
-
-
-
-
+- Interface for linearized white-box building envelope models from Modelica
+- Automated construction and tuning of MPC and state estimation algorithms
+- Closed-loop simulation, plotting, and performance analysis
+- Approximate MPC via machine learning (deep lerarning in particular)
+- FMI interface for Modelica emulator models (comming soon)
 
 ## Structure
+
+
 
 ## Prerequisities
 
 
 
+```
+![Image](src)
 
 ## Welcome to GitHub Pages
 
@@ -35,27 +40,6 @@ You can use the [editor on GitHub](https://github.com/drgona/BuiSim/edit/master/
 
 Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
 
-### Markdown
-
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
-
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
 
 For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
 
