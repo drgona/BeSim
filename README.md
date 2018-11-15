@@ -26,6 +26,10 @@ List of key enabling algorithms and models implemented in BuiSim.
 - FMI interface for Modelica emulator models (comming soon)
 
 ## Structure
+**Functional Structure**
+![BuiSim structure](/Data/Page/BuiSim_structure2.eps)
+
+**Repository Structure**
 List of repository folders with associated functionality.
 - Bui_Run (run files)
 - Bui_Modeling (model loading, discretization, model order reduction)
