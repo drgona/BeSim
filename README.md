@@ -1,10 +1,8 @@
 
-## Algorithms and Models
-List of key enabling algorithms and models implemented in BuiSim.
+For quick start and more details check out the presentation about algorithms and tools behind [BuiSim](https://www.researchgate.net/publication/328171184_Tools_and_Techniques_for_Advanced_Model_Predictive_Building_Control).
 
-**Building Models**
-- [Linearized white-box building envelope models](http://www.ep.liu.se/ecp/article.asp?issue=118&article=005&volume=)
-- arbitrary linear time invariant model in state space format
+## Algorithms 
+List of key enabling algorithms implemented in BuiSim.
 
 **Optimal Control**
 - Model predictive control (MPC)
@@ -17,6 +15,22 @@ List of key enabling algorithms and models implemented in BuiSim.
 **Machine Learning Models**
 - Deep learning
 - Regression trees
+
+
+## Building Models
+
+**Model Structure**
+- [Linearized white-box building envelope models](http://www.ep.liu.se/ecp/article.asp?issue=118&article=005&volume=)
+- arbitrary linear time invariant model in state space format
+
+**Available Building Models**
+
+Building type | Location      |  Label        | floor area [m2] | #states         | #outputs       | #inputs         | #disturbances
+------------  | ------------- | ------------- | -------------   | -------------  | -------------   | -------------  | ------------- 
+Residential   |  Belgium      | 'Old', 'Reno', 'RenoLight'  | 56 | 283,286,250 | 6    | 6               | 44
+Office   |  Hasselt, Belgium      | 'HollandschHuys' | 3760 | 700 | 12    | 73               | 289
+Office   |  Belgium      | 'Infrax' | 2232 | 1262 | 19    | 28               | 259
+
 
 ## Features
 - Matlab interface for loading linearized white-box building envelope models from Modelica
