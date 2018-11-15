@@ -27,7 +27,7 @@ List of key enabling algorithms and models implemented in BuiSim.
 
 ## Structure
 **Functional Structure**
-![BuiSim structure](/Data/Page/BuiSim_structure2.eps)
+![BuiSim structure](/Data/Page/BuiSim_structure2.png)
 
 **Repository Structure**
 List of repository folders with associated functionality.
