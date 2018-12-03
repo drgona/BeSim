@@ -24,7 +24,7 @@ elseif AgentParam.regNN.use
      MLagent.regNN.trainFcn =  'trainscg';  
      MLagent.regNN.net = fitnet(MLagent.regNN.hiddenLayerSize,MLagent.regNN.trainFcn);   % initialize network
      % change  layer activation functions to ReLU  
-     MLagent.regNN.net.layers{1:end-1}.transferFcn =  'poslin';
+%      MLagent.regNN.net.layers{1:end-1}.transferFcn =  'poslin';
      MLagent.type = 'Regression neural network'; 
      
 elseif AgentParam.TDNN.use

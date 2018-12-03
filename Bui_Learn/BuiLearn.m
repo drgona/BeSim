@@ -31,7 +31,7 @@ if MLagent.TDNN.use
     MLagent.TDNN.trainFcn =  'trainscg';  
     MLagent.TDNN.net.divideFcn = '';
     MLagent.TDNN.net.trainParam.showWindow = true;
-    MLagent.TDNN.net.trainParam.epochs = 4000; % nr of iterations
+    MLagent.TDNN.net.trainParam.epochs = 500; % nr of iterations
     MLagent.TDNN.net.trainParam.max_fail = 100;  % nr of validation checks
     %  prepare time series data via preparets 
     [inputs,inputStates,layerStates,targets] = preparets(MLagent.TDNN.net,X,T);   % delay setup 

@@ -16,6 +16,11 @@
 % HVAC time delays modeling and incporporation into prediction model
 % TODO: issue with low order??
 
+coupling with other toolboxes for automated model generation from data
+Gauss process for matlab
+BRCM
+System identification
+
 -------------------------------------
 %% disturbacnes 
 % TODO: HH buidling mismatch in Ed matrix and d0

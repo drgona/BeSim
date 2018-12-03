@@ -7,6 +7,18 @@ run BuiInit.m
 
 return
 
+
+% sparsity of A matrix
+figure
+ imagesc(model.plant.Ad)
+ colorbar
+ title('A')
+ 
+figure
+spy(model.plant.Ad>0.001)
+title('A')
+
+return
 % paralel coordinates chart and box plots - reveal variance in data
 
 figure

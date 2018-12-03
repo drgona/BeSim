@@ -21,13 +21,13 @@ addpath('../Bui_Learn/')
 
 %% ====== Model ======
 % available buildings  'Infrax',  'HollandschHuys', 'Reno', 'Old', 'RenoLight'
-buildingType = 'Reno';  ModelOrders.range = [4, 7, 10, 15, 20, 30, 40, 100];
+buildingType = 'RenoLight';  ModelOrders.range = [4, 7, 10, 15, 20, 30, 40, 60, 100];
 % buildingType = 'Infrax'; ModelOrders.range = [100, 200, 600]; 
 % buildingType = 'HollandschHuys'; ModelOrders.range = [100, 200, 600]; 
 % buildingType = 'Borehole';  ModelOrders.range = [10, 15, 20, 40, 100];  % orderds for borehole
-% ModelOrders.choice = 100; 
+% ModelOrders.choice = 30; 
 ModelOrders.choice = 'full';
-ModelOrders.off_free = 0;    %  augmented model
+ModelOrders.off_free = 1;    %  augmented model
 reload = 0; 
 % emulator + predictor
 model = BuiModel(buildingType, ModelOrders, reload);
@@ -68,8 +68,8 @@ SimParam.emulate = 1;  % 0 = measurements, 1 = emulation based on LTI model
 SimParam.profile = 0;  % profiler function for CPU evaluation
 
 PlotParam.flagPlot = 1;     % plot 0 - no 1 - yes
-PlotParam.plotStates = 0;        % plot states
-PlotParam.plotDist = 0;        % plot disturbances
+PlotParam.plotStates = 1;        % plot states
+PlotParam.plotDist = 1;        % plot disturbances
 PlotParam.plotEstim = 1;        % plot estimation
 PlotParam.plotCtrl = 1;        % plot control
 % PlotParam.Transitions = 1;      % pot dynamic transitions of Ax matrix

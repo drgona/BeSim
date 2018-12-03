@@ -4,10 +4,11 @@ function BuiPlot(outdata,PlotParam)
 % plot_data.m - general file for plotting the results from run files
 
 if nargin < 2
-   PlotParam.plotStates = 0;        % plot states
-   PlotParam.plotDist = 0;        % plot disturbances
-   PlotParam.plotEstim = 0;        % plot disturbances
-   PlotParam.plotCtrl = 0;        % plot disturbances
+    PlotParam.plotStates = 0;        % plot states
+    PlotParam.plotDist = 0;        % plot disturbances
+    PlotParam.plotEstim = 0;        % plot estimation
+    PlotParam.plotCtrl = 0;        % plot control
+    PlotParam.plotPrice = 0;        % plot price signal
 end
 
 % init
@@ -18,6 +19,7 @@ Time = (1:Nsim)*outdata.model.plant.Ts/3600/24;  % days
 % preview setup
 if outdata.ctrl.MPC.use
     N = outdata.ctrl.MPC.N;
+    Nrp = outdata.ctrl.MPC.Nrp;
 elseif outdata.ctrl.MLagent.use
     N = outdata.ctrl.MLagent.numDelays;
 else
@@ -210,8 +212,8 @@ if outdata.ctrl.use && PlotParam.plotCtrl
 %          Rmin = outdata.data.wb(1,1:end-N);
 %          Rmax = outdata.data.wa(1,1:end-N);
          
-         Rmin = mean(outdata.data.wb(:,1:end-N),1);
-         Rmax = mean(outdata.data.wa(:,1:end-N),1);
+         Rmin = mean(outdata.data.wb(:,1:end-Nrp),1);
+         Rmax = mean(outdata.data.wa(:,1:end-Nrp),1);
          
 %          R = outdata.data.R;
   
@@ -246,6 +248,34 @@ if outdata.ctrl.use && PlotParam.plotCtrl
 
 end
   
+% energy price profile
+if PlotParam.plotPrice
+    figure
+%     price profile
+    subplot(3, 1, 1); 
+    plot(Time, outdata.data.Price, 'linewidth', 2);
+    title('Energy Price Profile');
+    axis tight
+    grid on
+    ylabel('Price [Euro/kW]')
+    xlabel('time [days]')
+%   Cost = price * energy consumed
+    subplot(3, 1, 2); 
+    stairs(Time, outdata.data.Cost', 'linewidth', 2);
+    title('Energy Cost per Heat Flow');
+    axis tight
+    grid on
+    ylabel('Cost [Euro]')
+    xlabel('time [days]')
+    subplot(3, 1, 3); 
+    stairs(Time, sum(outdata.data.Cost), 'linewidth', 2);
+    title('Total Energy Cost');
+    axis tight
+    grid on
+    ylabel('Cost [Euro]')
+    xlabel('time [days]')
+end
+
 
 end
 

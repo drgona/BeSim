@@ -41,10 +41,12 @@ if nargin < 6   % simulation parameters
     SimParam.profile = 0; 
 end
 if nargin < 7   % plotting  
-    PlotParam.flagPlot = 0;  % plot 0 - no 1 - yes
-    PlotParam.reduced = 0;   % simplified paper plots formats 0 - no 1 - yes
-    PlotParam.zone = 2;    % choose zone if simplified
-    PlotParam.only_zone = 0;    %  plot only zone temperatures 0 - no 1 - yes     
+    PlotParam.flagPlot = 0;     % plot 0 - no 1 - yes
+    PlotParam.plotStates = 0;        % plot states
+    PlotParam.plotDist = 1;        % plot disturbances
+    PlotParam.plotEstim = 1;        % plot estimation
+    PlotParam.plotCtrl = 1;        % plot control
+    PlotParam.plotPrice = 1;        % plot price signal
 end
 
 % matlab profiler function for CPU evaluation
@@ -78,10 +80,13 @@ Nsim = length(SimStart:SimStop);
 % preview setup
 if ctrl.MPC.use
             N = ctrl.MPC.N;
+            Nrp = ctrl.MPC.Nrp;
 elseif ctrl.MLagent.use
             N = ctrl.MLagent.numDelays;
+            Nrp = ctrl.MLagent.numDelays;
 else
             N = 0;
+            Nrp = 0;
 end
 
 
@@ -108,6 +113,8 @@ else   % initialize matrices for closed loop control simulations
     % ------ PMV zone ------ 
     PMVub = refs.PMVub(SimStart:SimStop);
     PMVlb = refs.PMVlb(SimStart:SimStop);
+    % ------ energy price ------
+    Price = refs.Price(SimStart:SimStop+N,:)';
 
     if ctrl.RBC.use
         % supply water temperature
@@ -203,19 +210,22 @@ for k = 1:Nsim
             % preview of thresholds on the prediction horizon - Dynamic comfort zone
             wa_prev = wa(:, k:k+(ctrl.MPC.Nrp-1));
             wb_prev = wb(:, k:k+(ctrl.MPC.Nrp-1));
+            % preview of the price signal
+            Price_prev = Price(:, k:k+(ctrl.MPC.Nrp-1));
+            
             
 %             TODO:  adapt Dpreview wa_prev wb_prev
             if estim.use   % estimated states
                 if model.plant.nd == 0  %  no disturbnances option
-                     [opt_out, feasible, info1, info2] =  ctrl.MPC.optimizer{{xp, wa_prev, wb_prev}}; % optimizer with estimated states
+                     [opt_out, feasible, info1, info2] =  ctrl.MPC.optimizer{{xp, wa_prev, wb_prev, Price_prev}}; % optimizer with estimated states
                 else
-                     [opt_out, feasible, info1, info2] =  ctrl.MPC.optimizer{{xp, Dpreview, wa_prev, wb_prev}}; % optimizer with estimated states
+                     [opt_out, feasible, info1, info2] =  ctrl.MPC.optimizer{{xp, Dpreview, wa_prev, wb_prev, Price_prev}}; % optimizer with estimated states
                 end
             else    % perfect state update
                 if model.plant.nd == 0  %  no disturbnances option
-                     [opt_out, feasible, info1, info2] =  ctrl.MPC.optimizer{{x0, wa_prev, wb_prev}}; % optimizer with estimated states
+                     [opt_out, feasible, info1, info2] =  ctrl.MPC.optimizer{{x0, wa_prev, wb_prev, Price_prev}}; % optimizer with estimated states
                 else
-                     [opt_out, feasible, info1, info2] =  ctrl.MPC.optimizer{{x0, Dpreview, wa_prev, wb_prev}}; % optimizer with measured states  
+                     [opt_out, feasible, info1, info2] =  ctrl.MPC.optimizer{{x0, Dpreview, wa_prev, wb_prev, Price_prev}}; % optimizer with measured states  
                 end
                  
             end
@@ -599,6 +609,10 @@ if ctrl.use
 %     outdata.data.PMV_AV = PMVAboveViol;
 %     outdata.data.PMV_BV = PMVBelowViol;
 %     outdata.data.PMV_V = PMVViol;
+    
+%     Price signal
+    outdata.data.Price = Price(:,1:end-Nrp);       
+    outdata.data.Cost = Price(:,1:end-Nrp).*U;   
     
 %     if ctrl.MPC.use
 %         % obj function

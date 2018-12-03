@@ -43,10 +43,12 @@ end
     u = sdpvar(nu, Nc, 'full'); % ctrl action - heat commanded by the thermostat [W]
     y = sdpvar(ny, N, 'full'); % output = indoor temperatures [degC]
     s = sdpvar(ny, N, 'full'); %  general slack
-    % % % above and below threshold -- dynamic comfort zone 
+    % above and below threshold -- dynamic comfort zone 
     wa_prev = sdpvar(ny, Nrp, 'full');
     wb_prev = sdpvar(ny, Nrp, 'full');
-
+    % variable energy price profile
+    price = sdpvar(1, Nrp, 'full');
+    
     % weight diagonal matrices 
     Qsb = MPCParam.Qsb;
     Qsa = MPCParam.Qsa;
@@ -71,13 +73,15 @@ end
             Dpreview = d_prev(:, k);
         end
 
-            % comfort zone preview 
+            % comfort zone and price preview 
         if k > Nrp
             wa = wa_prev(:,Nrp);
             wb = wb_prev(:,Nrp);
+            P = price(:,Nrp);
         else
             wa = wa_prev(:,k);
             wb = wb_prev(:,k);
+            P = price(:,k);
         end
 
             % move blocking
@@ -126,7 +130,7 @@ end
     %   -------------  OBJECTIVE FUNCTION  -------------
         %    % quadratic objective function withouth states constr.  penalisation
                 obj = obj + s(:,k)'*Qsb*s(:,k) + ...         %  comfort zone penalization
-                              uk'*Qu*uk;                              %  quadratic penalization of ctrl action move blocking formulation
+                              P*(uk'*Qu*uk);                              %  quadratic penalization of ctrl action move blocking formulation
     end
 
 
@@ -142,9 +146,11 @@ end
 
     % optimizer for dynamic comfort zone
     if nd == 0  % no disturbances formulation
-        mpc = optimizer(con, obj, options,  { x(:, 1), wa_prev, wb_prev }, {u(:,1); obj} );
+        mpc = optimizer(con, obj, options,  { x(:, 1), wa_prev, wb_prev, price }, {u(:,1); obj} );
     else
-        mpc = optimizer(con, obj, options,  { x(:, 1), d_prev, wa_prev, wb_prev }, {u(:,1); obj} );
+        mpc = optimizer(con, obj, options,  { x(:, 1), d_prev, wa_prev, wb_prev, price }, {u(:,1); obj} );
     end
+    
+    
 
 end
