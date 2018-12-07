@@ -1,4 +1,4 @@
-function model = BuiModel(buildingType, ModelOrders, reload)
+function model = BuiModel(buildingType, ModelParam)
 %% Description
 
 
@@ -8,33 +8,31 @@ if nargin == 0
    buildingType = 'Infrax'; 
 end
 if nargin < 2
-   ModelOrders.range = [100, 200, 600]; % add any reduced order model you wish to have
-   ModelOrders.choice = 200;            % insert model order or 'full' for full order SSM 
+   ModelParam.Orders.range = [100, 200, 600]; % add any reduced order model you wish to have
+   ModelParam.Orders.choice = 200;            % insert model order or 'full' for full order SSM 
 %   alternative choice of the model order - adopt to be general, possibly
 % TODO:  abandon this feature and adopt residential model
-   ModelOrders.ctrlModIndex = 9;
-   ModelOrders.plantModIndex = 9;
+   ModelParam.Orders.ctrlModIndex = 9;
+   ModelParam.Orders.plantModIndex = 9;
    
-   ModelOrders.off_free = 0;    %  augmented model
-end
-if nargin < 3
-   reload = 0;    % reload SSMs and regenerate ROMs flag
+   ModelParam.Orders.off_free = 0;    %  augmented model
+   ModelParam.reload = 0;    % reload SSMs and regenerate ROMs flag
 end
 
 % building parameters
 path = ['../buildings/', buildingType];
 disturbanceType = ''; % can be '_lin' if used for linearization validation
 model.buildingType = buildingType;
-model.Orders.range = ModelOrders.range;
-model.Orders.choice =  ModelOrders.choice;
-model.reload = reload;
+model.Orders.range = ModelParam.Orders.range;
+model.Orders.choice =  ModelParam.Orders.choice;
+model.reload = ModelParam.reload;
 
 fprintf('\n------------------ Building Model -------------------\n');
 
 	%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	% Load model 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	if reload       
+	if ModelParam.reload       
 		% Model
 		fprintf('*** Create ROM models ...\n')
         % Disturbances
@@ -46,7 +44,7 @@ fprintf('\n------------------ Building Model -------------------\n');
             [t,  v, inputIndex, dictCtlInputs, dicValVar, dicOutputNameIndex, x0]= disturbances(path,disturbanceType,0, 0);
         end
         Ts = t(2) - t(1);
-        orders = ModelOrders.range;
+        orders = ModelParam.Orders.range;
 %        states are initalized to x0 = 293.15 K in original model, extended
 %        model initalizes states to 0 which is equivalent with  293.15 K  via matrix extension  
 		[sys_dExt, rom] = fGenerateSysAndRom([path '/models/ssm.mat'], Ts, x0, orders);      
@@ -75,10 +73,10 @@ load([path '/preComputed_matlab/indexing.mat']);
 NM = size(rom,1);       % number of investigated reduced order models
 plantModIndex = NM+1;   % plant model index
 % controller ROM index 
-if ModelOrders.choice == 'full' 
+if ModelParam.Orders.choice == 'full' 
    ctrlModIndex = plantModIndex; 
 else
-   ctrlModIndex = find([orders, size(sys_dExt.a,1)] == ModelOrders.choice);  
+   ctrlModIndex = find([orders, size(sys_dExt.a,1)] == ModelParam.Orders.choice);  
 end
 
 % ---------- Plant model  ----------      
@@ -137,7 +135,7 @@ model.pred.Ts = pred_mod.Ts;  % simulation sampling time
     model.pred.nu = size(model.pred.Bd, 2);
 
     
-if  ModelOrders.off_free % use augmented prediction model for offset free control
+if  ModelParam.Orders.off_free % use augmented prediction model for offset free control
     % number of output disturbances p_k =  number of outputs
     model.pred.np = size(model.pred.Cd, 1);
     % output disturbacne matrix- design conditions:  mag(Gp) < mag(Cd)
@@ -158,7 +156,7 @@ if  ModelOrders.off_free % use augmented prediction model for offset free contro
     model.pred.nu = size(model.pred.Bd, 2); 
 end
     %  offset free control indicator
-    model.pred.off_free = ModelOrders.off_free;   
+    model.pred.off_free = ModelParam.Orders.off_free;   
     
 %% Control input constraints
 

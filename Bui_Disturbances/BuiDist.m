@@ -1,20 +1,20 @@
-function dusturb = BuiDist(buildingType, reload)
+function dusturb = BuiDist(model, DistParam)
 
 if nargin == 0
-   buildingType = 'Infrax';  
+   model.buildingType = 'Infrax';  
 end
 if nargin < 2
-    reload = 0;
+   DistParam.reload = 0;
 end
 
 
-path = ['../buildings/', buildingType];
+path = ['../buildings/', model.buildingType];
 disturbanceType = ''; % can be '_lin' if used for linearization validation
 
-if reload
+if DistParam.reload
         fprintf('*** Load disturbances ... \n')
 		% Disturbances
-        if strcmp(buildingType,'Reno') || strcmp(buildingType,'RenoLight') || strcmp(buildingType,'Old') 
+        if strcmp(model.buildingType,'Reno') || strcmp(model.buildingType,'RenoLight') || strcmp(model.buildingType,'Old') 
             [t, v, x0] = disturbances_old(path, 0, 0);
             save([path '/preComputed_matlab/dis' disturbanceType '.mat'], 't', 'v', 'x0');
         else
@@ -37,5 +37,9 @@ dusturb.d = v;
 % max and min disturbances
 dusturb.dmin = min(dusturb.d, [], 1);
 dusturb.dmax = max(dusturb.d, [], 1);
+
+%% TODO: automatic evaluation of statistical properties of datasets
+% probability distributions, mean, min, max, etc.
+
 
 end

@@ -1,4 +1,4 @@
-function outdata = BuiSim(model, estim, ctrl, dist, refs, SimParam, PlotParam)
+function outdata = BuiSim(model, estim, ctrl, dist, refs, SimParam)
 
 if nargin == 0  % model
    buildingType = 'Infrax';  
@@ -40,15 +40,6 @@ if nargin < 6   % simulation parameters
     SimParam.comfortTol = 1e-1;
     SimParam.profile = 0; 
 end
-if nargin < 7   % plotting  
-    PlotParam.flagPlot = 0;     % plot 0 - no 1 - yes
-    PlotParam.plotStates = 0;        % plot states
-    PlotParam.plotDist = 1;        % plot disturbances
-    PlotParam.plotEstim = 1;        % plot estimation
-    PlotParam.plotCtrl = 1;        % plot control
-    PlotParam.plotPrice = 1;        % plot price signal
-end
-
 % matlab profiler function for CPU evaluation
 if SimParam.profile
     profile on 
@@ -656,10 +647,6 @@ if SimParam.flagSave
     save(str,'outdata');
 end
 
-% PLOT the outut data 
-if PlotParam.flagPlot
-    BuiPlot(outdata,PlotParam)
-end
 
 % PROFILE CPU load
 if SimParam.profile
