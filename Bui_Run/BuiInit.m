@@ -41,13 +41,14 @@ addpath('../Bui_RealTime/Mervis')
 % model = BuiModel(buildingType, ModelParam);
 
 
+
 buildingType = 'Reno';  ModelParam.Orders.range = [4, 7, 10, 15, 20, 30, 40, 100];
 % buildingType = 'Infrax'; ModelParam.Orders.range = [100, 200, 600]; 
 % buildingType = 'HollandschHuys'; ModelParam.Orders.range = [100, 200, 600]; 
-% buildingType = 'Borehole';  ModelParam.Orders.range = [10, 15, 20, 40, 100];    
+% buildingType = 'Borehole';  ModelParam.Orders.range = [10, 15, 20, 40, 100];  
 ModelParam.Orders.choice = 'full';
 ModelParam.Orders.off_free = 0;    
-ModelParam.reload = 1; 
+ModelParam.reload = 0; 
 
 % model = BuiModel(buildingType, ModelOrders, reload);
 model = BuiModel(buildingType, ModelParam);      % construct a model object   
@@ -63,7 +64,7 @@ model = BuiModel(buildingType, ModelParam);      % construct a model object
 % == Option 1: load custom data    %%%% TODO  %%%%
 % == Option 2: select from library of available models 
 
-DistParam.reload = 1;
+DistParam.reload = 0;
 
 % dist = BuiDist(buildingType, reload);
 dist = BuiDist(model, DistParam);        % construct a disturbances object  
@@ -91,6 +92,7 @@ CtrlParam.MPC.use = 1;
 CtrlParam.MPC.Condensing = 1;
 CtrlParam.RBC.use = 0;
 CtrlParam.PID.use = 0;
+CtrlParam.MLagent.use = 0;
 
 ctrl = BuiCtrl(model, CtrlParam);       % construct a controller object  
 
@@ -111,7 +113,7 @@ outdata = BuiSim(model, estim, ctrl, dist, refs, SimParam);
 PlotParam.flagPlot = 1;     % plot 0 - no 1 - yes
 PlotParam.plotStates = 0;        % plot states
 PlotParam.plotDist = 0;        % plot disturbances
-PlotParam.plotEstim = 0;        % plot estimation
+PlotParam.plotEstim = 1;        % plot estimation
 PlotParam.plotCtrl = 1;        % plot control
 PlotParam.plotPrice = 1;        % plot price signal
 % PlotParam.Transitions = 1;      % pot dynamic transitions of Ax matrix

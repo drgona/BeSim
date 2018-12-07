@@ -53,6 +53,7 @@ references.TSup = TSup;   % supply water temperature from HC
 %% variable price profiles
 if RefsParam.Price.variable
    references.Price = 1+sin(0.01*(1:length(TLow)))'; % variable price profile
+%    references.Price = time_series;
 %    TODO:  load price profile interface
 else
    references.Price = ones(size(TLow));  % standard fixed price 

@@ -249,7 +249,7 @@ if outdata.ctrl.use && PlotParam.plotCtrl
 end
   
 % energy price profile
-if PlotParam.plotPrice
+if PlotParam.plotPrice && outdata.ctrl.use
     figure
 %     price profile
     subplot(3, 1, 1); 

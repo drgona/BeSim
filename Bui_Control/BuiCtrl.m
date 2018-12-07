@@ -16,6 +16,7 @@ if nargin < 2
    CtrlParam.MPC.Condensing = 1;
    CtrlParam.RBC.use = 0;
    CtrlParam.PID.use = 0;
+   CtrlParam.MLagent.use = 0;
 end
 
 % controller parameters
@@ -25,6 +26,7 @@ controller.MPC.use =    CtrlParam.MPC.use;
 controller.MPC.Condensing =    CtrlParam.MPC.Condensing;
 controller.RBC.use =    CtrlParam.RBC.use;
 controller.PID.use =    CtrlParam.PID.use;
+controller.MLagent.use =    CtrlParam.MLagent.use;
 
 % %  % input constraints  [W]
 % % controller.umax = ; % 
