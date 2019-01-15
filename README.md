@@ -19,7 +19,7 @@ For quick start and more details check out the presentation about algorithms and
 - Matlab toolboxes: Deep Learning, Machine learning (approximate MPC functionality)
 
 ## Getting Started - Demos
-just run following scripts in Matlab to get quick results:
+run following scripts in Matlab to get quick results:
 - [BuiInit.m](https://github.com/drgona/BuiSim/blob/master/Bui_Run/BuiInit.m): design and simulation of optimization-based MPC and state estimator for selected building model
 - [BuiInitML.m](https://github.com/drgona/BuiSim/blob/master/Bui_Run/BuiInitML.m): design and simulation of approximate MPC via machine learning for selected buiding model
 
