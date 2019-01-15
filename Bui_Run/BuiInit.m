@@ -9,7 +9,6 @@
 yalmip('clear');
 close all
 
-% TODO: change this to import BuiSim.*
 addpath('../Bui_Modeling/')
 addpath('../Bui_Disturbances/')
 addpath('../Bui_References/')
@@ -19,8 +18,6 @@ addpath('../Bui_Simulation/')
 addpath('../Bui_Learn/')
 addpath('../Bui_RealTime/')
 addpath('../Bui_RealTime/Mervis')
-
-% TODO: implement load functions for arbitrary model and disturbance files
 
 %% Model: emulator + predictor (controller)
 % =========== 1, choose building model =================
@@ -40,8 +37,6 @@ addpath('../Bui_RealTime/Mervis')
 % =========== 3, construct model structue =================
 % model = BuiModel(buildingType, ModelParam);
 
-
-
 buildingType = 'Reno';  ModelParam.Orders.range = [4, 7, 10, 15, 20, 30, 40, 100];
 % buildingType = 'Infrax'; ModelParam.Orders.range = [100, 200, 600]; 
 % buildingType = 'HollandschHuys'; ModelParam.Orders.range = [100, 200, 600]; 
@@ -50,9 +45,7 @@ ModelParam.Orders.choice = 'full';
 ModelParam.Orders.off_free = 0;    
 ModelParam.reload = 0; 
 
-% model = BuiModel(buildingType, ModelOrders, reload);
 model = BuiModel(buildingType, ModelParam);      % construct a model object   
-
 
 %% Constraints
 % TODO: state, input, algebraic equations...
@@ -66,9 +59,7 @@ model = BuiModel(buildingType, ModelParam);      % construct a model object
 
 DistParam.reload = 0;
 
-% dist = BuiDist(buildingType, reload);
 dist = BuiDist(model, DistParam);        % construct a disturbances object  
-
 
 %% References 
 % comfort constraints, price profiles
