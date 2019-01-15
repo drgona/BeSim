@@ -71,7 +71,7 @@ Office   |  Belgium      | 'Infrax' | 2232 | 1262 | 19    | 28               | 2
 
 ## Contact
 - Send feedback to: jan.drgona@kuleuven.be 
-Ján Drgoňa
+- Author: Ján Drgoňa
 postdoctoral researcher
 Department of Mechanical Engineering
 Division of Applied Mechanics and Energy Conversion (TME)
