@@ -1,5 +1,5 @@
 # BuiSim Toolbox
-Matlab toolbox for quick design and simulation of advanced building climate control algorithms
+Matlab toolbox for quick design and simulation of advanced building climate control algorithms.
 
 ## Features
 - Interface for [linearized white-box building envelope models from Modelica](http://www.ep.liu.se/ecp/article.asp?issue=118&article=005&volume=)
@@ -7,7 +7,7 @@ Matlab toolbox for quick design and simulation of advanced building climate cont
 - Closed-loop simulation, plotting, and performance analysis
 - [Approximate MPC via machine learning](https://www.sciencedirect.com/science/article/pii/S0306261918302903) (deep lerarning in particular)
 - FMI interface for Modelica emulator models (comming soon)
-- For quick start and more details check out the presentation about algorithms and tools behind [BuiSim](https://www.researchgate.net/publication/328171184_Tools_and_Techniques_for_Advanced_Model_Predictive_Building_Control).
+- For quick start and more details check out the presentation about algorithms and tools behind [BuiSim](https://www.researchgate.net/publication/328171184_Tools_and_Techniques_for_Advanced_Model_Predictive_Building_Control)
 
 ## Installation
 - clone the BuiSim repository
