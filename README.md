@@ -14,6 +14,7 @@ Matlab toolbox for quick design and simulation of advanced building climate cont
 - save BuiSim folder with its subfolders to Matlab path  
 
 ## Prerequisities
+- Matlab: developed and tested on R2017a and R2017b
 - [Yalmip](https://yalmip.github.io/) mathematical modeling and optimization toolbox: BuiSim's backbone.
 - Advanced optimization solver, e.g. [Gurobi](http://www.gurobi.com/): for solution of implicit MPC, MHE problems.
 - Matlab toolboxes: Deep Learning, Machine learning (approximate MPC functionality)
