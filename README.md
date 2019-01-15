@@ -1,7 +1,6 @@
 
 For quick start and more details check out the presentation about algorithms and tools behind [BuiSim](https://www.researchgate.net/publication/328171184_Tools_and_Techniques_for_Advanced_Model_Predictive_Building_Control).
 
-
 ## Features
 - Matlab toolbox for quick design and simulation of advanced building climate control algorithms
 - Interface for [linearized white-box building envelope models from Modelica](http://www.ep.liu.se/ecp/article.asp?issue=118&article=005&volume=)
@@ -10,8 +9,17 @@ For quick start and more details check out the presentation about algorithms and
 - [Approximate MPC via machine learning](https://www.sciencedirect.com/science/article/pii/S0306261918302903) (deep lerarning in particular)
 - FMI interface for Modelica emulator models (comming soon)
 
-## Getting Started
-clone the repository and just run following scripts in Matlab to get quick results:
+## Installation
+- clone the BuiSim repository
+- save BuiSim folder with its subfolders to Matlab path  
+
+## Prerequisities
+- [Yalmip](https://yalmip.github.io/) mathematical modeling and optimization toolbox: BuiSim's backbone.
+- Advanced optimization solver, e.g. [Gurobi](http://www.gurobi.com/): for solution of implicit MPC, MHE problems.
+- Matlab toolboxes, mainly Deep Learning, Machine learning: for approximate MPC functionality
+
+## Getting Started - Demos
+just run following scripts in Matlab to get quick results:
 - [BuiInit.m](https://github.com/drgona/BuiSim/blob/master/Bui_Run/BuiInit.m): design and simulation of optimization-based MPC and state estimator for selected building model
 - [BuiInitML.m](https://github.com/drgona/BuiSim/blob/master/Bui_Run/BuiInitML.m): design and simulation of approximate MPC via machine learning for selected buiding model
 
@@ -47,7 +55,6 @@ List of key enabling algorithms implemented in BuiSim.
 - Deep learning
 - Regression trees
 
-
 ## Building Models
 
 **Model Structure**
@@ -62,11 +69,14 @@ Residential   |  Belgium      | 'Old', 'Reno', 'RenoLight'  | 56 | 283,286,250 |
 Office   |  Hasselt, Belgium      | 'HollandschHuys' | 3760 | 700 | 12    | 73               | 289
 Office   |  Belgium      | 'Infrax' | 2232 | 1262 | 19    | 28               | 259
 
-
-## Prerequisities
-- [Yalmip](https://yalmip.github.io/) mathematical modeling and optimization toolbox: BuiSim's backbone.
-- Advanced optimization solver, e.g. [Gurobi](http://www.gurobi.com/): for solution of implicit MPC, MHE problems.
-- Matlab toolboxes, mainly Deep Learning, Machine learning: for approximate MPC functionality
+## Contact
+- Send feedback to: jan.drgona@kuleuven.be 
+Ján Drgoňa
+postdoctoral researcher
+Department of Mechanical Engineering
+Division of Applied Mechanics and Energy Conversion (TME)
+KU Leuven
+Celestijnenlaan 300A, BE-3001 Leuven (Heverlee), Belgium
 
 
 
