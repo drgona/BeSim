@@ -16,7 +16,7 @@ For quick start and more details check out the presentation about algorithms and
 ## Prerequisities
 - [Yalmip](https://yalmip.github.io/) mathematical modeling and optimization toolbox: BuiSim's backbone.
 - Advanced optimization solver, e.g. [Gurobi](http://www.gurobi.com/): for solution of implicit MPC, MHE problems.
-- Matlab toolboxes, mainly Deep Learning, Machine learning: for approximate MPC functionality
+- Matlab toolboxes: Deep Learning, Machine learning (approximate MPC functionality)
 
 ## Getting Started - Demos
 just run following scripts in Matlab to get quick results:
