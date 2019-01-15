@@ -24,7 +24,7 @@ run following scripts in Matlab to get quick results:
 - [BuiInitML.m](https://github.com/drgona/BuiSim/blob/master/Bui_Run/BuiInitML.m): design and simulation of approximate MPC via machine learning for selected buiding model
 
 ## Structure
-**Functional Structure** Graphical overview of the BuiSim structure with data-flow dependencies.
+**Functional Structure:** Graphical overview of the BuiSim structure with data-flow dependencies.
 ![BuiSim structure](/Data/Page/BuiSim_structure2.png)
 
 **Repository Structure:**
