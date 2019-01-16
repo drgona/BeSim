@@ -53,16 +53,16 @@ List of key enabling algorithms implemented in BuiSim.
 - [Balanced truncation](https://nl.mathworks.com/help/robust/ref/reduce.html)
 
 **State Estimation**
-- Kalman filters
-- Moving horizon estimation
+- Kalman filters (KF)
+- Moving horizon estimation (MHE)
 
 **Optimal Control**
 - Model predictive control (MPC)
 - [Approximate MPC via machine learning](https://www.sciencedirect.com/science/article/pii/S0306261918302903)
 
 **Machine Learning Models**
-- Deep learning
-- Regression trees
+- Deep learning (DL)
+- Regression trees (RT)
 
 ## Building Models
 
