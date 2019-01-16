@@ -49,13 +49,16 @@ List of repository folders with associated functionality.
 ## Algorithms 
 List of key enabling algorithms implemented in BuiSim.
 
-**Optimal Control**
-- Model predictive control (MPC)
-- [Approximate MPC via machine learning](https://www.sciencedirect.com/science/article/pii/S0306261918302903)
+**Model Order Reduction**
+- [Balanced truncation](https://nl.mathworks.com/help/robust/ref/reduce.html)
 
 **State Estimation**
 - Kalman filters
 - Moving horizon estimation
+
+**Optimal Control**
+- Model predictive control (MPC)
+- [Approximate MPC via machine learning](https://www.sciencedirect.com/science/article/pii/S0306261918302903)
 
 **Machine Learning Models**
 - Deep learning
