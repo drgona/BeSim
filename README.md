@@ -15,7 +15,8 @@ Matlab toolbox for quick design and simulation of advanced building climate cont
 - Install BuiSim via:  **tbxmanager install buisim**
 - Check for updates:  **tbxmanager update** 
 ### manual
-- clone  BuiSim repository and save BuiSim folder with its subfolders to Matlab path  
+- clone  BuiSim repository 
+- save BuiSim folder with its subfolders to Matlab path  
 
 ## Prerequisities
 - Matlab: developed and tested on R2017a and R2017b
