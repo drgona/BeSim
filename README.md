@@ -10,8 +10,12 @@ Matlab toolbox for quick design and simulation of advanced building climate cont
 - For quick start and more details check out the presentation about algorithms and tools behind [BuiSim](https://www.researchgate.net/publication/328171184_Tools_and_Techniques_for_Advanced_Model_Predictive_Building_Control)
 
 ## Installation
-- clone the BuiSim repository
-- save BuiSim folder with its subfolders to Matlab path  
+### tbxmanager
+- Install [tbxmanager](http://www.tbxmanager.com/) 
+- Install BuiSim via:  tbxmanager install buisim
+- Check for updates:  tbxmanager update 
+### manual
+- clone  BuiSim repository and save BuiSim folder with its subfolders to Matlab path  
 
 ## Prerequisities
 - Matlab: developed and tested on R2017a and R2017b
@@ -72,7 +76,7 @@ Office   |  Belgium      | 'Infrax' | 2232 | 1262 | 19    | 28               | 2
 
 ## Contact
 - Send feedback to: jan.drgona@kuleuven.be 
-- Author: [Ján Drgoňa](https://www.kuleuven.be/wieiswie/en/person/00107194) \\
+- Author: [Ján Drgoňa](https://www.kuleuven.be/wieiswie/en/person/00107194) 
 postdoctoral researcher
 Department of Mechanical Engineering
 Division of Applied Mechanics and Energy Conversion (TME)
