@@ -80,9 +80,9 @@ Email: jan.drgona@kuleuven.be
 
 Author: [Ján Drgoňa](https://www.kuleuven.be/wieiswie/en/person/00107194)  
 postdoctoral researcher  
+KU Leuven  
 Department of Mechanical Engineering  
 Division of Applied Mechanics and Energy Conversion (TME)  
-KU Leuven  
 Celestijnenlaan 300A, BE-3001 Leuven (Heverlee), Belgium  
 
 
