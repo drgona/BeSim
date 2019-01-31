@@ -22,6 +22,7 @@ if outdata.ctrl.MPC.use
     Nrp = outdata.ctrl.MPC.Nrp;
 elseif outdata.ctrl.MLagent.use
     N = outdata.ctrl.MLagent.numDelays;
+    Nrp = N;
 else
     N = 0;
 end

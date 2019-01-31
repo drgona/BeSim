@@ -165,9 +165,11 @@ ctrl.MPC.use = 0;
 ctrl.RBC.use = 0;
 ctrl.PID.use = 0;
 
-MLoutdata = BuiSim(model, estim, ctrl, dist, refs, SimParam, PlotParam);
+MLoutdata = BuiSim(model, estim, ctrl, dist, refs, SimParam);
 
-
+if PlotParam.flagPlot
+    BuiPlot(MLoutdata,PlotParam)
+end
 
 
 
