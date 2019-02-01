@@ -26,8 +26,8 @@ Matlab toolbox for quick design and simulation of advanced building climate cont
 
 ## Getting Started - Demos
 run following scripts in Matlab to get quick results:
-- [BuiInit.m](https://github.com/drgona/BeSim/blob/master/Be_Run/BeInit.m): design and simulation of optimization-based MPC and state estimator for selected building model
-- [BuiInitML.m](https://github.com/drgona/BeSim/blob/master/Be_Run/BeInitML.m): design and simulation of approximate MPC via machine learning for selected buiding model
+- [BeInit.m](https://github.com/drgona/BeSim/blob/master/Be_Run/BeInit.m): design and simulation of optimization-based MPC and state estimator for selected building model
+- [BeInitML.m](https://github.com/drgona/BeSim/blob/master/Be_Run/BeInitML.m): design and simulation of approximate MPC via machine learning for selected buiding model
 
 ## Structure
 **Functional Structure:** Graphical overview of BuiSim structure with data-flow dependencies.
