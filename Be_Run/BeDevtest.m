@@ -1,7 +1,7 @@
 % development and testing srcipt
 
 
-run BuiInit.m
+run BeInit.m
 
 
 

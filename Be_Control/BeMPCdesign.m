@@ -1,4 +1,4 @@
-function mpc = BuiMPCdesign(model, MPCParam)
+function mpc = BeMPCdesign(model, MPCParam)
 
 if nargin == 0
    buildingType = 'Infrax';  
@@ -7,7 +7,7 @@ if nargin == 0
    ModelOrders.off_free = 0;            %  augmented model
    reload = 0;
 %    construct the model
-   model = BuiModel(buildingType, ModelOrders, reload); 
+   model = BeModel(buildingType, ModelOrders, reload); 
 end
 if nargin < 2
    MPCParam.use = 0;

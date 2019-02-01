@@ -1,4 +1,4 @@
-function outdata = BuiSim(model, estim, ctrl, dist, refs, SimParam)
+function outdata = BeSim(model, estim, ctrl, dist, refs, SimParam)
 
 if nargin == 0  % model
    buildingType = 'Infrax';  
@@ -7,7 +7,7 @@ if nargin == 0  % model
    ModelOrders.choice = 100;            % insert model order or 'full' for full order SSM 
    ModelOrders.off_free = 0;            %  augmented model
    reload = 0;
-   model = BuiModel(buildingType, ModelOrders, reload);     %  construct the model
+   model = BeModel(buildingType, ModelOrders, reload);     %  construct the model
 end
 if nargin < 2   % estimator
    EstimParam.LOPP.use = 0;      %  Luenberger observer via pole placement 
@@ -15,7 +15,7 @@ if nargin < 2   % estimator
    EstimParam.TVKF.use = 1;   % time varying KF
    EstimParam.MHE.use = 0;   % moving horizon estimation via yalmip
    EstimParam.MHE.Condensing = 1;   % moving horizon estimation via yalmip
-   estim = BuiEstim(model, EstimParam);
+   estim = BeEstim(model, EstimParam);
 end
 if nargin < 3   % controller
    CtrlParam.precomputed = 1;
@@ -23,13 +23,13 @@ if nargin < 3   % controller
    CtrlParam.MPC.Condensing = 1;
    CtrlParam.RBC.use = 0;
    CtrlParam.PID.use = 0;
-   ctrl = BuiCtrl(model, CtrlParam);
+   ctrl = BeCtrl(model, CtrlParam);
 end
 if nargin < 4  % disturbances
-   dist = BuiDist(model.buildingType, model.reload);
+   dist = BeDist(model.buildingType, model.reload);
 end
 if nargin < 5   % references
-   refs = BuiRefs();      % TODO FIX to be general
+   refs = BeRefs();      % TODO FIX to be general
 end
 if nargin < 6   % simulation parameters
     SimParam.run.start = 1;     % starting day
@@ -188,7 +188,7 @@ for k = 1:Nsim
     if ctrl.use   
         if ctrl.RBC.use
             %  heat curve control 
-            [uopt, heat] = BuiRBC(yn,R(:,k),heat,TSup(k),ctrl);
+            [uopt, heat] = BeRBC(yn,R(:,k),heat,TSup(k),ctrl);
 %             TODO - automatic tuning general case         
             
         elseif ctrl.PID.use

@@ -1,4 +1,4 @@
-function model = BuiModel(buildingType, ModelParam)
+function model = BeModel(buildingType, ModelParam)
 %% Description
 
 

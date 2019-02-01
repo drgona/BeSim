@@ -1,4 +1,4 @@
-function MLagent = BuiMLAgent(outdata, AgentParam)
+function MLagent = BeMLAgent(outdata, AgentParam)
 
 % todo: generate agent untrained structure
 

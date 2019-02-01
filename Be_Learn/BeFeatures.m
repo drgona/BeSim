@@ -1,4 +1,4 @@
-function [traindata, MLagent] = BuiFeatures(outdata, dist, MLagent, FeaturesParam)
+function [traindata, MLagent] = BeFeatures(outdata, dist, MLagent, FeaturesParam)
 
 % todo: finish
 

@@ -1,4 +1,4 @@
-function MLagent = BuiLearn(MLagent,traindata)
+function MLagent = BeLearn(MLagent,traindata)
 
 
 
@@ -52,8 +52,8 @@ if MLagent.TDNN.use
     MLagent.TDNN.train_time = etime(clock, start_t);  
     fprintf('*** Training time: %.2f sec:\n',MLagent.TDNN.train_time);
 
-    genFunction(MLagent.TDNN.net_apply,'../Bui_Learn/TDNN_ctrl.m','MatrixOnly','yes')  % evaluation function generation
-%     genFunction(MLagent.TDNN.net_apply,'../Bui_Learn/TDNN_ctrl.m','MatrixOnly','yes')  % evaluation function generation
+    genFunction(MLagent.TDNN.net_apply,'../Be_Learn/TDNN_ctrl.m','MatrixOnly','yes')  % evaluation function generation
+%     genFunction(MLagent.TDNN.net_apply,'../Be_Learn/TDNN_ctrl.m','MatrixOnly','yes')  % evaluation function generation
 
     
 elseif MLagent.RT

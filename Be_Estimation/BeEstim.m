@@ -1,4 +1,4 @@
-function estimator = BuiEstim(model, EstimParam)
+function estimator = BeEstim(model, EstimParam)
 
 if nargin == 0
    buildingType = 'Infrax';  
@@ -7,7 +7,7 @@ if nargin == 0
    ModelOrders.off_free = 0;            %  augmented model
    reload = 0;
 %    construct the model
-   model = BuiModel(buildingType, ModelOrders, reload); 
+   model = BeModel(buildingType, ModelOrders, reload); 
 end
 if nargin < 2
    EstimParam.use = 1;       % use estimator if not take states from plant model
@@ -103,7 +103,7 @@ if estimator.use
       estimator.MHE.P = model.pred.Bd*P*model.pred.Bd';                   % error covariance of the arrival cost  
 
          %  construct MHE optimizer 
-      estimator.MHE.optimizer = BuiMHEdesign(model, estimator.MHE);
+      estimator.MHE.optimizer = BeMHEdesign(model, estimator.MHE);
      
       fprintf('*** Done.\n')
       

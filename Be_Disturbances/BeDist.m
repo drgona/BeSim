@@ -1,4 +1,4 @@
-function dusturb = BuiDist(model, DistParam)
+function dusturb = BeDist(model, DistParam)
 
 if nargin == 0
    model.buildingType = 'Infrax';  

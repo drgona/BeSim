@@ -1,4 +1,4 @@
-function mhe = BuiMHEdesign(model, MHEParam)
+function mhe = BeMHEdesign(model, MHEParam)
 
 if nargin == 0
    buildingType = 'Infrax';  
@@ -7,7 +7,7 @@ if nargin == 0
    ModelOrders.off_free = 0;            %  augmented model
    reload = 0;
 %    construct the model
-   model = BuiModel(buildingType, ModelOrders, reload); 
+   model = BeModel(buildingType, ModelOrders, reload); 
 end
 if nargin < 2
    MHEParam.N = 3; %  estimation horizon  

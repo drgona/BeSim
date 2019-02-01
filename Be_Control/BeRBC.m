@@ -1,4 +1,4 @@
-function [u, heat] = BuiRBC(T,R,heat,TSup,ctrl)
+function [u, heat] = BeRBC(T,R,heat,TSup,ctrl)
 % T = actual temperatures in all zones
 
 

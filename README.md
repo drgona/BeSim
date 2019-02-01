@@ -1,4 +1,4 @@
-# BuiSim Toolbox
+﻿# BeSim Toolbox
 Matlab toolbox for quick design and simulation of advanced building climate control algorithms.
 
 ## Features
@@ -12,42 +12,42 @@ Matlab toolbox for quick design and simulation of advanced building climate cont
 ## Installation
 ### tbxmanager
 - Install [tbxmanager](http://www.tbxmanager.com/) 
-- Install BuiSim via:  `tbxmanager install buisim`
+- Install BeSim via:  `tbxmanager install besim`
 - Check for updates:  `tbxmanager update` 
 ### manual
-- clone  BuiSim repository 
-- save BuiSim folder with its subfolders to Matlab path  
+- clone  BeSim repository 
+- save BeSim folder with its subfolders to Matlab path  
 
 ## Prerequisities
 - Matlab: developed and tested on R2017a and R2017b
-- [Yalmip](https://yalmip.github.io/) mathematical modeling and optimization toolbox (BuiSim's backbone)
+- [Yalmip](https://yalmip.github.io/) mathematical modeling and optimization toolbox (BeSim's backbone)
 - Advanced optimization solver, e.g. [Gurobi](http://www.gurobi.com/) (solution of implicit MPC and MHE problems)
 - Matlab toolboxes: Deep Learning, Machine learning (approximate MPC functionality)
 
 ## Getting Started - Demos
 run following scripts in Matlab to get quick results:
-- [BuiInit.m](https://github.com/drgona/BuiSim/blob/master/Bui_Run/BuiInit.m): design and simulation of optimization-based MPC and state estimator for selected building model
-- [BuiInitML.m](https://github.com/drgona/BuiSim/blob/master/Bui_Run/BuiInitML.m): design and simulation of approximate MPC via machine learning for selected buiding model
+- [BuiInit.m](https://github.com/drgona/BeSim/blob/master/Be_Run/BeInit.m): design and simulation of optimization-based MPC and state estimator for selected building model
+- [BuiInitML.m](https://github.com/drgona/BeSim/blob/master/Be_Run/BeInitML.m): design and simulation of approximate MPC via machine learning for selected buiding model
 
 ## Structure
 **Functional Structure:** Graphical overview of BuiSim structure with data-flow dependencies.
-![BuiSim structure](/Data/Page/BuiSim_structure2.png)
+![BuiSim structure](/Data/Page/BeSim_structure2.png)
 
 **Repository Structure:**
 List of repository folders with associated functionality.
-- [Bui_Run](https://github.com/drgona/BuiSim/tree/master/Bui_Run) (run files and demos)
-- [Bui_Modeling](https://github.com/drgona/BuiSim/tree/master/Bui_Modeling) (model loading, discretization, model order reduction)
-- [Bui_Disturbances](https://github.com/drgona/BuiSim/tree/master/Bui_Disturbances) (disturbance trajectories loading)
-- [Bui_References](https://github.com/drgona/BuiSim/tree/master/Bui_References) (reference trajectories loading)
-- [Bui_Estimation](https://github.com/drgona/BuiSim/tree/master/Bui_Estimation) (estimator design)
-- [Bui_Control](https://github.com/drgona/BuiSim/tree/master/Bui_Control) (controller design)
-- [Bui_Simulation](https://github.com/drgona/BuiSim/tree/master/Bui_Simulation) (main simulation and plotting functions)
-- [Bui_Learn](https://github.com/drgona/BuiSim/tree/master/Bui_Learn) (machine learning functions, synthesis of approximate MPC)
-- [buildings](https://github.com/drgona/BuiSim/tree/master/buildings) (building models files)
+- [Be_Run](https://github.com/drgona/BeSim/tree/master/Be_Run) (run files and demos)
+- [Be_Modeling](https://github.com/drgona/BeSim/tree/master/Be_Modeling) (model loading, discretization, model order reduction)
+- [Be_Disturbances](https://github.com/drgona/BeSim/tree/master/Be_Disturbances) (disturbance trajectories loading)
+- [Be_References](https://github.com/drgona/BeSim/tree/master/Be_References) (reference trajectories loading)
+- [Be_Estimation](https://github.com/drgona/BeSim/tree/master/Be_Estimation) (estimator design)
+- [Be_Control](https://github.com/drgona/BeSim/tree/master/Be_Control) (controller design)
+- [Be_Simulation](https://github.com/drgona/BeSim/tree/master/Be_Simulation) (main simulation and plotting functions)
+- [Be_Learn](https://github.com/drgona/BeSim/tree/master/Be_Learn) (machine learning functions, synthesis of approximate MPC)
+- [buildings](https://github.com/drgona/BeSim/tree/master/buildings) (building models files)
 - [Data](https://github.com/drgona/BuiSim/tree/master/Data) (stored results)
 
 ## Algorithms 
-List of key enabling algorithms implemented in BuiSim.
+List of key enabling algorithms implemented in BeSim.
 
 **Model Order Reduction**
 - [Balanced truncation](https://nl.mathworks.com/help/robust/ref/reduce.html)
@@ -74,9 +74,10 @@ List of key enabling algorithms implemented in BuiSim.
 
 Building type | Location      |  Label        | floor area [m2] | #states         | #outputs       | #inputs         | #disturbances
 ------------  | ------------- | ------------- | -------------   | -------------  | -------------   | -------------  | ------------- 
-Residential   |  Belgium      | 'Old', 'Reno', 'RenoLight'  | 56 | 283,286,250 | 6    | 6               | 44
-Office   |  Hasselt, Belgium      | 'HollandschHuys' | 3760 | 700 | 12    | 73               | 289
-Office   |  Belgium      | 'Infrax' | 2232 | 1262 | 19    | 28               | 259
+Residential   |  Belgium      | 'Old', 'Reno', 'RenoLight' | 56 | 283,286,250    | 6               | 6               | 44
+Office        |  Belgium      | 'HollandschHuys' | 3760         | 700            | 12              | 73               | 289
+Office        |  Belgium      | 'Infrax'         | 2232         | 1262           | 19              | 28               | 259
+Borehole      |  Belgium      | 'Borehole '      | -            | 190            | 1               | 1                   | 0
 
 ## Contact
 Email: jan.drgona@kuleuven.be 

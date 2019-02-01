@@ -1,4 +1,4 @@
-function controller = BuiCtrl(model, CtrlParam)
+function controller = BeCtrl(model, CtrlParam)
 
 if nargin == 0
    buildingType = 'Infrax';  
@@ -7,7 +7,7 @@ if nargin == 0
    ModelOrders.off_free = 0;            %  augmented model
    reload = 0;
 %    construct the model
-   model = BuiModel(buildingType, ModelOrders, reload); 
+   model = BeModel(buildingType, ModelOrders, reload); 
 end
 if nargin < 2
    CtrlParam.use = 1;
@@ -75,7 +75,7 @@ elseif CtrlParam.MPC.use
     controller.MPC.Qu = 1e0*eye(model.pred.nu);
     
     %  MPC optimizer synthesis   
-    controller.MPC.optimizer = BuiMPCdesign(model, controller.MPC);
+    controller.MPC.optimizer = BeMPCdesign(model, controller.MPC);
        
     fprintf('*** Done.\n')
     

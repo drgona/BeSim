@@ -110,12 +110,20 @@ if ReduceParam.flagPlot
 
             figure         
             subplot(2,2,1)
-            plot(Xreduced)
+            plot(Xreduced, 'linewidth', 2)
             title('Used features profiles')
-                 
+            axis tight
+            xlabel('samples []')
+            set(gca,'fontsize',20)
+            grid on
+            
             subplot(2,2,2)
-            plot(Xdiscard)
+            plot(Xdiscard, 'linewidth', 2)
             title('Discarded features profiles')
+            axis tight
+            xlabel('samples []')
+            set(gca,'fontsize',20)
+            grid on
             
             %             subplot(2,2,2)
 %             bar(explained)  
@@ -128,9 +136,11 @@ if ReduceParam.flagPlot
           if ReduceParam.PCA.use
             subplot(2,2,3)
             bar(var_weight)
-            title('Importance of the original features on principal components')
+            title('Importance of the features on principal components')
             xlabel('Features')
             ylabel('Relative importance [0-1]')
+            set(gca,'fontsize',20)
+            grid on
           end         
 
           if ReduceParam.D_model.use
@@ -138,7 +148,9 @@ if ReduceParam.flagPlot
             bar(influecneD)
             title('Importance of the disturbances in the model')
             xlabel('Disturbances (Features)')
-            ylabel('Relative importance [0-1]')           
+            ylabel('Relative importance [0-1]')  
+            set(gca,'fontsize',20)
+            grid on
           end 
 end
     

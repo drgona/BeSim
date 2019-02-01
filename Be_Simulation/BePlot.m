@@ -1,4 +1,4 @@
-function BuiPlot(outdata,PlotParam)
+function BePlot(outdata,PlotParam)
 
 %% Description
 % plot_data.m - general file for plotting the results from run files
@@ -194,13 +194,14 @@ if outdata.ctrl.use && PlotParam.plotCtrl
      figure
      subplot(2, 1, 1); 
      title('Indoor temperature','fontsize',24); 
-     
+     hold on
      plot(Time, outdata.data.Y-273.15, 'linewidth', 2);
      axis tight
      grid on
      ylabel('Zone temperatures [\circC]','fontsize',22)  
      set(gca,'fontsize',22)
-     hold on
+     box on
+     
 %      box on
 % %         slight rotation to prevent misplotting
 %      ax = gca;
@@ -230,7 +231,11 @@ if outdata.ctrl.use && PlotParam.plotCtrl
     set(h, 'linewidth', 2, 'linestyle', '-');
     axis tight
     grid on
+    ylabel('Heat flows [W]','fontsize',22)  
+    xlabel('time [days]','fontsize',22)  
     set(gca,'fontsize',22)
+    box on
+    
     %           box on
 % %         slight rotation to prevent misplotting
 %           ax = gca;

@@ -1,4 +1,4 @@
-function references = BuiRefs(model, RefsParam)
+function references = BeRefs(model, RefsParam)
 
 % TODO:  FIX THIS 
 % TODO: Variable TZoneSetLow not found in Data/preComputedInfrax.mat

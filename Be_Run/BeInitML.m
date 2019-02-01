@@ -1,23 +1,25 @@
 
-%% BuiSim 
+%% BeSim 
 % Matlab toolbox for fast developlent, simulation and deployment of
 % advanced building climate controllers 
-% Model Predictive Control (MPC)
+
 % functionality intended for automatic construction of controls and
 % estimation for a given linear building model
 
-yalmip('clear');
-close all
+% Main control strategies
+% 1, Model Predictive Control (MPC) 
+% 2, deep learning control supervised by MPC
 
-addpath('../Bui_Modeling/')
-addpath('../Bui_Disturbances/')
-addpath('../Bui_References/')
-addpath('../Bui_Estimation/')
-addpath('../Bui_Control/')
-addpath('../Bui_Simulation/')
-addpath('../Bui_Learn/')
-addpath('../Bui_RealTime/')
-addpath('../Bui_RealTime/Mervis')
+
+addpath('../Be_Modeling/')
+addpath('../Be_Disturbances/')
+addpath('../Be_References/')
+addpath('../Be_Estimation/')
+addpath('../Be_Control/')
+addpath('../Be_Simulation/')
+addpath('../Be_Learn/')
+addpath('../Be_RealTime/')
+addpath('../Be_RealTime/Mervis')
 
 %% Model: emulator + predictor (controller)
 % =========== 1, choose building model =================
@@ -35,7 +37,7 @@ addpath('../Bui_RealTime/Mervis')
 % ModelParam.Orders.choice = 'full'                       % full model order selection  
 % ModelParam.Orders.off_free = 0 or 1                     % augmented model
 % =========== 3, construct model structue =================
-% model = BuiModel(buildingType, ModelParam);
+% model = BeModel(buildingType, ModelParam);
 
 buildingType = 'Reno';  ModelParam.Orders.range = [4, 7, 10, 15, 20, 30, 40, 100];
 % buildingType = 'Infrax'; ModelParam.Orders.range = [100, 200, 600]; 
@@ -45,7 +47,7 @@ ModelParam.Orders.choice = 'full';
 ModelParam.Orders.off_free = 0;    
 ModelParam.reload = 0; 
 
-model = BuiModel(buildingType, ModelParam);      % construct a model object   
+model = BeModel(buildingType, ModelParam);      % construct a model object   
 
 %% Constraints
 % TODO: state, input, algebraic equations...
@@ -59,13 +61,13 @@ model = BuiModel(buildingType, ModelParam);      % construct a model object
 
 DistParam.reload = 0;
 
-dist = BuiDist(model, DistParam);        % construct a disturbances object  
+dist = BeDist(model, DistParam);        % construct a disturbances object  
 
 %% References 
 % comfort constraints, price profiles
 RefsParam.Price.variable = 0;       %1 =  variable price profile, 0 = fixed to 1
 
-refs = BuiRefs(model, RefsParam);     % construct a references object  
+refs = BeRefs(model, RefsParam);     % construct a references object  
 
 %%  estimator 
 EstimParam.LOPP.use = 0;      %  Luenberger observer via pole placement - Not implemented
@@ -75,7 +77,7 @@ EstimParam.MHE.use = 0;   % moving horizon estimation via yalmip
 EstimParam.MHE.Condensing = 1;   % state condensing 
 EstimParam.use = 1;
 
-estim = BuiEstim(model, EstimParam);      % construct an estimator object  
+estim = BeEstim(model, EstimParam);      % construct an estimator object  
 
 %% controller 
 CtrlParam.use = 1;   % 0 for precomputed u,y    1 for closed loop control
@@ -85,7 +87,7 @@ CtrlParam.RBC.use = 0;
 CtrlParam.PID.use = 0;
 CtrlParam.MLagent.use = 0;
 
-ctrl = BuiCtrl(model, CtrlParam);       % construct a controller object  
+ctrl = BeCtrl(model, CtrlParam);       % construct a controller object  
 
 %% Simulate
 SimParam.run.start = 1;
@@ -97,7 +99,7 @@ SimParam.emulate = 1;  % emulation or real measurements:  0 = measurements,  1 =
 SimParam.profile = 0;  % profiler function for CPU evaluation
 
 % %  simulation file with embedded plotting file
-outdata = BuiSim(model, estim, ctrl, dist, refs, SimParam);
+outdata = BeSim(model, estim, ctrl, dist, refs, SimParam);
 
 
 %% Plot Results
@@ -113,8 +115,70 @@ PlotParam.plotPrice = 1;        % plot price signal
 % PlotParam.only_zone = 0;    %  plot only zone temperatures 0 - no 1 - yes  
 
 if PlotParam.flagPlot
-    BuiPlot(outdata,PlotParam)
+    BePlot(outdata,PlotParam)
 end
+
+%% ========================================================================
+%% BuiInitML
+% machine learning approximations of MPC
+
+%% ====== Machine Learning Agent ======
+
+% pre-defined ML agent models
+AgentParam.RT.use = 0;       % regression tree with orthogonal splits - TODO
+AgentParam.regNN.use = 0;    % function fitting regression neural network - TODO
+AgentParam.TDNN.use = 1;     % time delayed neural network for time series approximation - OK
+AgentParam.custom.use = 0;   % custom designed ML model - TODO
+
+% initialize MLagent type and structure
+MLagent = BeMLAgent(outdata, AgentParam);
+
+
+%% ====== Features ======
+
+FeaturesParam.time_transform = 0;  % time transformations suitable for R
+% feature refuction parameters
+FeaturesParam.reduce.PCA.use = 1;
+FeaturesParam.reduce.PCA.component = 0.999;   % principal component weight threshold
+FeaturesParam.reduce.PCA.feature = 0.95;      % PCA features weight threshold
+FeaturesParam.reduce.D_model.use = 1;
+FeaturesParam.reduce.D_model.feature = 0.99;   % model features weight threshold
+FeaturesParam.reduce.lincols.use = 1;
+FeaturesParam.reduce.flagPlot = 1;
+
+% generate training data {traindata} for a given agent from simulation data {outdata}
+[traindata, MLagent] = BeFeatures(outdata, dist, MLagent, FeaturesParam);
+
+
+%% ====== MLagent training ======
+
+% train ML agent
+MLagent = BeLearn(MLagent,traindata);
+
+
+%% ====== MLagent Simulation ======
+
+ctrl.use = 1;
+ctrl.MLagent = MLagent;
+ctrl.MLagent.use = 1;
+ctrl.MPC.use = 0;
+ctrl.RBC.use = 0;
+ctrl.PID.use = 0;
+
+MLoutdata = BeSim(model, estim, ctrl, dist, refs, SimParam);
+
+if PlotParam.flagPlot
+    BePlot(MLoutdata,PlotParam)
+end
+
+
+
+
+
+
+
+
+
  
  
  
