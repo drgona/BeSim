@@ -62,6 +62,9 @@ SimStop = ceil(SimStop_sec/model.plant.Ts);
 % number of simulation steps for MPC
 Nsim = length(SimStart:SimStop);
 
+
+
+
 %% Initial values  
 
 % if not(exist('ctrl.MLagent'))
@@ -83,6 +86,16 @@ end
 
 X = zeros(model.plant.nx,Nsim+1);
 D = dist.d(SimStart:SimStop+N,:)';
+
+% realisrtic states initialization for particular models
+if  strcmp(model.buildingType,'HollandschHuys')
+    % building parameters
+    path = ['../buildings/', model.buildingType];
+    load([path '/preComputed_matlab/X_initialization.mat'],'x_init');
+%     load('X_initialization.mat','x_init')
+	X(:,1) = x_init;
+end
+
 
 if  not(ctrl.use)  % precomputed inputs and outputs
     U = ctrl.precomputed.U(:,SimStart:SimStop);
@@ -112,7 +125,6 @@ else   % initialize matrices for closed loop control simulations
         TSup = refs.TSup(SimStart:SimStop,:)';
         heat = 0;
     end
-
 end
 
 if estim.use 

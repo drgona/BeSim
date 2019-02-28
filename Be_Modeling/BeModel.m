@@ -159,16 +159,67 @@ end
     model.pred.off_free = ModelParam.Orders.off_free;   
     
 %% Control input constraints
-
-
     model.pred.umax = 10000*ones(model.pred.nu,1);
-%     model.pred.umax(1:4) = 10;
-%     model.pred.umax(25:28) = 0;
-%     model.pred.umax([17,16,8,5,11,12]) = 0;
-    model.pred.umin = -20000*ones(model.pred.nu,1);
-%     model.pred.umax(1:4) = -5;
-%     model.pred.uin(25:28) = 0;
-%     model.pred.umin([17,16,8,5,11,12]) = 0;
+    model.pred.umin = -10000*ones(model.pred.nu,1);
+
+
+%% post processing of individual models
+
+if  strcmp(buildingType,'HollandschHuys')
+    
+    % supply vent temp as disturbance
+    Tven_index = 17:28;
+    model.plant.Ed = plant_mod.B(:,[d_index, Tven_index]);  %  adding supply temp for ventilation
+    model.plant.nd = size(model.plant.Ed, 2);
+    model.pred.Ed = pred_mod.B(:,[d_index, Tven_index]);  %  adding supply temp for ventilation
+    model.pred.nd = size(model.pred.Ed, 2);
+     
+    % min-max heat flows circuits
+    % Q = valve*m_nominal*1.159*dT;
+    dT = 4;   % TODO: specify this - make this more accurate assumption
+    model.m_nominal = [1283 1188 1393 1198 2471 3773 2619 2360 1885 1829 1350 1638 3952 1583 2786 2237 1433 1874 1792 1782];
+    Qmax = model.m_nominal*1.159*dT;
+    Qmin = -model.m_nominal*1.159*dT;
+
+    model.pred.umax = Qmax';
+    model.pred.umin = Qmin';
+
+%     % total heat limits
+%     model.pred.umax = 181000;
+%     model.pred.umin = -90000;
+
+    % model pre-processing
+    % lumping interconnected inputs - see excel document
+    oldB = model.plant.Bd;
+    newB = [oldB(:,1:4), 0.5*oldB(:,5) + 0.5*oldB(:,12),0.5*oldB(:,6) + 0.5*oldB(:,13), ...
+       0.5*oldB(:,7) + 0.5*oldB(:,15), oldB(:,8:11),  oldB(:,14), 0.5*oldB(:,16) + 0.5*oldB(:,28), ...
+      0.5*oldB(:,17) + 0.5*oldB(:,29), oldB(:,18:19), 0.5*oldB(:,20) + 0.5*oldB(:,24), ...
+      0.5*oldB(:,21) + 0.5*oldB(:,25), 0.5*oldB(:,22) + 0.5*oldB(:,26), 0.5*oldB(:,23) + 0.5*oldB(:,27)];
+    % newB = [oldB(:,1:4), sum(oldB(:,[5,12]),2), sum(oldB(:,[6,13]),2), sum(oldB(:,[7,15]),2), ...
+    %     oldB(:,8:11),  oldB(:,14), sum(oldB(:,[16,28]),2), sum(oldB(:,[17,29]),2), oldB(:,18:19), ...
+    %     sum(oldB(:,[20,24]),2), sum(oldB(:,[21,25]),2), sum(oldB(:,[22,26]),2), sum(oldB(:,[23,27]),2)];
+    model.plant.Bd = newB;
+    model.plant.nu = size(model.plant.Bd,2);
+    model.plant.Dd = model.plant.Dd(:,1:model.plant.nu);
+
+    oldB = model.pred.Bd;
+    % newB = [oldB(:,1:4), sum(oldB(:,[5,12]),2), sum(oldB(:,[6,13]),2), sum(oldB(:,[7,15]),2), ...
+    %     oldB(:,8:11),  oldB(:,14), sum(oldB(:,[16,28]),2), sum(oldB(:,[17,29]),2), oldB(:,18:19), ...
+    %     sum(oldB(:,[20,24]),2), sum(oldB(:,[21,25]),2), sum(oldB(:,[22,26]),2), sum(oldB(:,[23,27]),2)];
+    newB = [oldB(:,1:4), 0.5*oldB(:,5) + 0.5*oldB(:,12),0.5*oldB(:,6) + 0.5*oldB(:,13), ...
+       0.5*oldB(:,7) + 0.5*oldB(:,15), oldB(:,8:11),  oldB(:,14), 0.5*oldB(:,16) + 0.5*oldB(:,28), ...
+      0.5*oldB(:,17) + 0.5*oldB(:,29), oldB(:,18:19), 0.5*oldB(:,20) + 0.5*oldB(:,24), ...
+      0.5*oldB(:,21) + 0.5*oldB(:,25), 0.5*oldB(:,22) + 0.5*oldB(:,26), 0.5*oldB(:,23) + 0.5*oldB(:,27)];
+    model.pred.Bd = newB;
+    model.pred.nu = size(model.pred.Bd,2);
+    model.pred.Dd = model.pred.Dd(:,1:model.pred.nu);
+%     lump constraints
+    model.pred.umax = model.pred.umax(1:model.pred.nu);
+    model.pred.umin = model.pred.umin(1:model.pred.nu);
+
+    
+    
+end
 
 
 

@@ -20,7 +20,6 @@ end
 
 % estimator parameters
 estimator.use = EstimParam.use;
-estimator.LOPP.use = EstimParam.LOPP.use; %Use pole placement for estimator
 estimator.SKF.use = EstimParam.SKF.use;
 estimator.TVKF.use = EstimParam.TVKF.use;
 estimator.MHE.use = EstimParam.MHE.use;
@@ -47,29 +46,29 @@ if estimator.use
         end
         
  % % % Estimator design  % % %
-    if estimator.LOPP.use   % pole placement -- REMOVE????
-        fprintf('*** Create Luenberger Observer via pole placement ... \n')
-         
-        dMat = zeros(size(pred_mod.c,1),size(pred_mod.B,2));
-        MPCObj = mpc(ss(pred_mod.a,pred_mod.b,pred_mod.c,dMat,model.plant.Ts));
-        [~,M,A1,Cm1] = getEstimator(MPCObj);
-        e = eig(pred_mod.a-pred_mod.a*M(1:model.pred.nx,:)*pred_mod.c);
-        new_poles = abs(e) .* 0.9;
-
-        try % Try to place the pole
-            estimator.LOPP.L1 = place(pred_mod.a',pred_mod.c',new_poles)';
-            disp('*** offset free = no')
-        catch
-            Qe = 10*eye(size(model.pred.Ed_estim,2));
-            Re = 10*eye(model.pred.ny);   
-            Ge = model.pred.Ed_estim;
-            estimator.LOPP.L1 = dlqe(model.pred.Ad, Ge, model.pred.Cd, Qe, Re);
-            disp('*** No poles placement was possible for this model.')
-        end
-%        model.estim.M = model.pred.Ad \ model.estim.L1;
-        fprintf('*** Done.\n')
-        
-    elseif  estimator.SKF.use   % stationary Kalman estimator design 
+%     if estimator.LOPP.use   % pole placement -- REMOVE????
+%         fprintf('*** Create Luenberger Observer via pole placement ... \n')
+%          
+%         dMat = zeros(size(pred_mod.c,1),size(pred_mod.B,2));
+%         MPCObj = mpc(ss(pred_mod.a,pred_mod.b,pred_mod.c,dMat,model.plant.Ts));
+%         [~,M,A1,Cm1] = getEstimator(MPCObj);
+%         e = eig(pred_mod.a-pred_mod.a*M(1:model.pred.nx,:)*pred_mod.c);
+%         new_poles = abs(e) .* 0.9;
+% 
+%         try % Try to place the pole
+%             estimator.LOPP.L1 = place(pred_mod.a',pred_mod.c',new_poles)';
+%             disp('*** offset free = no')
+%         catch
+%             Qe = 10*eye(size(model.pred.Ed_estim,2));
+%             Re = 10*eye(model.pred.ny);   
+%             Ge = model.pred.Ed_estim;
+%             estimator.LOPP.L1 = dlqe(model.pred.Ad, Ge, model.pred.Cd, Qe, Re);
+%             disp('*** No poles placement was possible for this model.')
+%         end
+% %        model.estim.M = model.pred.Ad \ model.estim.L1;
+%         fprintf('*** Done.\n')
+%         
+   if  estimator.SKF.use   % stationary Kalman estimator design 
         fprintf('*** Create SKF estimator ... \n')    
         
         estimator.SKF.Qe = 10*eye(model.pred.nx);     % process noise covariance 
@@ -121,7 +120,7 @@ if estimator.use
     %        x[n+1] = Ax[n] + Bu[n] + Gw[n]    {State equation}
     %        y[n]   = Cx[n] + Du[n] +  v[n]    {Measurements}
 
-    if estimator.LOPP.use || estimator.SKF.use
+    if estimator.SKF.use
             % check the stability of the estimator matrix LS
         if estimator.SKF.use
            L1_stable = eig(model.pred.Ad-model.pred.Ad*estimator.SKF.L1*model.pred.Cd);

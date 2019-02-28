@@ -16,14 +16,28 @@
 % HVAC time delays modeling and incporporation into prediction model
 % TODO: issue with low order??
 
+% TODO: missing disturbance file for borehole large file on github
+
+% == Option 2: load custom model     %%%% TODO  %%%%
+% buildingType = 'Load'
+
 coupling with other toolboxes for automated model generation from data
 Gauss process for matlab
 BRCM
 System identification
 
 -------------------------------------
+%% Constraints
+% TODO: state, input, algebraic equations...
+% const = BuiConstraints(model,ConstrParam)
+
+-------------------------------------
 %% disturbacnes 
 % TODO: HH buidling mismatch in Ed matrix and d0
+
+% =========== 1, choose disturbances =================
+% == Option 1: load custom data    %%%% TODO  %%%%
+% == Option 2: select from library of available models   %%%% TODO  %%%%
 
 -------------------------------------
 %% References 
@@ -34,6 +48,8 @@ System identification
 -------------------------------------
 %%  estimator 
 % TODO: flag for using estimation, if not use perfect state update from plant model
+
+EstimParam.LOPP.use = 0;         %  Luenberger observer via pole placement - Not implemented
 
 -------------------------------------
 %% controller 

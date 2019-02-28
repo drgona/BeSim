@@ -58,21 +58,30 @@ if not(controller.use)    % precomputed inputs and outputs or real measurements
 elseif CtrlParam.MPC.use  
     fprintf('*** Create MPC controller ... \n')
 
-    % horizons
-%     controller.MPC.N = 10;
-%     controller.MPC.Nc = 10;
-%     controller.MPC.Nrp = 10;
-%     controller.MPC.Ndp = 10;
-
+   
+if  strcmp(model.buildingType,'HollandschHuys')    
+     % horizons
+    controller.MPC.N = 32;
+    controller.MPC.Nc = 32;
+    controller.MPC.Nrp = 32;
+    controller.MPC.Ndp = 32;
+    % weight diagonal matrices 
+    controller.MPC.Qsb = 1e10*eye(model.pred.ny);
+    controller.MPC.Qsa = 1e10*eye(model.pred.ny);
+    controller.MPC.Qu = 1e0*eye(model.pred.nu);
+else 
+     % horizons
     controller.MPC.N = 22;
     controller.MPC.Nc = 22;
     controller.MPC.Nrp = 22;
     controller.MPC.Ndp = 22;
-    
     % weight diagonal matrices 
     controller.MPC.Qsb = 1e8*eye(model.pred.ny);
     controller.MPC.Qsa = 1e8*eye(model.pred.ny);
     controller.MPC.Qu = 1e0*eye(model.pred.nu);
+end
+
+   
     
     %  MPC optimizer synthesis   
     controller.MPC.optimizer = BeMPCdesign(model, controller.MPC);

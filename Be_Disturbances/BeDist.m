@@ -32,8 +32,18 @@ end
 
         
 %% disturbances
-dusturb.t = t;
-dusturb.d = v;
+if  strcmp(model.buildingType,'HollandschHuys')
+%     including fixed ventilation temperature as disturbance for HH
+    VenTsup_temp = 20+273.15;
+    VenTsup = repmat(VenTsup_temp,[size(v,1),12]);
+    dusturb.t = t;
+    dusturb.d = [v, VenTsup];
+else
+    dusturb.t = t;
+    dusturb.d = v;
+end
+
+
 % max and min disturbances
 dusturb.dmin = min(dusturb.d, [], 1);
 dusturb.dmax = max(dusturb.d, [], 1);

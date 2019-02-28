@@ -49,6 +49,8 @@ end
     % variable energy price profile
     price = sdpvar(1, Nrp, 'full');
     
+%     u_traj = sdpvar(nu, Nc, 'full');
+    
     % weight diagonal matrices 
     Qsb = MPCParam.Qsb;
     Qsa = MPCParam.Qsa;
@@ -87,10 +89,44 @@ end
             % move blocking
         if k > Nc
             uk = u(:,Nc);
+%             u_traj(:,k) = u(:,Nc);
         else
             uk = u(:,k);
+%             u_traj(:,k) = u(:,k);
         end
 
+        
+%           %     state + output update equations
+%         if MPCParam.Condensing
+%             if k == 1
+%                 AB(:, (N-k)*nu+1:(N-k+1)*nu ) = model.pred.Bd;        %  input matrix evolution
+%                 AE(:, (N-k)*nd+1:(N-k+1)*nd ) =  model.pred.Ed;       %  disturbance matrix evolution
+%                 AG(:, (N-k)*1+1:(N-k+1)*1 ) =  model.pred.Gd;         %  initial conditions matrix evolution
+%                 con = con + [ y(:, k) == model.pred.Cd*x(:, k)  + model.pred.Dd*uk + model.pred.Fd*1 ];
+%             else
+%                 AExpX0 = model.pred.Ad * AExpX0;
+% %                 con = con + [ y(:, k) == model.pred.Cd*( AExpX0 + AB(:, (N-k+1)*nu+1 : end ) * reshape( u(:,1:k-1) , nu * (k-1) , 1) + ...
+% %                                                                  AE(:, (N-k+1)*nd+1 : end ) * reshape( d_prev(:,1:k-1) , nd * (k-1) , 1) + ...
+% %                                                                  AG(:, (N-k+1)*1+1 : end ) * ones(k-1,1) ) + ...
+% %                                                                  model.pred.Dd*uk  + model.pred.Fd*1 ];
+%                  con = con + [ y(:, k) == model.pred.Cd*( AExpX0 + AB(:, (N-k+1)*nu+1 : end ) * reshape( u_traj(:,1:k-1) , nu * (k-1) , 1) + ...
+%                                                                  AE(:, (N-k+1)*nd+1 : end ) * reshape( d_prev(:,1:k-1) , nd * (k-1) , 1) + ...
+%                                                                  AG(:, (N-k+1)*1+1 : end ) * ones(k-1,1) ) + ...
+%                                                                  model.pred.Dd*uk  + model.pred.Fd*1 ];
+% 
+%                 AB(:, (N-k)*nu+1:(N-k+1)*nu ) = model.pred.Ad* AB(:, (N-k+1)*nu+1:(N-k+2)*nu );
+%                 AE(:, (N-k)*nd+1:(N-k+1)*nd ) = model.pred.Ad* AE(:, (N-k+1)*nd+1:(N-k+2)*nd );
+%                 AG(:, (N-k)*1+1:(N-k+1)*1 ) = model.pred.Ad* AG(:, (N-k+1)*1+1:(N-k+2)*1 );
+%             end  
+%         else
+%             if nd == 0 % no disturbances formulation
+%                 con = con + [ x(:, k+1) == model.pred.Ad*x(:, k) + model.pred.Bd*uk + model.pred.Gd*1];
+%                 con = con + [ y(:, k) == model.pred.Cd*x(:, k)  + model.pred.Dd*uk + model.pred.Fd*1 ];
+%             else
+%                 con = con + [ x(:, k+1) == model.pred.Ad*x(:, k) + model.pred.Bd*uk + model.pred.Ed*Dpreview + model.pred.Gd*1];
+%                 con = con + [ y(:, k) == model.pred.Cd*x(:, k)  + model.pred.Dd*uk + model.pred.Fd*1 ];
+%             end
+%         end
 
         %     state + output update equations
         if MPCParam.Condensing

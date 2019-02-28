@@ -16,47 +16,37 @@ addpath('../Be_Estimation/')
 addpath('../Be_Control/')
 addpath('../Be_Simulation/')
 addpath('../Be_Learn/')
-addpath('../Be_RealTime/')
-addpath('../Be_RealTime/Mervis')
 
 %% Model: emulator + predictor (controller)
+
 % =========== 1, choose building model =================
-% == Option 1: load custom model     %%%% TODO  %%%%
-% buildingType = 'Load'
-% == Option 2: select from library of available models 
+% == Option 1: select from library of available models 
 % buildingType = ModelIdentifier 
 % ModelIdentifier for residential houses with radiators:   'Reno', 'Old', 'RenoLight'
 % ModelIdentifier for office buildings with TABS:          'Infrax', 'HollandschHuys'
 % ModelIdentifier for borehole:                            'Borehole' 
-% TODO: missing disturbance file for borehole large file on github
+
 % =========== 2, choose model order =================
 % ModelParam.Orders.range  = [4, 10, 20, 40, 100, ... ]   % vector of model orders 
 % ModelParam.Orders.choice = 100                          % particular model order selection  
 % ModelParam.Orders.choice = 'full'                       % full model order selection  
 % ModelParam.Orders.off_free = 0 or 1                     % augmented model
+
 % =========== 3, construct model structue =================
 % model = BeModel(buildingType, ModelParam);
 
+% =========== particular example =================
 buildingType = 'Reno';  ModelParam.Orders.range = [4, 7, 10, 15, 20, 30, 40, 100];
-% buildingType = 'Infrax'; ModelParam.Orders.range = [100, 200, 600]; 
 % buildingType = 'HollandschHuys'; ModelParam.Orders.range = [100, 200, 600]; 
-% buildingType = 'Borehole';  ModelParam.Orders.range = [10, 15, 20, 40, 100];  
 ModelParam.Orders.choice = 'full';
 ModelParam.Orders.off_free = 0;    
 ModelParam.reload = 0; 
 
 model = BeModel(buildingType, ModelParam);      % construct a model object   
 
-%% Constraints
-% TODO: state, input, algebraic equations...
-% const = BuiConstraints(model,ConstrParam)
 
 %% Disturbacnes 
 % ambient temperature, solar radiation, internal heat gains
-% =========== 1, choose disturbances =================
-% == Option 1: load custom data    %%%% TODO  %%%%
-% == Option 2: select from library of available models 
-
 DistParam.reload = 0;
 
 dist = BeDist(model, DistParam);        % construct a disturbances object  
@@ -68,10 +58,9 @@ RefsParam.Price.variable = 0;       %1 =  variable price profile, 0 = fixed to 1
 refs = BeRefs(model, RefsParam);     % construct a references object  
 
 %%  estimator 
-EstimParam.LOPP.use = 0;      %  Luenberger observer via pole placement - Not implemented
-EstimParam.SKF.use = 0;    % stationary KF
-EstimParam.TVKF.use = 1;   % time varying KF
-EstimParam.MHE.use = 0;   % moving horizon estimation via yalmip
+EstimParam.SKF.use = 0;          % stationary KF
+EstimParam.TVKF.use = 1;         % time varying KF
+EstimParam.MHE.use = 0;          % moving horizon estimation via yalmip
 EstimParam.MHE.Condensing = 1;   % state condensing 
 EstimParam.use = 1;
 
@@ -89,7 +78,7 @@ ctrl = BeCtrl(model, CtrlParam);       % construct a controller object
 
 %% Simulate
 SimParam.run.start = 1;
-SimParam.run.end = 13; 
+SimParam.run.end = 7; 
 SimParam.verbose = 1;
 SimParam.flagSave = 0;
 SimParam.comfortTol = 1e-1;
