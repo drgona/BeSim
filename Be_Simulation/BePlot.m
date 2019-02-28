@@ -112,10 +112,14 @@ if outdata.estim.use && PlotParam.plotEstim
         subplot(2,1,1)
         title('Simulated vs estimated outputs');
         hold on
-        plot(Time, outdata.data.Y,'-' ,'linewidth', 2);
-        plot(Time, outdata.data.Ye, '--', 'linewidth', 2);
-%         plot(Time, outdata.data.Y-273.15,'-' ,'linewidth', 2);
-%         plot(Time, outdata.data.Ye-273.15, '--', 'linewidth', 2);
+        if  strcmp(outdata.model.buildingType,'HollandschHuys')
+               plot(Time, outdata.data.Y-273.15,'-' ,'linewidth', 2);
+               plot(Time, outdata.data.Ye-273.15, '--', 'linewidth', 2);
+        else
+               plot(Time, outdata.data.Y,'-' ,'linewidth', 2);
+               plot(Time, outdata.data.Ye, '--', 'linewidth', 2);
+        end
+        
         axis tight
         grid on
         ylabel('Temp [^{\circ}C]')
@@ -131,21 +135,39 @@ if outdata.estim.use && PlotParam.plotEstim
         ylabel('Temp [^{\circ}C]')
         xlabel('time [days]')  
    
-        % states - simulated vs estimated 
+%         % states - simulated vs estimated 
+%         figure
+%         subplot(2, 1, 1);
+%         plot(Time, outdata.data.X(:,1:end-1), 'linewidth', 2);
+%         title('states: simulated');
+%         axis tight
+%         grid on
+%         xlabel('time [days]')
+%         
+%         subplot(2, 1, 2);
+%         plot(Time, outdata.data.Xe(:,1:end),'linewidth', 2);
+%         title('states:  estimated');
+%         axis tight
+%         grid on
+%         xlabel('time [days]')
+        
+           % states - simulated vs estimated 
         figure
         subplot(2, 1, 1);
-        plot(Time, outdata.data.X(:,1:end-1), 'linewidth', 2);
+        plot(Time, outdata.data.X(:,1:end-1)+x_init-273.15, 'linewidth', 2);
         title('states: simulated');
         axis tight
         grid on
         xlabel('time [days]')
+        ylabel('Temp [^{\circ}C]')
         
         subplot(2, 1, 2);
-        plot(Time, outdata.data.Xe(:,1:end),'linewidth', 2);
+        plot(Time, outdata.data.Xe(:,1:end)+x_init-273.15,'linewidth', 2);
         title('states:  estimated');
         axis tight
         grid on
         xlabel('time [days]')
+        ylabel('Temp [^{\circ}C]')
         
         
     if outdata.estim.MHE.use   % MHE variables 

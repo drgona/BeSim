@@ -6,8 +6,9 @@
 % functionality intended for automatic construction of controls and
 % estimation for a given linear building model
 
+clear
 yalmip('clear');
-close all
+% close all
 
 addpath('../Be_Modeling/')
 addpath('../Be_Disturbances/')
@@ -36,8 +37,8 @@ addpath('../Be_Learn/')
 % model = BeModel(buildingType, ModelParam);
 
 % =========== particular example =================
-buildingType = 'Reno';  ModelParam.Orders.range = [4, 7, 10, 15, 20, 30, 40, 100];
-% buildingType = 'HollandschHuys'; ModelParam.Orders.range = [100, 200, 600]; 
+% buildingType = 'Reno';  ModelParam.Orders.range = [4, 7, 10, 15, 20, 30, 40, 100];
+buildingType = 'HollandschHuys'; ModelParam.Orders.range = [100, 200, 600]; 
 ModelParam.Orders.choice = 'full';
 ModelParam.Orders.off_free = 0;    
 ModelParam.reload = 0; 
@@ -55,7 +56,7 @@ dist = BeDist(model, DistParam);        % construct a disturbances object
 % comfort constraints, price profiles
 RefsParam.Price.variable = 0;       %1 =  variable price profile, 0 = fixed to 1
 
-refs = BeRefs(model, RefsParam);     % construct a references object  
+refs = BeRefs(model, dist, RefsParam);     % construct a references object  
 
 %%  estimator 
 EstimParam.SKF.use = 0;          % stationary KF
@@ -91,8 +92,8 @@ outdata = BeSim(model, estim, ctrl, dist, refs, SimParam);
 
 %% Plot Results
 PlotParam.flagPlot = 1;     % plot 0 - no 1 - yes
-PlotParam.plotStates = 0;        % plot states
-PlotParam.plotDist = 0;        % plot disturbances
+PlotParam.plotStates = 1;        % plot states
+PlotParam.plotDist = 1;        % plot disturbances
 PlotParam.plotEstim = 1;        % plot estimation
 PlotParam.plotCtrl = 1;        % plot control
 PlotParam.plotPrice = 1;        % plot price signal

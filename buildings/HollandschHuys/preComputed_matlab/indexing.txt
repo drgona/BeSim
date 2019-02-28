@@ -1,0 +1,14 @@
+TABS 
+33:90
+
+TABS  heat
+33:61
+
+TABS cool
+62:90
+
+Ventilation T sup
+17:30, 32
+
+T ambient
+312

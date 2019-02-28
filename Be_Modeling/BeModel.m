@@ -135,33 +135,9 @@ model.pred.Ts = pred_mod.Ts;  % simulation sampling time
     model.pred.nu = size(model.pred.Bd, 2);
 
     
-if  ModelParam.Orders.off_free % use augmented prediction model for offset free control
-    % number of output disturbances p_k =  number of outputs
-    model.pred.np = size(model.pred.Cd, 1);
-    % output disturbacne matrix- design conditions:  mag(Gp) < mag(Cd)
-    model.pred.Gp = 0.1*eye(model.pred.ny,model.pred.np);
-    % % augmented model with output disturbances p_k
-    % xS_k+1 = AS*xS_k + BS*uk + ES*d_0 + GS*1 
-    % yk = CS*xS_k + Fd*1 + Gp+p
-    % xS_k = [x_k, p_k]
-    model.pred.Ad = [model.pred.Ad, zeros(model.pred.nx,model.pred.np) ; zeros(model.pred.np,model.pred.nx), eye(model.pred.np)];
-    model.pred.Bd = [model.pred.Bd; zeros(model.pred.np,model.pred.nu)];
-    model.pred.Ed = [model.pred.Ed; zeros(model.pred.np,model.pred.nd)];
-    model.pred.Gd = [model.pred.Gd; zeros(model.pred.np,1)];
-    model.pred.Cd = [model.pred.Cd, model.pred.Gp];
-    % Overall estim. model dimensions
-    model.pred.nx = size(model.pred.Ad, 2);
-    model.pred.ny = size(model.pred.Cd, 1);
-    model.pred.nd = size(model.pred.Ed, 2);
-    model.pred.nu = size(model.pred.Bd, 2); 
-end
-    %  offset free control indicator
-    model.pred.off_free = ModelParam.Orders.off_free;   
-    
 %% Control input constraints
     model.pred.umax = 10000*ones(model.pred.nu,1);
     model.pred.umin = -10000*ones(model.pred.nu,1);
-
 
 %% post processing of individual models
 
@@ -213,14 +189,36 @@ if  strcmp(buildingType,'HollandschHuys')
     model.pred.Bd = newB;
     model.pred.nu = size(model.pred.Bd,2);
     model.pred.Dd = model.pred.Dd(:,1:model.pred.nu);
+    
 %     lump constraints
     model.pred.umax = model.pred.umax(1:model.pred.nu);
-    model.pred.umin = model.pred.umin(1:model.pred.nu);
+    model.pred.umin = model.pred.umin(1:model.pred.nu);  
 
-    
-    
 end
 
+if  ModelParam.Orders.off_free % use augmented prediction model for offset free control
+    % number of output disturbances p_k =  number of outputs
+    model.pred.np = size(model.pred.Cd, 1);
+    % output disturbacne matrix- design conditions:  mag(Gp) < mag(Cd)
+    model.pred.Gp = 0.1*eye(model.pred.ny,model.pred.np);
+    % % augmented model with output disturbances p_k
+    % xS_k+1 = AS*xS_k + BS*uk + ES*d_0 + GS*1 
+    % yk = CS*xS_k + Fd*1 + Gp+p
+    % xS_k = [x_k, p_k]
+    model.pred.Ad = [model.pred.Ad, zeros(model.pred.nx,model.pred.np) ; zeros(model.pred.np,model.pred.nx), eye(model.pred.np)];
+    model.pred.Bd = [model.pred.Bd; zeros(model.pred.np,model.pred.nu)];
+    model.pred.Ed = [model.pred.Ed; zeros(model.pred.np,model.pred.nd)];
+    model.pred.Gd = [model.pred.Gd; zeros(model.pred.np,1)];
+    model.pred.Cd = [model.pred.Cd, model.pred.Gp];
+    % Overall estim. model dimensions
+    model.pred.nx = size(model.pred.Ad, 2);
+    model.pred.ny = size(model.pred.Cd, 1);
+    model.pred.nd = size(model.pred.Ed, 2);
+    model.pred.nu = size(model.pred.Bd, 2); 
+end
+    %  offset free control indicator
+    model.pred.off_free = ModelParam.Orders.off_free;   
+    
 
 
 end

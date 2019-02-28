@@ -110,7 +110,9 @@ else   % initialize matrices for closed loop control simulations
     uopt = U(:,1); % initialize controls
 
     % ------ references ------
-    R = refs.R(SimStart:SimStop,:)';
+    if  strcmp(model.buildingType,'Reno') ||  strcmp(model.buildingType,'Old') ||  strcmp(model.buildingType,'RenoLight')
+         R = refs.R(SimStart:SimStop,:)';
+    end
     % above and below threshold comfort zone
     wa = refs.wa(SimStart:SimStop+N,:)';
     wb = refs.wb(SimStart:SimStop+N,:)';
