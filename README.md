@@ -76,7 +76,7 @@ List of key enabling algorithms implemented in BeSim.
 Building type | Location      |  Label        | floor area [m2] | #states         | #outputs       | #inputs         | #disturbances
 ------------  | ------------- | ------------- | -------------   | -------------  | -------------   | -------------  | ------------- 
 Residential   |  Belgium      | 'Old', 'Reno', 'RenoLight' | 56 | 283,286,250    | 6               | 6               | 44
-Office        |  Belgium      | 'HollandschHuys' | 3760         | 700            | 12              | 73               | 289
+Office        |  Belgium      | 'HollandschHuys' | 3760         | 700            | 12              | 20               | 289
 Office        |  Belgium      | 'Infrax'         | 2232         | 1262           | 19              | 28               | 259
 Borehole      |  Belgium      | 'Borehole '      | -            | 190            | 1               | 1                   | 0
 
