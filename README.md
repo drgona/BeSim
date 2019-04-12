@@ -94,7 +94,7 @@ Celestijnenlaan 300A, BE-3001 Leuven (Heverlee), Belgium
 
 The first stage of the toolbox emerged from the code development of the author during his PhD study held at [Institute of Information Engineering, Automation, and Mathematics, Slovak University of Technology in Bratislava](https://www.uiam.sk/) under the supervision of [prof. Michal Kvasnica](https://www.uiam.sk/~kvasnica/).
 
-The second stage with detailed white-box building models was developed during the post-doc position at [Thermal Systems Simulation (The SySi) research group](https://www.mech.kuleuven.be/en/tme/research/thermal_systems), Department of Mechanical Engineering
+The second stage with detailed white-box building models was developed during the visiting PhD and post-doc position at [Thermal Systems Simulation (The SySi) research group](https://www.mech.kuleuven.be/en/tme/research/thermal_systems), Department of Mechanical Engineering
 Division of Applied Mechanics and Energy Conversion (TME), KU Leuven under the supervision of [prof. Lieve Helsen](https://www.kuleuven.be/wieiswie/en/person/00009689).
 
 An early contribution of [Damien Picard](https://www.kuleuven.be/wieiswie/nl/person/00085306) towards the code development, conceptual contributions of [Martin Klaučo](https://www.uiam.sk/~klauco/) and [Michal Kvasnica](https://www.uiam.sk/~kvasnica/), and modeling work of [Filip Jorissen](https://www.kuleuven.be/wieiswie/nl/person/00091751) and [Iago Cupeiro Figueroa](https://www.kuleuven.be/wieiswie/en/person/00112721) on Infrax building and borehole models are gratefully acknowledged.
