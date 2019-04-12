@@ -92,16 +92,16 @@ Celestijnenlaan 300A, BE-3001 Leuven (Heverlee), Belgium
 
 ## Acknowledgement
 
-First stage of the toolbox emerged from the code development of the author during his PhD study held at [Institute of Information Engineering, Automation, and Mathematics, Slovak University of Technology in Bratislava](https://www.uiam.sk/) under the supervision of [prof. Michal Kvasnica](https://www.uiam.sk/~kvasnica/).
+The first stage of the toolbox emerged from the code development of the author during his PhD study held at [Institute of Information Engineering, Automation, and Mathematics, Slovak University of Technology in Bratislava](https://www.uiam.sk/) under the supervision of [prof. Michal Kvasnica](https://www.uiam.sk/~kvasnica/).
 
-Second stage with detailed white-box building models was developed during the post-doc position at [Thermal Systems Simulation (The SySi) research group](https://www.mech.kuleuven.be/en/tme/research/thermal_systems), Department of Mechanical Engineering
+The second stage with detailed white-box building models was developed during the post-doc position at [Thermal Systems Simulation (The SySi) research group](https://www.mech.kuleuven.be/en/tme/research/thermal_systems), Department of Mechanical Engineering
 Division of Applied Mechanics and Energy Conversion (TME), KU Leuven under the supervision of [prof. Lieve Helsen](https://www.kuleuven.be/wieiswie/en/person/00009689).
 
 An early contribution of [Damien Picard](https://www.kuleuven.be/wieiswie/nl/person/00085306) towards the code development, conceptual contributions of [Martin Klaučo](https://www.uiam.sk/~klauco/) and [Michal Kvasnica](https://www.uiam.sk/~kvasnica/), and modeling work of [Filip Jorissen](https://www.kuleuven.be/wieiswie/nl/person/00091751) and [Iago Cupeiro Figueroa](https://www.kuleuven.be/wieiswie/en/person/00112721) on Infrax building and borehole models are gratefully acknowledged.
 
-The financial support by the European Union through  the EU-H2020-GEOT\euro CH 
-project ‘Geothermal Technology for \euro conomic Cooling and Heating’ is acknowledged.
+The financial support by the European Union through  the [EU-H2020-GEOTeCH 
+project ‘Geothermal Technology for conomic Cooling and Heating’](http://www.geotech-project.eu/) is acknowledged.
 
-Finally, later stages of this work partially emerged from the IBPSA Project 1, an international project conducted under the umbrella of the International Building Performance Simulation Association (IBPSA). Project 1 will develop and demonstrate a BIM/GIS and Modelica Framework for building and community energy system design and operation.
+Finally, later stages of this work partially emerged from the [IBPSA Project 1](https://ibpsa.github.io/project1/), an international project conducted under the umbrella of the International Building Performance Simulation Association (IBPSA). Project 1 will develop and demonstrate a BIM/GIS and Modelica Framework for building and community energy system design and operation.
 
 
