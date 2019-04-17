@@ -109,6 +109,8 @@ Finally, later stages of this work partially emerged from the [IBPSA Project 1](
 ![Sysi](/Data/Page/SySi.png)
 
 <img src="/Data/Page/IBPSA-project1.png" alt="drawing" width="200"/>
+<img src="/Data/Page/GEOTeCH.png" alt="drawing" width="200"/>
+
 ![geotech](/Data/Page/GEOTeCH.png)
 
 ![IAM](/Data/Page/IAM.png)
