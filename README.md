@@ -107,5 +107,8 @@ Finally, later stages of this work partially emerged from the [IBPSA Project 1](
 
 ![KULeuven](/Data/Page/kuleuven_logo.png)
 ![Sysi](/Data/Page/SySi.png)
+![IBPSA](/Data/Page/IBPSA-project1.png)
+![geotech](/Data/Page/GEOTeCH.png)
 ![IAM](/Data/Page/IAM.png)
 ![fchpt](/Data/Page/logo_fchpt.png)
+
