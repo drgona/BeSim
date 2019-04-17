@@ -115,7 +115,7 @@ Finally, later stages of this work partially emerged from the [IBPSA Project 1](
 
 ## References
 
-1. Cupeiro Figueroa I, Drgona J, Helsen L, State estimators applied to a linear white-box geothermal borefield controller model, 16th International Building Performance Simulation Association Conference, Rome, Italy, 02 Sep 2019 - 04 Sep 2019. N/A. Proceedings of the 16th IBPSA Conference 2019
+1. Cupeiro Figueroa I., Drgona J., Helsen L., State estimators applied to a linear white-box geothermal borefield controller model, 16th International Building Performance Simulation Association Conference, Rome, Italy, 02 Sep 2019 - 04 Sep 2019. N/A. Proceedings of the 16th IBPSA Conference 2019
 
 2. Cupeiro Figueroa I., Drgona J., Abdollahpouri M., Picard D., and Helsen L., State Observer for Optimal Control using White-box Building Models, Purdue Conferences - 5th International High Performance Building Conference, Purdue University, West Lafayette, IN, USA. INTERNATIONAL HIGH PERFORMANCE BUILDINGS CONFERENCE. Purdue e-Pubs. Jul 2018.
 
