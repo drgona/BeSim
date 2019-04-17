@@ -105,4 +105,4 @@ project ‘Geothermal Technology for conomic Cooling and Heating’](http://www.
 
 Finally, later stages of this work partially emerged from the [IBPSA Project 1](https://ibpsa.github.io/project1/), an international project conducted under the umbrella of the International Building Performance Simulation Association (IBPSA). Project 1 will develop and demonstrate a BIM/GIS and Modelica Framework for building and community energy system design and operation.
 
-![KULeuven](/Data/Page/kuleuven_logo.png | height = 100px)
+![KULeuven](/Data/Page/kuleuven_logo.png =100x60)
