@@ -111,8 +111,5 @@ Finally, later stages of this work partially emerged from the [IBPSA Project 1](
 ![geotech](/Data/Page/GEOTeCH.png)
 <img src="/Data/Page/IBPSA-project1.png" alt="drawing" width="400"/>
 
-![IAM](/Data/Page/IAM.png)
-![fchpt](/Data/Page/logo_fchpt.png)
-
-<img src="/Data/Page/IAM.png" alt="drawing" width="300"/> <img src="/Data/Page/logo_fchpt.png" alt="drawing" width="300"/>
+<img src="/Data/Page/IAM.png" alt="drawing" width="150"/> <img src="/Data/Page/logo_fchpt.png" alt="drawing" width="200"/>
 
