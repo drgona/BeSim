@@ -49,10 +49,11 @@ ModelParam.analyze.openLoop.end = 7;                % ending day of the analysis
 ModelParam.analyze.nStepAhead.use = false;           % n-step ahead predicion error
 ModelParam.analyze.nStepAhead.steps = [1, 10, 40];  % x*Ts 
 ModelParam.analyze.HSV = true;                      %  hankel singular values of ROM
-ModelParam.analyze.frequency = false;                % frequency analysis
+ModelParam.analyze.frequency = true;                % frequency analysis
 
 model = BeModel(buildingType, ModelParam);      % construct a model object   
 
+return
 
 %% Disturbacnes 
 % ambient temperature, solar radiation, internal heat gains
