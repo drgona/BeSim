@@ -15,7 +15,7 @@ if nargin < 2
    ModelParam.Orders.ctrlModIndex = 9;
    ModelParam.Orders.plantModIndex = 9;
    
-   ModelParam.Orders.off_free = 0;    %  augmented model
+   ModelParam.off_free = 0;    %  augmented model
    ModelParam.reload = 0;    % reload SSMs and regenerate ROMs flag
 end
 
@@ -26,6 +26,14 @@ model.buildingType = buildingType;
 model.Orders.range = ModelParam.Orders.range;
 model.Orders.choice =  ModelParam.Orders.choice;
 model.reload = ModelParam.reload;
+% model analysis
+model.analyze.openLoop.use = ModelParam.analyze.openLoop.use;
+model.analyze.openLoop.start = ModelParam.analyze.openLoop.start;
+model.analyze.openLoop.end = ModelParam.analyze.openLoop.end;
+model.analyze.nStepAhead.use = ModelParam.analyze.nStepAhead.use;
+model.analyze.nStepAhead.steps = ModelParam.analyze.nStepAhead.steps;
+model.analyze.HSV = ModelParam.analyze.HSV;
+model.analyze.frequency = ModelParam.analyze.frequency;
 
 fprintf('\n------------------ Building Model -------------------\n');
 
@@ -196,7 +204,7 @@ if  strcmp(buildingType,'HollandschHuys')
 
 end
 
-if  ModelParam.Orders.off_free % use augmented prediction model for offset free control
+if  ModelParam.off_free % use augmented prediction model for offset free control
     % number of output disturbances p_k =  number of outputs
     model.pred.np = size(model.pred.Cd, 1);
     % output disturbacne matrix- design conditions:  mag(Gp) < mag(Cd)
@@ -217,8 +225,66 @@ if  ModelParam.Orders.off_free % use augmented prediction model for offset free 
     model.pred.nu = size(model.pred.Bd, 2); 
 end
     %  offset free control indicator
-    model.pred.off_free = ModelParam.Orders.off_free;   
+    model.pred.off_free = ModelParam.off_free;   
     
+%% Model analysis
+%     analysis = BeModelAccuracy(model);
 
+% TODO: implement functionality and plotting from function
+% offLinePredPerf.m
+
+% D = v
+% TODO: generate control actions U from simulation for every building
+if (model.analyze.openLoop.use || model.analyze.nStepAhead.use || model.analyze.HSV)
+        
+% % % % % % % %  HSV  analysis % % % % % % % %    
+       %         In state coordinates that equalize the input-to-state and state-to-output energy transfers
+% Hankel singular values  measure the contribution of each state to the input/output behavior.
+%  Hankel singular values are to model order what singular values are  to matrix rank.
+    if model.analyze.HSV    
+        
+%         TODO: HSV values lines paper form
+        
+         figure % HSV for full order model
+        [hsvd_val_ssm, hsv_data_ssm] = hsvd(sys_dExt);
+        bar(hsvd_val_ssm/max(hsvd_val_ssm),0.8)
+          title(['HSV of full order model: ' buildingType],'FontSize',16)
+%            title(['Original Model HSV (state contribution)'],'FontSize',12)          
+%          legend hide
+        xlabel('State []','FontSize',14)
+         ylabel('State Energy []','FontSize',14)
+         set(gca,'YScale', 'log','FontSize',14)
+         grid on
+         axis tight 
+         
+         figure % HSV for ROM models
+         nCol = ceil( ( length(model.Orders.range )) /2  );
+         for i=1:length(model.Orders.range )
+            subplot(2, nCol ,i)
+           [hsvd_val{i} hsv_data{i}] =  hsvd(rom{i});
+%            hsvd(rom{i})
+           HSV_rom{i} = hsvd_val{i}/max(hsvd_val{i});
+           bar(HSV_rom{i},0.8)
+%             title([buildingType(j) 'Model Order ' num2str(orders(i)) ]);
+            title(['HSV of ROM: ' num2str(model.Orders.range(i)) ],'FontSize',12);
+%             legend hide
+            set(gca,'YScale', 'log','FontSize',9)
+            grid on
+            axis tight            
+            if i ~= 1 && i ~= length(model.Orders.range)/2+1
+                     ylabel('')
+            else
+               ylabel('State Energy','FontSize',12) 
+            end
+            if i > length(model.Orders.range )/2
+                xlabel('State','FontSize',12)               
+            else
+                xlabel('')
+            end                                         
+         end
+    end  
+
+
+end
 
 end

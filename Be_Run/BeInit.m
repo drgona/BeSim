@@ -37,11 +37,19 @@ addpath('../Be_Learn/')
 % model = BeModel(buildingType, ModelParam);
 
 % =========== particular example =================
-% buildingType = 'Reno';  ModelParam.Orders.range = [4, 7, 10, 15, 20, 30, 40, 100];
-buildingType = 'HollandschHuys'; ModelParam.Orders.range = [100, 200, 600]; 
+buildingType = 'Reno';  ModelParam.Orders.range = [4, 7, 10, 15, 20, 30, 40, 100];
+% buildingType = 'HollandschHuys'; ModelParam.Orders.range = [100, 200, 600]; 
 ModelParam.Orders.choice = 'full';
-ModelParam.Orders.off_free = 0;    
+ModelParam.off_free = 1;    
 ModelParam.reload = 0; 
+% predictiona accurcy analysis 
+ModelParam.analyze.openLoop.use = false;             %  open loop simulation
+ModelParam.analyze.openLoop.start = 1;              % starting day of the analysis
+ModelParam.analyze.openLoop.end = 7;                % ending day of the analysis
+ModelParam.analyze.nStepAhead.use = false;           % n-step ahead predicion error
+ModelParam.analyze.nStepAhead.steps = [1, 10, 40];  % x*Ts 
+ModelParam.analyze.HSV = true;                      %  hankel singular values of ROM
+ModelParam.analyze.frequency = false;                % frequency analysis
 
 model = BeModel(buildingType, ModelParam);      % construct a model object   
 
