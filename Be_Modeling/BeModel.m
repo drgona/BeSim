@@ -236,11 +236,19 @@ end
 % D = v
 % TODO: generate control actions U from simulation for every building
 if (model.analyze.openLoop.use || model.analyze.nStepAhead.use || model.analyze.HSV ||  model.analyze.frequency)
+    
+    % % % % % % % %  open loop  analysis % % % % % % % %    
+    if model.analyze.openLoop.use
+    
         
-% % % % % % % %  HSV  analysis % % % % % % % %    
-       %         In state coordinates that equalize the input-to-state and state-to-output energy transfers
-% Hankel singular values  measure the contribution of each state to the input/output behavior.
-%  Hankel singular values are to model order what singular values are  to matrix rank.
+        
+        
+    end
+    
+    % % % % % % % %  HSV  analysis % % % % % % % %    
+    % In state coordinates that equalize the input-to-state and state-to-output energy transfers
+    % Hankel singular values  measure the contribution of each state to the input/output behavior.
+    % Hankel singular values are to model order what singular values are  to matrix rank.
     if model.analyze.HSV           
 %         TODO: HSV values lines paper form
         
@@ -283,6 +291,7 @@ if (model.analyze.openLoop.use || model.analyze.nStepAhead.use || model.analyze.
          end
     end  
 
+    % % % % % % % %  Frequency  analysis % % % % % % % %    
     if model.analyze.frequency
         % Option for bode plots
         opts = bodeoptions('cstprefs');

@@ -43,13 +43,13 @@ ModelParam.Orders.choice = 'full';
 ModelParam.off_free = 1;    
 ModelParam.reload = 0; 
 % predictiona accurcy analysis 
-ModelParam.analyze.openLoop.use = false;             %  open loop simulation
+ModelParam.analyze.openLoop.use = false;             %  open loop simulation   - TODO
 ModelParam.analyze.openLoop.start = 1;              % starting day of the analysis
 ModelParam.analyze.openLoop.end = 7;                % ending day of the analysis
-ModelParam.analyze.nStepAhead.use = false;           % n-step ahead predicion error
-ModelParam.analyze.nStepAhead.steps = [1, 10, 40];  % x*Ts 
+ModelParam.analyze.nStepAhead.use = false;           % n-step ahead predicion error  - TODO
+ModelParam.analyze.nStepAhead.steps = [1, 10, 40];  % x*Ts  
 ModelParam.analyze.HSV = true;                      %  hankel singular values of ROM
-ModelParam.analyze.frequency = true;                % frequency analysis
+ModelParam.analyze.frequency = false;                % frequency analysis - TODO
 
 model = BeModel(buildingType, ModelParam);      % construct a model object   
 
