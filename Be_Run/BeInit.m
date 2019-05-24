@@ -18,31 +18,24 @@ addpath('../Be_Control/')
 addpath('../Be_Simulation/')
 addpath('../Be_Learn/')
 
-%% Model: emulator + predictor (controller)
+%% Model: emulator + prediction
 
 % =========== 1, choose building model =================
-% == Option 1: select from library of available models 
+% select from a library of available models 
 % buildingType = ModelIdentifier 
 % ModelIdentifier for residential houses with radiators:   'Reno', 'Old', 'RenoLight'
 % ModelIdentifier for office buildings with TABS:          'Infrax', 'HollandschHuys'
 % ModelIdentifier for borehole:                            'Borehole' 
+buildingType = 'Reno';  
 
 % =========== 2, choose model order =================
-% ModelParam.Orders.range  = [4, 10, 20, 40, 100, ... ]   % vector of model orders 
-% ModelParam.Orders.choice = 100                          % particular model order selection  
-% ModelParam.Orders.choice = 'full'                       % full model order selection  
-% ModelParam.Orders.off_free = 0 or 1                     % augmented model
+ModelParam.Orders.range = [4, 7, 10, 15, 20, 30, 40, 100];    % vector of model orders 
+% ModelParam.Orders.range = [100, 200, 600];                  % vector of model orders 
+ModelParam.Orders.choice = 'full';                            % model order selection for prediction
+ModelParam.off_free = 1;                                      % augmented model with unmeasured disturbances
+ModelParam.reload = 0;                                        % if 1 reload ROM, if 0 load saved ROM
 
-% =========== 3, construct model structue =================
-% model = BeModel(buildingType, ModelParam);
-
-% =========== particular example =================
-buildingType = 'Reno';  ModelParam.Orders.range = [4, 7, 10, 15, 20, 30, 40, 100];
-% buildingType = 'HollandschHuys'; ModelParam.Orders.range = [100, 200, 600]; 
-ModelParam.Orders.choice = 'full';
-ModelParam.off_free = 1;    
-ModelParam.reload = 0; 
-% predictiona accurcy analysis 
+% =========== 4, choose model analysis =================
 ModelParam.analyze.openLoop.use = false;             %  open loop simulation   - TODO
 ModelParam.analyze.openLoop.start = 1;              % starting day of the analysis
 ModelParam.analyze.openLoop.end = 7;                % ending day of the analysis
@@ -51,9 +44,8 @@ ModelParam.analyze.nStepAhead.steps = [1, 10, 40];  % x*Ts
 ModelParam.analyze.HSV = true;                      %  hankel singular values of ROM
 ModelParam.analyze.frequency = false;                % frequency analysis - TODO
 
+% =========== 4, construct model structue =================
 model = BeModel(buildingType, ModelParam);      % construct a model object   
-
-return
 
 %% Disturbacnes 
 % ambient temperature, solar radiation, internal heat gains

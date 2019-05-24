@@ -10,7 +10,6 @@
 % 1, Model Predictive Control (MPC) 
 % 2, deep learning control supervised by MPC
 
-
 addpath('../Be_Modeling/')
 addpath('../Be_Disturbances/')
 addpath('../Be_References/')
@@ -18,35 +17,34 @@ addpath('../Be_Estimation/')
 addpath('../Be_Control/')
 addpath('../Be_Simulation/')
 addpath('../Be_Learn/')
-addpath('../Be_RealTime/')
-addpath('../Be_RealTime/Mervis')
 
-%% Model: emulator + predictor (controller)
+%% Model: emulator + prediction
+
 % =========== 1, choose building model =================
-% == Option 1: load custom model     %%%% TODO  %%%%
-% buildingType = 'Load'
-% == Option 2: select from library of available models 
+% select from a library of available models 
 % buildingType = ModelIdentifier 
 % ModelIdentifier for residential houses with radiators:   'Reno', 'Old', 'RenoLight'
 % ModelIdentifier for office buildings with TABS:          'Infrax', 'HollandschHuys'
 % ModelIdentifier for borehole:                            'Borehole' 
-% TODO: missing disturbance file for borehole large file on github
+buildingType = 'Reno';  
+
 % =========== 2, choose model order =================
-% ModelParam.Orders.range  = [4, 10, 20, 40, 100, ... ]   % vector of model orders 
-% ModelParam.Orders.choice = 100                          % particular model order selection  
-% ModelParam.Orders.choice = 'full'                       % full model order selection  
-% ModelParam.Orders.off_free = 0 or 1                     % augmented model
-% =========== 3, construct model structue =================
-% model = BeModel(buildingType, ModelParam);
+ModelParam.Orders.range = [4, 7, 10, 15, 20, 30, 40, 100];    % vector of model orders 
+% ModelParam.Orders.range = [100, 200, 600];                  % vector of model orders 
+ModelParam.Orders.choice = 'full';                            % model order selection for prediction
+ModelParam.off_free = 1;                                      % augmented model with unmeasured disturbances
+ModelParam.reload = 0;                                        % if 1 reload ROM, if 0 load saved ROM
 
-buildingType = 'Reno';  ModelParam.Orders.range = [4, 7, 10, 15, 20, 30, 40, 100];
-% buildingType = 'Infrax'; ModelParam.Orders.range = [100, 200, 600]; 
-% buildingType = 'HollandschHuys'; ModelParam.Orders.range = [100, 200, 600]; 
-% buildingType = 'Borehole';  ModelParam.Orders.range = [10, 15, 20, 40, 100];  
-ModelParam.Orders.choice = 'full';
-ModelParam.Orders.off_free = 0;    
-ModelParam.reload = 0; 
+% =========== 4, choose model analysis =================
+ModelParam.analyze.openLoop.use = false;             %  open loop simulation   - TODO
+ModelParam.analyze.openLoop.start = 1;              % starting day of the analysis
+ModelParam.analyze.openLoop.end = 7;                % ending day of the analysis
+ModelParam.analyze.nStepAhead.use = false;           % n-step ahead predicion error  - TODO
+ModelParam.analyze.nStepAhead.steps = [1, 10, 40];  % x*Ts  
+ModelParam.analyze.HSV = true;                      %  hankel singular values of ROM
+ModelParam.analyze.frequency = false;                % frequency analysis - TODO
 
+% =========== 4, construct model structue =================
 model = BeModel(buildingType, ModelParam);      % construct a model object   
 
 %% Constraints
