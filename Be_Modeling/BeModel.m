@@ -5,18 +5,28 @@ function model = BeModel(buildingType, ModelParam)
 %% Initiation
 % default offset free control setup  
 if nargin == 0  
-   buildingType = 'Infrax'; 
+   buildingType = 'Reno'; 
 end
 if nargin < 2
-   ModelParam.Orders.range = [100, 200, 600]; % add any reduced order model you wish to have
-   ModelParam.Orders.choice = 200;            % insert model order or 'full' for full order SSM 
+    ModelParam.Orders.range = [7, 15, 30, 100];    % vector of model orders 
+    ModelParam.Orders.choice = 'full';                            % model order selection for prediction
+%    ModelParam.Orders.range = [100, 200, 600]; % add any reduced order model you wish to have
+%    ModelParam.Orders.choice = 200;            % insert model order or 'full' for full order SSM 
 %   alternative choice of the model order - adopt to be general, possibly
 % TODO:  abandon this feature and adopt residential model
    ModelParam.Orders.ctrlModIndex = 9;
-   ModelParam.Orders.plantModIndex = 9;
-   
+   ModelParam.Orders.plantModIndex = 9; 
    ModelParam.off_free = 0;    %  augmented model
    ModelParam.reload = 0;    % reload SSMs and regenerate ROMs flag
+   ModelParam.analyze.SimSteps = 672; % 672 = one week Number of simulation steps (Ts = 900 s)
+   ModelParam.analyze.openLoop.use = false;             %  open loop simulation   - TODO
+   ModelParam.analyze.openLoop.start = 1;              % starting day of the analysis
+   ModelParam.analyze.openLoop.end = 7;                % ending day of the analysis
+   ModelParam.analyze.nStepAhead.use = true;           % n-step ahead predicion error  - TODO
+   ModelParam.analyze.nStepAhead.steps = [1, 10, 40];  % x*Ts  
+   ModelParam.analyze.HSV = true;                      %  hankel singular values of ROM
+   ModelParam.analyze.frequency = false;                % frequency analysis - TODO
+
 end
 
 % building parameters
@@ -27,6 +37,7 @@ model.Orders.range = ModelParam.Orders.range;
 model.Orders.choice =  ModelParam.Orders.choice;
 model.reload = ModelParam.reload;
 % model analysis
+model.analyze.SimSteps = ModelParam.analyze.SimSteps;
 model.analyze.openLoop.use = ModelParam.analyze.openLoop.use;
 model.analyze.openLoop.start = ModelParam.analyze.openLoop.start;
 model.analyze.openLoop.end = ModelParam.analyze.openLoop.end;
@@ -40,7 +51,7 @@ fprintf('\n------------------ Building Model -------------------\n');
 	%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	% Load model 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	if ModelParam.reload       
+	if (ModelParam.reload || model.analyze.openLoop.use || model.analyze.nStepAhead.use)   
 		% Model
 		fprintf('*** Create ROM models ...\n')
         % Disturbances
@@ -233,17 +244,198 @@ end
 % TODO: implement functionality and plotting from function
 % offLinePredPerf.m
 
-% D = v
 % TODO: generate control actions U from simulation for every building
 if (model.analyze.openLoop.use || model.analyze.nStepAhead.use || model.analyze.HSV ||  model.analyze.frequency)
     
-    % % % % % % % %  open loop  analysis % % % % % % % %    
-    if model.analyze.openLoop.use
     
-        
-        
-        
+        % % % % % % % %  open loop  analysis % % % % % % % %    
+    if (model.analyze.openLoop.use || model.analyze.nStepAhead.use)   
+        % Generate control actions by weekly oscilations between umin and umax
+        sine_waves = time_transform(size(v,1),model.plant.Ts);
+        U = zeros(size(v,1),model.plant.nu);  
+        U(sine_waves(:,2)>=0,:) = sine_waves(sine_waves(:,2)>=0,2)*model.pred.umax'; 
+        U(sine_waves(:,2)<0,:) = -sine_waves(sine_waves(:,2)<0,2)*model.pred.umin'; 
+        % disturbance profiles
+        D = v; 
+        % lumped model inputs
+        UExt = [U, D, ones(size(v,1),1)]';
+        t_sim = (1:size(v,1))*sys_dExt.Ts;
+        HSim = model.analyze.SimSteps;
+
+        % simulate the different models. 
+        ny = size(sys_dExt.C, 1);
+        yComp = zeros( length(orders)+1, HSim, ny );
+            % Full SSM
+        [yComp(end, :, :),t,xSSM] = lsim(sys_dExt,UExt(:,1:HSim),t_sim(1:HSim));
+        leg = cell(length(orders)+1,1);
+            % Reduced order models
+        for i = 1:length(orders)
+            [yComp(i, :, :),t,x] = lsim(rom{i},UExt(:,1:HSim),t_sim(1:HSim));
+            leg{i} = num2str(orders(i));
+        end
+        leg{end} = 'SSM';
+        yComp(:, :, :) = yComp(:, :, :) - 273.15;      
     end
+    
+     if model.analyze.openLoop.use
+        sampling = 14;
+        markers = {'d','o','^','v','x','s','+','<','>','*','--','-*'};        
+        % Plot simulation result for each zone
+        fig = figure;
+        time = t/3600/24; %in days 
+        ha = tight_subplot(2,3,[.1 .03],[.15 .01],[.08 .01]);
+        for i = 1:ny
+            axes(ha(i));hold off
+            for k = 1:length(orders)
+                p = plot(time(1:sampling:end) , yComp(k, 1:sampling:end, i)); hold on;
+                p.Marker = markers{k};
+            end
+            p = plot(time , yComp(end, :, i));
+            p.LineWidth = 2;
+            p.Color = 'k';
+            p.LineStyle = '--';
+%             ylim([15,25]);
+%             xlim([0,7]);
+            % Set title into plot
+            titlePlot = title(['TZone ' num2str(i)]);
+            pos = get(titlePlot,'Position');
+            set(titlePlot,'Position',[pos(1) pos(2)-1.2 pos(3)])
+            grid on
+            if i==1 || i==4
+                ylabel('T [^\circ C]')
+            elseif i==5
+                xlabel('Time [Day]')
+                legend(leg, 'Orientation', 'horizontal')
+            end
+        end
+        % remove xLabel from first row
+        set(ha(1:3),'XTickLabel',''); 
+        % remove yLabel from second column 
+        set(ha(2:3),'YTickLabel','')
+        set(ha(5:6),'YTickLabel','')
+
+        % Plot simulation result for zone 1 for all SSM and ROM
+        % The black line is the reference, the dashed line is the full
+        % order SSM
+        % FIXME: legend symbole for SSM is not correct. Why?
+        figure
+        for i = 1:length(orders)
+            p = plot(time(1:sampling:end) , yComp(i, 1:sampling:end, 1)); hold on;
+            p.Marker = markers{i};
+        end
+        p = plot(time(1:sampling:end) , yComp(end, 1:sampling:end, 1));
+        p.LineWidth = 2;
+        p(end).Color = 'k';
+        p(end).LineStyle = '--';
+        legend(leg);
+        ylabel('T [^\circ C]');
+        xlabel('Day');
+        title(['TZone ' num2str(1)]);
+        grid on
+%         plot(time,Rmin(:,1:HSim),'k','LineWidth',0.5);
+        %plot(time,Rmax(:,1:opt.HSim),'k','LineWidth',0.5);
+
+        % Plot zones average simulation result for all SSM and ROM
+        % The black line is the reference, the dashed line is the full
+        % order SSM
+        % FIXME: legend symbole for SSM is not correct. Why?
+        figure      
+        for i = 1:length(orders)
+            yAve = mean(yComp(i, 1:sampling:end,:),3);
+            p = plot(time(1:sampling:end) ,yAve); hold on;
+            p.Marker = markers{i};
+        end
+        p = plot(time(1:sampling:end) , yComp(end, 1:sampling:end, 1));
+        p.LineWidth = 2;
+        p(end).Color = 'k';
+        p(end).LineStyle = '--';
+        legend(leg);
+        ylabel('T [^\circ C]');
+        xlabel('Day');
+        title(['Average(TZones)']);
+        grid on
+%         plot(time,Rmin(:,1:opt.HSim),'k','LineWidth',0.5);
+     end
+    
+    
+%      TODO: make this more efficient
+%  simplify the code using https://www.mathworks.com/help/ident/ref/predict.html
+      if model.analyze.nStepAhead.use
+        % Plot for n-steps ahead predictions        
+        nStepAhead = model.analyze.nStepAhead.steps;
+        H = length(nStepAhead);
+        start = max(nStepAhead)+2;
+%         if opt.computeNSteps
+            yNStepAhead = zeros( length(orders) + 1, H, HSim, ny); % [order, time, zone]
+            for z=1:H   % --------- Different h-step ahead horizons
+                h = nStepAhead(z);
+                check = 0;
+                for t_end = start:HSim  % --------- Compute the h-step ahead prediction for all point from start to HSim
+                    t_start = t_end - h;
+                    % Re-create ROM with correct initial values 
+                    [sys_dExtXN, romXN] = fGenerateSysAndRom([path '/models/ssm.mat'], Ts, xSSM(t_start,:)' + x0, orders);
+                    for i = 1:length(orders) % --------- Compute prediction for each ROM
+                        % Simulate from t = t_end - h to t_end to get h-step ahead prediction             
+                        yTemp = lsim( romXN{i}, UExt(:,t_start:t_end),t_sim(t_start:t_end)) - 273.15;
+                        % Save h-step ahead prediction
+                        yNStepAhead(i, z, t_end, :) = yTemp(end,:);
+                    end
+                    yTemp = lsim( sys_dExtXN, UExt(:,t_start:t_end),t_sim(t_start:t_end)) - 273.15;
+                    % Save h-step ahead prediction
+                    yNStepAhead(end, z, t_end, :) = yTemp(end,:);
+                    check = max( check, abs(squeeze(yTemp(end,:)) - squeeze(yComp(end,t_end,:))') );
+                end
+                display(['Check = ' num2str(check) ' for h = ' num2str(h) ' of building ' buildingType])
+            end
+
+%             save(['../Data/yNStepAhead'  buildingType{j} '.mat'], 'yNStepAhead');
+%         else
+%             load(['../Data/yNStepAhead'  buildingType{j} '.mat']);
+%         end
+        
+        % Take temperature different between yNStepAhead and reference and
+        % reshape yNSteAhead by appending all zones to 1 column.
+        % Also compute 1-NRMSE
+        yRef = squeeze(yComp(end,start:end,:));
+        HSim_new = HSim - start + 1;
+        deltaTNStepAhead = zeros( length(orders), H, HSim_new*ny);
+        NRMSE_NStepAhead = zeros( length(orders), H, ny);
+        for z=1:H
+            for i=1:length(orders)
+                yNStepAhead_iz = squeeze(yNStepAhead(i, z, start:end, :));
+                deltaTNStepAhead(i, z, :) = reshape( yNStepAhead_iz - yRef, [], 1); %squeeze removes singleton dimensions
+                ave = mean( yNStepAhead_iz );
+                NRMSE_NStepAhead(i, z, :) = ones(1,ny) - sqrt( sum( (yNStepAhead_iz - yRef).^2 ) ) ./ ...
+                    sqrt( sum( (yNStepAhead_iz - repmat(ave, HSim_new,1)).^2 ) );
+            end
+        end
+        
+        fig = figure;
+        ylabel('[K]');
+        leg = cell(length(orders),1);
+        for i=1:length(orders)
+            leg{i} = ['ROM ' num2str(orders(i))];
+        end
+        for z=1:H
+            p(z) = subplot(1,H,z);
+            deltaTNStepAhead_z = squeeze(deltaTNStepAhead(:,z,:));
+            boxplot(deltaTNStepAhead_z', 'labels', leg, 'labelorientation','inline')
+            title([num2str( nStepAhead(z) ) '-steps ahead'])
+%             ylim([-3, 2])
+        end
+        % Add common label by adding invisible axes to subplot 1
+        h=axes('position',[p(1).Position],'visible','off');
+        ylabel('[K]','visible','on');
+  
+        if opt.saveNSteps
+            % resize page size. This set the boundingBox of the eps file
+            figuresize(fig, 407, 279, 'points');
+            % Save figure as eps. Argument epsc is for color printing
+            saveas(fig,['PredPerf' buildingType{j} '.eps'],'epsc')
+        end
+      end
+    
+    
     
     % % % % % % % %  HSV  analysis % % % % % % % %    
     % In state coordinates that equalize the input-to-state and state-to-output energy transfers
