@@ -73,7 +73,7 @@ function [t, v, inputIndex, dictCtlInputs, dicValVar, dicOutputNameIndex, x0] = 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Save control inputs names and indexes into dictionary from uNames of model
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    dNamesControlInputs = {'inputBus'};
+    dNamesControlInputs = {'inputBus','inputs'};
     keys = [];
     indices = [];
     for i=1:length(dNamesControlInputs)
@@ -90,28 +90,34 @@ function [t, v, inputIndex, dictCtlInputs, dicValVar, dicOutputNameIndex, x0] = 
     % Get disturbance variable values
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    t = findOutput(path_preComp, 'Time' )';
-    v = zeros(length(t),length(varNames));
-    for i=1:length(varNames)
-        if debug
-            temp1 = strfind(varNames(i),'Tenv');
-            temp2 = strfind(varNames(i),'Te');
-            temp3 = strfind(varNames(i),'TGroundDes');
-            temp4 = strfind(varNames(i),'dummy');
-            if ~isempty(temp1{1}) || ~isempty(temp2{1}) || ~isempty(temp3{1})
-                v(:,i) = ones(length(t),1).*293.15;
-            elseif ~isempty(temp4{1})
-                v(:,i) = ones(length(t),1);
+    if exist(path_preComp, 'dir')   
+        t = findOutput(path_preComp, 'Time' )';
+        v = zeros(length(t),length(varNames));
+        for i=1:length(varNames)
+            if debug
+                temp1 = strfind(varNames(i),'Tenv');
+                temp2 = strfind(varNames(i),'Te');
+                temp3 = strfind(varNames(i),'TGroundDes');
+                temp4 = strfind(varNames(i),'dummy');
+                if ~isempty(temp1{1}) || ~isempty(temp2{1}) || ~isempty(temp3{1})
+                    v(:,i) = ones(length(t),1).*293.15;
+                elseif ~isempty(temp4{1})
+                    v(:,i) = ones(length(t),1);
+                else
+                    v(:,i) = zeros(length(t),1);
+                end
             else
-                v(:,i) = zeros(length(t),1);
+                v(:,i) = findOutput(path_preComp,varNames(i))';
             end
-        else
-            v(:,i) = findOutput(path_preComp,varNames(i))';
         end
+        %Remove last point because not equidistant
+        t = t(1:end-1);
+        v = v(1:end-1,:); 
+    else
+        warning('Missing disturbance precomputed file')
+        t = [0 900];
+        v = 0; 
     end
-    %Remove last point because not equidistant
-    t = t(1:end-1);
-    v = v(1:end-1,:); 
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Get output names and indices

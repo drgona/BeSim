@@ -18,7 +18,7 @@ if nargin < 2
    ModelParam.Orders.plantModIndex = 9; 
    ModelParam.off_free = 0;    %  augmented model
    ModelParam.reload = 0;    % reload SSMs and regenerate ROMs flag
-   ModelParam.analyze.SimSteps = 672; % 672 = one week Number of simulation steps (Ts = 900 s)
+   ModelParam.analyze.SimSteps = 2*672; % 672 = one week Number of simulation steps (Ts = 900 s)
    ModelParam.analyze.openLoop.use = false;             %  open loop simulation   - TODO
    ModelParam.analyze.openLoop.start = 1;              % starting day of the analysis
    ModelParam.analyze.openLoop.end = 7;                % ending day of the analysis
@@ -51,23 +51,24 @@ fprintf('\n------------------ Building Model -------------------\n');
 	%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	% Load model 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	if (ModelParam.reload || model.analyze.openLoop.use || model.analyze.nStepAhead.use)   
+	if ModelParam.reload  
 		% Model
 		fprintf('*** Create ROM models ...\n')
         % Disturbances
         
 %         TODO: get rid of this if else by unifying disturbances for house model 
-        if strcmp(buildingType,'Reno') || strcmp(buildingType,'RenoLight') || strcmp(buildingType,'Old') 
+        if strcmp(buildingType,'Reno') || strcmp(buildingType,'RenoLight') || strcmp(buildingType,'Old')  
             [t, v, x0] = disturbances_old(path, 0, 0);
         else
-            [t,  v, inputIndex, dictCtlInputs, dicValVar, dicOutputNameIndex, x0]= disturbances(path,disturbanceType,0, 0);
+%             [t,  v, inputIndex, dictCtlInputs, dicValVar, dicOutputNameIndex, x0]= disturbances(path,disturbanceType,0, 0);
+            [t,  v, ~, ~, ~, ~, x0]= disturbances(path,disturbanceType,0, 0);
         end
         Ts = t(2) - t(1);
         orders = ModelParam.Orders.range;
 %        states are initalized to x0 = 293.15 K in original model, extended
 %        model initalizes states to 0 which is equivalent with  293.15 K  via matrix extension  
 		[sys_dExt, rom] = fGenerateSysAndRom([path '/models/ssm.mat'], Ts, x0, orders);      
-		save([path '/preComputed_matlab/mod.mat'], 'Ts', 'orders', 'sys_dExt', 'rom');
+		save([path '/preComputed_matlab/modTEST.mat'], 'Ts', 'orders', 'sys_dExt', 'rom', 'v', 't', 'x0');
    		fprintf('*** Done.\n')
     else
         fprintf('*** Load ROM models ...\n')
@@ -82,12 +83,9 @@ fprintf('\n------------------ Building Model -------------------\n');
 %     measured outputs ym_index
 load([path '/preComputed_matlab/indexing.mat']);
 
-% u_index = 178:205;
-% d_index = [1:177,206:287];
-% ym_index = 1:19;
-
 
 %% Linear SS Model
+fprintf('*** Construction controller model ...\n')
 % ---------- Model orders selection ----------
 NM = size(rom,1);       % number of investigated reduced order models
 plantModIndex = NM+1;   % plant model index
@@ -154,12 +152,23 @@ model.pred.Ts = pred_mod.Ts;  % simulation sampling time
     model.pred.nu = size(model.pred.Bd, 2);
 
     
-%% Control input constraints
-    model.pred.umax = 10000*ones(model.pred.nu,1);
-    model.pred.umin = -10000*ones(model.pred.nu,1);
+%% control input constraints
+    model.pred.umax = 1000*ones(model.pred.nu,1);
+    model.pred.umin = -1000*ones(model.pred.nu,1);
 
+%     TODO: generalize this based on loading constraint matrix
+if  strcmp(buildingType,'Reno')
+    model.pred.umax =[1680 685 154 1000 320 232]';
+    model.pred.umin = zeros(model.pred.nu,1);
+elseif strcmp(buildingType,'Old')
+    model.pred.umax = [2940 960 300 1400 460 253]';
+    model.pred.umin = zeros(model.pred.nu,1);  
+elseif strcmp(buildingType,'RenoLight')
+    model.pred.umax = [840 343 77 500 160 116]';
+    model.pred.umin = zeros(model.pred.nu,1);   
+end
+    
 %% post processing of individual models
-
 if  strcmp(buildingType,'HollandschHuys')
     
     % supply vent temp as disturbance
@@ -246,7 +255,9 @@ end
 
 % TODO: generate control actions U from simulation for every building
 if (model.analyze.openLoop.use || model.analyze.nStepAhead.use || model.analyze.HSV ||  model.analyze.frequency)
+    fprintf('*** Model analysis ...\n')
     
+%     TODO: analysis error for Hol Huys model
     
         % % % % % % % %  open loop  analysis % % % % % % % %    
     if (model.analyze.openLoop.use || model.analyze.nStepAhead.use)   
@@ -260,8 +271,12 @@ if (model.analyze.openLoop.use || model.analyze.nStepAhead.use || model.analyze.
         % lumped model inputs
         UExt = [U, D, ones(size(v,1),1)]';
         t_sim = (1:size(v,1))*sys_dExt.Ts;
-        HSim = model.analyze.SimSteps;
-
+        HSim = model.analyze.SimSteps;   
+        
+        %         Turn off lsim warnings
+        id = 'Control:analysis:LsimStartTime';
+        warning('off',id)
+        
         % simulate the different models. 
         ny = size(sys_dExt.C, 1);
         yComp = zeros( length(orders)+1, HSim, ny );
@@ -269,23 +284,27 @@ if (model.analyze.openLoop.use || model.analyze.nStepAhead.use || model.analyze.
         [yComp(end, :, :),t,xSSM] = lsim(sys_dExt,UExt(:,1:HSim),t_sim(1:HSim));
         leg = cell(length(orders)+1,1);
             % Reduced order models
+        xROM = {};
         for i = 1:length(orders)
-            [yComp(i, :, :),t,x] = lsim(rom{i},UExt(:,1:HSim),t_sim(1:HSim));
+            [yComp(i, :, :),t,xROM{i}] = lsim(rom{i},UExt(:,1:HSim),t_sim(1:HSim));
             leg{i} = num2str(orders(i));
         end
         leg{end} = 'SSM';
-        yComp(:, :, :) = yComp(:, :, :) - 273.15;      
+        yComp(:, :, :) = yComp(:, :, :) -273.15;      
     end
     
-     if model.analyze.openLoop.use
+     if model.analyze.openLoop.use       
         sampling = 14;
         markers = {'d','o','^','v','x','s','+','<','>','*','--','-*'};        
         % Plot simulation result for each zone
         fig = figure;
-        time = t/3600/24; %in days 
-        ha = tight_subplot(2,3,[.1 .03],[.15 .01],[.08 .01]);
+        time = t/3600/24; %in days  
+        columns = ceil(ny/2);
+        rows = 2;
+        ha = tight_subplot(rows,columns,[.1 .03],[.15 .01],[.08 .01]);
         for i = 1:ny
-            axes(ha(i));hold off
+            axes(ha(i));
+            hold off
             for k = 1:length(orders)
                 p = plot(time(1:sampling:end) , yComp(k, 1:sampling:end, i)); hold on;
                 p.Marker = markers{k};
@@ -308,11 +327,11 @@ if (model.analyze.openLoop.use || model.analyze.nStepAhead.use || model.analyze.
                 legend(leg, 'Orientation', 'horizontal')
             end
         end
-        % remove xLabel from first row
-        set(ha(1:3),'XTickLabel',''); 
-        % remove yLabel from second column 
-        set(ha(2:3),'YTickLabel','')
-        set(ha(5:6),'YTickLabel','')
+%         % remove xLabel from first row
+%         set(ha(1:3),'XTickLabel',''); 
+%         % remove yLabel from second column 
+%         set(ha(2:3),'YTickLabel','')
+%         set(ha(5:6),'YTickLabel','')
 
         % Plot simulation result for zone 1 for all SSM and ROM
         % The black line is the reference, the dashed line is the full
@@ -373,25 +392,20 @@ if (model.analyze.openLoop.use || model.analyze.nStepAhead.use || model.analyze.
                 for t_end = start:HSim  % --------- Compute the h-step ahead prediction for all point from start to HSim
                     t_start = t_end - h;
                     % Re-create ROM with correct initial values 
-                    [sys_dExtXN, romXN] = fGenerateSysAndRom([path '/models/ssm.mat'], Ts, xSSM(t_start,:)' + x0, orders);
+%                     [sys_dExtXN, romXN] = fGenerateSysAndRom([path '/models/ssm.mat'], Ts, xSSM(t_start,:)' + x0, orders);
                     for i = 1:length(orders) % --------- Compute prediction for each ROM
                         % Simulate from t = t_end - h to t_end to get h-step ahead prediction             
-                        yTemp = lsim( romXN{i}, UExt(:,t_start:t_end),t_sim(t_start:t_end)) - 273.15;
+                        yTemp = lsim(rom{i}, UExt(:,t_start:t_end),t_sim(t_start:t_end), xROM{i}(t_start,:)');
                         % Save h-step ahead prediction
-                        yNStepAhead(i, z, t_end, :) = yTemp(end,:);
+                        yNStepAhead(i, z, t_end, :) = yTemp(end,:)-273.15;
                     end
-                    yTemp = lsim( sys_dExtXN, UExt(:,t_start:t_end),t_sim(t_start:t_end)) - 273.15;
+                    yTemp = lsim(sys_dExt, UExt(:,t_start:t_end),t_sim(t_start:t_end), xSSM(t_start,:)');
                     % Save h-step ahead prediction
-                    yNStepAhead(end, z, t_end, :) = yTemp(end,:);
-                    check = max( check, abs(squeeze(yTemp(end,:)) - squeeze(yComp(end,t_end,:))') );
+                    yNStepAhead(end, z, t_end, :) = yTemp(end,:)-273.15;
+                    check = max( check, abs(squeeze(yTemp(end,:)-273.15) - squeeze(yComp(end,t_end,:))') );
                 end
-                display(['Check = ' num2str(check) ' for h = ' num2str(h) ' of building ' buildingType])
+                disp(['Check = ' num2str(check) ' for h = ' num2str(h) ' of building ' buildingType])
             end
-
-%             save(['../Data/yNStepAhead'  buildingType{j} '.mat'], 'yNStepAhead');
-%         else
-%             load(['../Data/yNStepAhead'  buildingType{j} '.mat']);
-%         end
         
         % Take temperature different between yNStepAhead and reference and
         % reshape yNSteAhead by appending all zones to 1 column.
@@ -427,15 +441,14 @@ if (model.analyze.openLoop.use || model.analyze.nStepAhead.use || model.analyze.
         h=axes('position',[p(1).Position],'visible','off');
         ylabel('[K]','visible','on');
   
-        if opt.saveNSteps
-            % resize page size. This set the boundingBox of the eps file
-            figuresize(fig, 407, 279, 'points');
-            % Save figure as eps. Argument epsc is for color printing
-            saveas(fig,['PredPerf' buildingType{j} '.eps'],'epsc')
-        end
+%         if opt.saveNSteps
+%             % resize page size. This set the boundingBox of the eps file
+%             figuresize(fig, 407, 279, 'points');
+%             % Save figure as eps. Argument epsc is for color printing
+%             saveas(fig,['PredPerf' buildingType{j} '.eps'],'epsc')
+%         end
       end
-    
-    
+  
     
     % % % % % % % %  HSV  analysis % % % % % % % %    
     % In state coordinates that equalize the input-to-state and state-to-output energy transfers
