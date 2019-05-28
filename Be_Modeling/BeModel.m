@@ -9,23 +9,24 @@ if nargin == 0
 end
 if nargin < 2
     ModelParam.Orders.range = [7, 15, 30, 100];    % vector of model orders 
+%     ModelParam.Orders.range = [4, 7, 10, 15, 20, 30, 40, 100];    % vector of model orders 
     ModelParam.Orders.choice = 'full';                            % model order selection for prediction
 %    ModelParam.Orders.range = [100, 200, 600]; % add any reduced order model you wish to have
 %    ModelParam.Orders.choice = 200;            % insert model order or 'full' for full order SSM 
 %   alternative choice of the model order - adopt to be general, possibly
 % TODO:  abandon this feature and adopt residential model
-   ModelParam.Orders.ctrlModIndex = 9;
-   ModelParam.Orders.plantModIndex = 9; 
-   ModelParam.off_free = 0;    %  augmented model
-   ModelParam.reload = 0;    % reload SSMs and regenerate ROMs flag
-   ModelParam.analyze.SimSteps = 2*672; % 672 = one week Number of simulation steps (Ts = 900 s)
-   ModelParam.analyze.openLoop.use = false;             %  open loop simulation   - TODO
-   ModelParam.analyze.openLoop.start = 1;              % starting day of the analysis
-   ModelParam.analyze.openLoop.end = 7;                % ending day of the analysis
-   ModelParam.analyze.nStepAhead.use = true;           % n-step ahead predicion error  - TODO
-   ModelParam.analyze.nStepAhead.steps = [1, 10, 40];  % x*Ts  
-   ModelParam.analyze.HSV = true;                      %  hankel singular values of ROM
-   ModelParam.analyze.frequency = false;                % frequency analysis - TODO
+    ModelParam.Orders.ctrlModIndex = 9;
+    ModelParam.Orders.plantModIndex = 9; 
+    ModelParam.off_free = 0;    %  augmented model
+    ModelParam.reload = 0;    % reload SSMs and regenerate ROMs flag
+    ModelParam.analyze.SimSteps = 2*672; % Number of simulation steps (Ts = 900 s),  672 = one week
+    ModelParam.analyze.openLoop.use = true;             %  open loop simulation   - TODO
+    ModelParam.analyze.openLoop.start = 1;              % starting day of the analysis
+    ModelParam.analyze.openLoop.end = 7;                % ending day of the analysis
+    ModelParam.analyze.nStepAhead.use = true;           % n-step ahead predicion error  - TODO
+    ModelParam.analyze.nStepAhead.steps = [1, 10, 40];  % x*Ts  
+    ModelParam.analyze.HSV = false;                      %  hankel singular values of ROM
+    ModelParam.analyze.frequency = false;                % frequency analysis - TODO
 
 end
 
@@ -67,8 +68,8 @@ fprintf('\n------------------ Building Model -------------------\n');
         orders = ModelParam.Orders.range;
 %        states are initalized to x0 = 293.15 K in original model, extended
 %        model initalizes states to 0 which is equivalent with  293.15 K  via matrix extension  
-		[sys_dExt, rom] = fGenerateSysAndRom([path '/models/ssm.mat'], Ts, x0, orders);      
-		save([path '/preComputed_matlab/modTEST.mat'], 'Ts', 'orders', 'sys_dExt', 'rom', 'v', 't', 'x0');
+		[sys_dExt, rom, redinfo] = fGenerateSysAndRom([path '/models/ssm.mat'], Ts, x0, orders);      
+		save([path '/preComputed_matlab/mod.mat'], 'Ts', 'orders', 'sys_dExt', 'rom', 'v', 't', 'x0');
    		fprintf('*** Done.\n')
     else
         fprintf('*** Load ROM models ...\n')
@@ -384,6 +385,85 @@ if (model.analyze.openLoop.use || model.analyze.nStepAhead.use || model.analyze.
         nStepAhead = model.analyze.nStepAhead.steps;
         H = length(nStepAhead);
         start = max(nStepAhead)+2;
+             
+%         K = 10;
+%         SimInputs = UExt(:,1:HSim)';
+%         for i = 1:length(orders) 
+%             SimOutputs{i} = squeeze(yComp(i,:,:))
+%             SimData{i} = iddata(SimOutputs{i},SimInputs,Ts);
+%             SimData{i} = [SimOutputs{i}, SimInputs];
+% %             err = pe(rom{i},SimData{i},K);
+% %             compare(SimData{i},rom{i},K);
+% %             yp = predict(rom{i},SimData{i},K);
+%         end           
+        
+% 
+% % % [HSV_STAB,HSV_UNSTAB] = BeHankelsv(rom{2})
+% [HSV_STAB,HSV_UNSTAB] = hankelsv(sys_dExt)
+% 
+% G = sys_dExt;
+% 
+% Ts = abs(get(G,'Ts'));
+% 
+% % Handle discrete case:
+% 
+% paaz = 2^-4*sqrt(eps);
+% 
+% if Ts
+%     a = get(G,'a');
+%     if (max(abs(eig(a)+1))>paaz)  % if no poles near z=-1
+%         paaz = 0;
+%     end
+%     G = bilin(G,-1,'S_Tust',[Ts, 1-paaz]);
+% end
+% 
+% hanksvstab = [];
+% hanksvunstab = [];
+% Gorig = G;
+% 
+% function r = localAssignRegion(p,jwtol)
+% if real(p)<-jwtol
+%    r = 1;
+% elseif real(p)>jwtol
+%    r = 2;
+% else
+%    r = 3;
+% end
+
+% % Split spectrum into stable/unstable/jw-axis
+% jwtol = sqrt(eps) * norm(balance(G.A),1);
+% [H,H0] = modsep(G,3,@(p) AssignRegion(p,jwtol));
+% nx = order(H);
+% m = nx(1);  no_unstable = nx(2);  no_jw_pole = nx(3); % no. stable, unstable, jw-axis poles
+% mjws = m+no_jw_pole;   ra = mjws+no_unstable;
+% [a,b,c,d] = ssdata(H,'cell');
+% G = H0 + ss(a{1},b{1},c{1},d{1}) + ss(a{2},b{2},c{2},d{2});
+% % G = H0 + subpar(H,{':',':',1}) + subpar(H,{':',':',2});
+% [a,b,c,d] = ssdata(G);
+% 
+% 
+% a = sys_dExt.a;
+% b = sys_dExt.b;
+% c = sys_dExt.c;
+% 
+% %            [a,b,c,d] = ssdata(sys_dExt);
+%            p = gram(a,b);
+%            q = gram(a',c');
+%            [up,sp,vp] = svd(p);
+%            lp = up*diag(sqrt(diag(sp)));
+%            [uq,sq,vq] = svd(q);
+%            lo = uq*diag(sqrt(diag(sq)));
+%            [U,Sigma,V]  = svd(lo'*lp);
+%            
+% %            https://nl.mathworks.com/help/robust/ref/balancmr.html
+%            SLbig = lo*U(:,1:30)*diag(sqrt(diag(Sigma(1:30,1:30))));
+%            SRbig = lp*V(:,1:30)*diag(sqrt(diag(Sigma(1:30,1:30))));
+%            
+%            AA =SLbig'*a*SRbig;
+%            
+% 
+% [hsvd_val_ssm, hsv_data_ssm] = hsvd(sys_dExt);
+
 %         if opt.computeNSteps
             yNStepAhead = zeros( length(orders) + 1, H, HSim, ny); % [order, time, zone]
             for z=1:H   % --------- Different h-step ahead horizons
@@ -394,12 +474,21 @@ if (model.analyze.openLoop.use || model.analyze.nStepAhead.use || model.analyze.
                     % Re-create ROM with correct initial values 
 %                     [sys_dExtXN, romXN] = fGenerateSysAndRom([path '/models/ssm.mat'], Ts, xSSM(t_start,:)' + x0, orders);
                     for i = 1:length(orders) % --------- Compute prediction for each ROM
-                        % Simulate from t = t_end - h to t_end to get h-step ahead prediction             
-                        yTemp = lsim(rom{i}, UExt(:,t_start:t_end),t_sim(t_start:t_end), xROM{i}(t_start,:)');
+                        % Simulate from t = t_end - h to t_end to get h-step ahead prediction      
+                        
+%                         TODO: project initial conditions of SSM onto ROM
+%                         solving system of lin equations
+%                         TODO: improve initialization with kalman filter  
+                        xROM_init =  rom{i}.C\squeeze(yComp(end,t_start,:));
+                        yTemp = lsim(rom{i}, UExt(:,t_start:t_end),t_sim(t_start:t_end), xROM_init);
+%                         yTemp = lsim(rom{i}, UExt(:,t_start:t_end),t_sim(t_start:t_end), xROM{i}(t_start,:)');
                         % Save h-step ahead prediction
+                        
+%                         yTemp = lsim(romXN{i}, UExt(:,t_start:t_end),t_sim(t_start:t_end));                      
                         yNStepAhead(i, z, t_end, :) = yTemp(end,:)-273.15;
                     end
                     yTemp = lsim(sys_dExt, UExt(:,t_start:t_end),t_sim(t_start:t_end), xSSM(t_start,:)');
+%                     yTemp = lsim( sys_dExtXN, UExt(:,t_start:t_end),t_sim(t_start:t_end));
                     % Save h-step ahead prediction
                     yNStepAhead(end, z, t_end, :) = yTemp(end,:)-273.15;
                     check = max( check, abs(squeeze(yTemp(end,:)-273.15) - squeeze(yComp(end,t_end,:))') );

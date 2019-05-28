@@ -1,4 +1,4 @@
-function [sys_dExt, rom] = fGenerateSysAndRom(path_ssm, Ts, x0_value, orders)
+function [sys_dExt, rom, redinfo] = fGenerateSysAndRom(path_ssm, Ts, x0_value, orders)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Generate the extended discrete state space model and a set of
     % reduce order models of order = orders.
@@ -23,7 +23,7 @@ function [sys_dExt, rom] = fGenerateSysAndRom(path_ssm, Ts, x0_value, orders)
     
     rom = cell(length(orders),1);
     for i = 1:length(orders)
-        rom{i} = reduce(sys_dExt, orders(i));
+        [rom{i}, redinfo] = reduce(sys_dExt, orders(i));
     end
 
 end
