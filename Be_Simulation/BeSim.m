@@ -33,12 +33,12 @@ if nargin < 5   % references
 end
 if nargin < 6   % simulation parameters
     SimParam.run.start = 1;     % starting day
-%     SimParam.run.end = 13;       % finishing day
-    SimParam.run.end = 3;       % finishing day
+    SimParam.run.end = 7;       % finishing day
     SimParam.verbose = 1;
     SimParam.flagSave = 0;
     SimParam.comfortTol = 1e-1;
     SimParam.profile = 0; 
+    SimParam.emulate = 1;  % emulation or real measurements:  0 = measurements,  1 = emulation
 end
 % matlab profiler function for CPU evaluation
 if SimParam.profile
@@ -304,6 +304,7 @@ for k = 1:Nsim
     end
          
 % 2, EMULATOR - plant model
+%     TODO: dymola co-simulation
     if  SimParam.emulate
 %    State and Output update
         xn = model.plant.Ad*x0 + model.plant.Bd*uopt+ model.plant.Ed*d0 +model.plant.Gd*1;
@@ -313,13 +314,9 @@ for k = 1:Nsim
         X(:,k+1) = xn;
         Y(:,k) = yn;
         U(:,k) = uopt;       
-    end   
-%     TODO: dymola co-simulation
-    
-    
+    else   
 % 3, Output measurements - real plant
     % TODO: implement real time measurement
-    if  not(SimParam.emulate) 
        yn = Y(:,k);         % current outputs               
     end
 

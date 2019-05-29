@@ -86,7 +86,7 @@ load([path '/preComputed_matlab/indexing.mat']);
 
 
 %% Linear SS Model
-fprintf('*** Construction controller model ...\n')
+fprintf('*** Simulation and prediction model construction ...\n')
 % ---------- Model orders selection ----------
 NM = size(rom,1);       % number of investigated reduced order models
 plantModIndex = NM+1;   % plant model index
@@ -130,7 +130,6 @@ if ctrlModIndex < plantModIndex
 elseif ctrlModIndex == plantModIndex
     pred_mod = sys_dExt;                % use original model
 end
-
 
 % ---------- Controller/Prediction model matrices and dimensions ----------
 model.pred.Ts = pred_mod.Ts;  % simulation sampling time
@@ -378,124 +377,113 @@ if (model.analyze.openLoop.use || model.analyze.nStepAhead.use || model.analyze.
      end
     
     
-%      TODO: make this more efficient
-%  simplify the code using https://www.mathworks.com/help/ident/ref/predict.html
       if model.analyze.nStepAhead.use
-        % Plot for n-steps ahead predictions        
+        % generate and plot for n-steps ahead predictions 
+        
+%         initial parameters
         nStepAhead = model.analyze.nStepAhead.steps;
         H = length(nStepAhead);
-        start = max(nStepAhead)+2;
-             
-%         K = 10;
-%         SimInputs = UExt(:,1:HSim)';
-%         for i = 1:length(orders) 
-%             SimOutputs{i} = squeeze(yComp(i,:,:))
-%             SimData{i} = iddata(SimOutputs{i},SimInputs,Ts);
-%             SimData{i} = [SimOutputs{i}, SimInputs];
-% %             err = pe(rom{i},SimData{i},K);
-% %             compare(SimData{i},rom{i},K);
-% %             yp = predict(rom{i},SimData{i},K);
-%         end           
+        start = max(nStepAhead)+2;    
+        yNStepAhead = zeros( length(orders) + 1, H, HSim, ny); % [order, time, zone]
         
-% 
-% % % [HSV_STAB,HSV_UNSTAB] = BeHankelsv(rom{2})
-% [HSV_STAB,HSV_UNSTAB] = hankelsv(sys_dExt)
-% 
-% G = sys_dExt;
-% 
-% Ts = abs(get(G,'Ts'));
-% 
-% % Handle discrete case:
-% 
-% paaz = 2^-4*sqrt(eps);
-% 
-% if Ts
-%     a = get(G,'a');
-%     if (max(abs(eig(a)+1))>paaz)  % if no poles near z=-1
-%         paaz = 0;
-%     end
-%     G = bilin(G,-1,'S_Tust',[Ts, 1-paaz]);
-% end
-% 
-% hanksvstab = [];
-% hanksvunstab = [];
-% Gorig = G;
-% 
-% function r = localAssignRegion(p,jwtol)
-% if real(p)<-jwtol
-%    r = 1;
-% elseif real(p)>jwtol
-%    r = 2;
-% else
-%    r = 3;
-% end
+        Mods = rom;
+        Mods{length(rom)+1} = sys_dExt;
+        
+        for i = 1:(length(orders)+1)
+                                
+%       state initialization x0 of ROMs based on Kalman Filter
+            sysMod = Mods{i};  
+            nx = size(sysMod.A,1);
+            ny = size(sysMod.C,1);
+            Qe = 1e10;     % process noise covariance 
+            Re = 1*eye(ny);      % measurement noise covariance    
+            Xp = zeros(nx,HSim+1);
+            Xe = zeros(nx,HSim);
+            Ye = zeros(ny,HSim);
+            Yp = zeros(ny,HSim);
+            xp = Xp(:, 1); 
+%             KF simulation
+            for k = 1:HSim
+                  if k == 1
+                      P = sysMod.B*Qe*sysMod.B';         % Initial error covariance   
+                  end
+                  
+                  uopt = UExt(:,k);
+                  yn = squeeze(yComp(i, k, :))+273.15;
+                  
+                  % Measurement update
+                  L1 = P*sysMod.C'/(sysMod.C*P*sysMod.C'+Re); % observer gain
+                  yp = sysMod.C*xp + sysMod.D*uopt;          % output estimation
+                  ep = yn - yp;                                                       % estimation error
+                  xe = xp + L1*ep;                                                    % x[n|n]
+                  P = (eye(nx)-L1*sysMod.C)*P;                          % P[n|n]   estimation error covariance
+                  % Time update
+                  xp = sysMod.A*xe + sysMod.B*uopt;        % x[n+1|n]
+                  P = sysMod.A*P*sysMod.A' + sysMod.B*Qe*sysMod.B';       % P[n+1|n]          
+                  ye = sysMod.C*xe + sysMod.D*uopt;     % output estimate with x[n|n]
 
-% % Split spectrum into stable/unstable/jw-axis
-% jwtol = sqrt(eps) * norm(balance(G.A),1);
-% [H,H0] = modsep(G,3,@(p) AssignRegion(p,jwtol));
-% nx = order(H);
-% m = nx(1);  no_unstable = nx(2);  no_jw_pole = nx(3); % no. stable, unstable, jw-axis poles
-% mjws = m+no_jw_pole;   ra = mjws+no_unstable;
-% [a,b,c,d] = ssdata(H,'cell');
-% G = H0 + ss(a{1},b{1},c{1},d{1}) + ss(a{2},b{2},c{2},d{2});
-% % G = H0 + subpar(H,{':',':',1}) + subpar(H,{':',':',2});
-% [a,b,c,d] = ssdata(G);
-% 
-% 
-% a = sys_dExt.a;
-% b = sys_dExt.b;
-% c = sys_dExt.c;
-% 
-% %            [a,b,c,d] = ssdata(sys_dExt);
-%            p = gram(a,b);
-%            q = gram(a',c');
-%            [up,sp,vp] = svd(p);
-%            lp = up*diag(sqrt(diag(sp)));
-%            [uq,sq,vq] = svd(q);
-%            lo = uq*diag(sqrt(diag(sq)));
-%            [U,Sigma,V]  = svd(lo'*lp);
-%            
-% %            https://nl.mathworks.com/help/robust/ref/balancmr.html
-%            SLbig = lo*U(:,1:30)*diag(sqrt(diag(Sigma(1:30,1:30))));
-%            SRbig = lp*V(:,1:30)*diag(sqrt(diag(Sigma(1:30,1:30))));
-%            
-%            AA =SLbig'*a*SRbig;
-%            
-% 
-% [hsvd_val_ssm, hsv_data_ssm] = hsvd(sys_dExt);
-
-%         if opt.computeNSteps
-            yNStepAhead = zeros( length(orders) + 1, H, HSim, ny); % [order, time, zone]
+                  Xp(:,k+1) = xp;
+                  Xe(:,k) = xe;
+                  Ye(:,k) = ye;
+                  Yp(:,k) = yp;
+            end
+%             figure
+%             plot(squeeze(yComp(i, :, :))+273.15-Ye')
+%             figure
+%             plot(Xe')
+            
+            
             for z=1:H   % --------- Different h-step ahead horizons
                 h = nStepAhead(z);
-                check = 0;
                 for t_end = start:HSim  % --------- Compute the h-step ahead prediction for all point from start to HSim
                     t_start = t_end - h;
-                    % Re-create ROM with correct initial values 
-%                     [sys_dExtXN, romXN] = fGenerateSysAndRom([path '/models/ssm.mat'], Ts, xSSM(t_start,:)' + x0, orders);
-                    for i = 1:length(orders) % --------- Compute prediction for each ROM
-                        % Simulate from t = t_end - h to t_end to get h-step ahead prediction      
-                        
-%                         TODO: project initial conditions of SSM onto ROM
-%                         solving system of lin equations
-%                         TODO: improve initialization with kalman filter  
-                        xROM_init =  rom{i}.C\squeeze(yComp(end,t_start,:));
-                        yTemp = lsim(rom{i}, UExt(:,t_start:t_end),t_sim(t_start:t_end), xROM_init);
-%                         yTemp = lsim(rom{i}, UExt(:,t_start:t_end),t_sim(t_start:t_end), xROM{i}(t_start,:)');
-                        % Save h-step ahead prediction
-                        
-%                         yTemp = lsim(romXN{i}, UExt(:,t_start:t_end),t_sim(t_start:t_end));                      
-                        yNStepAhead(i, z, t_end, :) = yTemp(end,:)-273.15;
+            
+                    if i == (length(orders)+1)
+                        x_init = xSSM(t_start,:)';
+                    else
+            %              x_init =  rom{i}.C\squeeze(yComp(end,t_start,:));
+                        x_init = Xe(:,t_start);
                     end
-                    yTemp = lsim(sys_dExt, UExt(:,t_start:t_end),t_sim(t_start:t_end), xSSM(t_start,:)');
-%                     yTemp = lsim( sys_dExtXN, UExt(:,t_start:t_end),t_sim(t_start:t_end));
-                    % Save h-step ahead prediction
-                    yNStepAhead(end, z, t_end, :) = yTemp(end,:)-273.15;
-                    check = max( check, abs(squeeze(yTemp(end,:)-273.15) - squeeze(yComp(end,t_end,:))') );
-                end
-                disp(['Check = ' num2str(check) ' for h = ' num2str(h) ' of building ' buildingType])
-            end
-        
+                    yTemp = lsim(Mods{i}, UExt(:,t_start:t_end),t_sim(t_start:t_end), x_init);
+                    yNStepAhead(i, z, t_end, :) = yTemp(end,:)-273.15;
+                    
+                end      
+            end      
+        end
+       
+                 
+% %         if opt.computeNSteps
+%             for z=1:H   % --------- Different h-step ahead horizons
+%                 h = nStepAhead(z);
+%                 check = 0;
+%                 for t_end = start:HSim  % --------- Compute the h-step ahead prediction for all point from start to HSim
+%                     t_start = t_end - h;
+%                     % Re-create ROM with correct initial values 
+% %                     [sys_dExtXN, romXN] = fGenerateSysAndRom([path '/models/ssm.mat'], Ts, xSSM(t_start,:)' + x0, orders);
+%                     for i = 1:length(orders) % --------- Compute prediction for each ROM
+%                         % Simulate from t = t_end - h to t_end to get h-step ahead prediction      
+%                         
+% %                         TODO: project initial conditions of SSM onto ROM
+% %                         solving system of lin equations
+% %                         TODO: improve initialization with kalman filter  
+%                         xROM_init =  rom{i}.C\squeeze(yComp(end,t_start,:));
+%                         yTemp = lsim(rom{i}, UExt(:,t_start:t_end),t_sim(t_start:t_end), xROM_init);
+% %                         yTemp = lsim(rom{i}, UExt(:,t_start:t_end),t_sim(t_start:t_end), xROM{i}(t_start,:)');
+%                         % Save h-step ahead prediction
+%                         
+% %                         yTemp = lsim(romXN{i}, UExt(:,t_start:t_end),t_sim(t_start:t_end));                      
+%                         yNStepAhead(i, z, t_end, :) = yTemp(end,:)-273.15;
+%                     end
+%                     yTemp = lsim(sys_dExt, UExt(:,t_start:t_end),t_sim(t_start:t_end), xSSM(t_start,:)');
+% %                     yTemp = lsim( sys_dExtXN, UExt(:,t_start:t_end),t_sim(t_start:t_end));
+%                     % Save h-step ahead prediction
+%                     yNStepAhead(end, z, t_end, :) = yTemp(end,:)-273.15;
+%                     check = max( check, abs(squeeze(yTemp(end,:)-273.15) - squeeze(yComp(end,t_end,:))') );
+%                 end
+%                 disp(['Check = ' num2str(check) ' for h = ' num2str(h) ' of building ' buildingType])
+%             end    
+            
+            
         % Take temperature different between yNStepAhead and reference and
         % reshape yNSteAhead by appending all zones to 1 column.
         % Also compute 1-NRMSE
@@ -603,6 +591,85 @@ if (model.analyze.openLoop.use || model.analyze.nStepAhead.use || model.analyze.
         h = bodeplot(sys_dExt,'k', opts, rom{1},'g--', opts, rom{2},'b:', opts);        
     end
     
+    
+% %     NOTES: initialization of ROM x0 via HSV projections of full SSM - unfinished 
+    %         K = 10;
+%         SimInputs = UExt(:,1:HSim)';
+%         for i = 1:length(orders) 
+%             SimOutputs{i} = squeeze(yComp(i,:,:))
+%             SimData{i} = iddata(SimOutputs{i},SimInputs,Ts);
+%             SimData{i} = [SimOutputs{i}, SimInputs];
+% %             err = pe(rom{i},SimData{i},K);
+% %             compare(SimData{i},rom{i},K);
+% %             yp = predict(rom{i},SimData{i},K);
+%         end           
+        
+% 
+% % % [HSV_STAB,HSV_UNSTAB] = BeHankelsv(rom{2})
+% [HSV_STAB,HSV_UNSTAB] = hankelsv(sys_dExt)
+% 
+% G = sys_dExt;
+% 
+% Ts = abs(get(G,'Ts'));
+% 
+% % Handle discrete case:
+% 
+% paaz = 2^-4*sqrt(eps);
+% 
+% if Ts
+%     a = get(G,'a');
+%     if (max(abs(eig(a)+1))>paaz)  % if no poles near z=-1
+%         paaz = 0;
+%     end
+%     G = bilin(G,-1,'S_Tust',[Ts, 1-paaz]);
+% end
+% 
+% hanksvstab = [];
+% hanksvunstab = [];
+% Gorig = G;
+% 
+% function r = localAssignRegion(p,jwtol)
+% if real(p)<-jwtol
+%    r = 1;
+% elseif real(p)>jwtol
+%    r = 2;
+% else
+%    r = 3;
+% end
+
+% % Split spectrum into stable/unstable/jw-axis
+% jwtol = sqrt(eps) * norm(balance(G.A),1);
+% [H,H0] = modsep(G,3,@(p) AssignRegion(p,jwtol));
+% nx = order(H);
+% m = nx(1);  no_unstable = nx(2);  no_jw_pole = nx(3); % no. stable, unstable, jw-axis poles
+% mjws = m+no_jw_pole;   ra = mjws+no_unstable;
+% [a,b,c,d] = ssdata(H,'cell');
+% G = H0 + ss(a{1},b{1},c{1},d{1}) + ss(a{2},b{2},c{2},d{2});
+% % G = H0 + subpar(H,{':',':',1}) + subpar(H,{':',':',2});
+% [a,b,c,d] = ssdata(G);
+% 
+% 
+% a = sys_dExt.a;
+% b = sys_dExt.b;
+% c = sys_dExt.c;
+% 
+% %            [a,b,c,d] = ssdata(sys_dExt);
+%            p = gram(a,b);
+%            q = gram(a',c');
+%            [up,sp,vp] = svd(p);
+%            lp = up*diag(sqrt(diag(sp)));
+%            [uq,sq,vq] = svd(q);
+%            lo = uq*diag(sqrt(diag(sq)));
+%            [U,Sigma,V]  = svd(lo'*lp);
+%            
+% %            https://nl.mathworks.com/help/robust/ref/balancmr.html
+%            SLbig = lo*U(:,1:30)*diag(sqrt(diag(Sigma(1:30,1:30))));
+%            SRbig = lp*V(:,1:30)*diag(sqrt(diag(Sigma(1:30,1:30))));
+%            
+%            AA =SLbig'*a*SRbig;
+%            
+% 
+% [hsvd_val_ssm, hsv_data_ssm] = hsvd(sys_dExt);
 
 end
 

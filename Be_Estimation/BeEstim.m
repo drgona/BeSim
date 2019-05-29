@@ -11,11 +11,10 @@ if nargin == 0
 end
 if nargin < 2
    EstimParam.use = 1;       % use estimator if not take states from plant model
-   EstimParam.LOPP.use = 0;  %  Luenberger observer via pole placement - Not implemented
    EstimParam.SKF.use = 0;    % stationary KF
-   EstimParam.TVKF.use = 0;   % time varying KF
-   EstimParam.MHE.use = 1;   % moving horizon estimation
-   EstimParam.MHE.Condensing = 1;   % state condensing 
+   EstimParam.TVKF.use = 1;   % time varying KF
+   EstimParam.MHE.use = 0;   % moving horizon estimation
+   EstimParam.MHE.Condensing = 0;   % state condensing 
 end
 
 % estimator parameters
