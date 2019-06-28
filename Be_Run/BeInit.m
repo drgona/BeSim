@@ -40,7 +40,7 @@ ModelParam.analyze.SimSteps = 2*672; % Number of simulation steps (Ts = 900 s), 
 ModelParam.analyze.openLoop.use = true;             %  open loop simulation   - TODO
 ModelParam.analyze.openLoop.start = 1;              % starting day of the analysis
 ModelParam.analyze.openLoop.end = 7;                % ending day of the analysis
-ModelParam.analyze.nStepAhead.use = true;           % n-step ahead predicion error  - TODO
+ModelParam.analyze.nStepAhead.use = false;           % n-step ahead predicion error  - TODO
 ModelParam.analyze.nStepAhead.steps = [1, 10, 40];  % x*Ts  
 ModelParam.analyze.HSV = false;                      %  hankel singular values of ROM
 ModelParam.analyze.frequency = false;                % frequency analysis - TODO
@@ -49,7 +49,7 @@ ModelParam.analyze.frequency = false;                % frequency analysis - TODO
 model = BeModel(buildingType, ModelParam);      % construct a model object   
 
 
-return
+% return
 %% Disturbacnes 
 % ambient temperature, solar radiation, internal heat gains
 DistParam.reload = 0;
