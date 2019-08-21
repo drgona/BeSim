@@ -31,7 +31,7 @@ if MLagent.TDNN.use
     MLagent.TDNN.trainFcn =  'trainscg';  
     MLagent.TDNN.net.divideFcn = '';
     MLagent.TDNN.net.trainParam.showWindow = true;
-    MLagent.TDNN.net.trainParam.epochs = 500; % nr of iterations
+    MLagent.TDNN.net.trainParam.epochs = 5000; % nr of iterations
     MLagent.TDNN.net.trainParam.max_fail = 100;  % nr of validation checks
     %  prepare time series data via preparets 
     [inputs,inputStates,layerStates,targets] = preparets(MLagent.TDNN.net,X,T);   % delay setup 
@@ -45,9 +45,9 @@ if MLagent.TDNN.use
     
 %     TODO: make this non-recursive, do it only once before implementation
     % Remove a delay from the network, to get the prediction one time step earlier.
-    MLagent.TDNN.net = removedelay(MLagent.TDNN.net);
+    MLagent_net_delay = removedelay(MLagent.TDNN.net);
 %     % make net for simulations = closed-loop (parallel) configuration
-    MLagent.TDNN.net_apply = closeloop(MLagent.TDNN.net);
+    MLagent.TDNN.net_apply = closeloop(MLagent_net_delay);
     % training finisher
     MLagent.TDNN.train_time = etime(clock, start_t);  
     fprintf('*** Training time: %.2f sec:\n',MLagent.TDNN.train_time);
