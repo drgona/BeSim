@@ -29,7 +29,8 @@ elseif AgentParam.regNN.use
      
 elseif AgentParam.TDNN.use
     MLagent.TDNN.use = 1;
-    MLagent.TDNN.hiddenLayerSize = [48,24,12];
+%     MLagent.TDNN.hiddenLayerSize = [48,24,12];
+    MLagent.TDNN.hiddenLayerSize = [48,24];
     MLagent.TDNN.trainFcn =  'trainscg';  
     MLagent.TDNN.net = timedelaynet([1:MLagent.numDelays],MLagent.TDNN.hiddenLayerSize,MLagent.TDNN.trainFcn);  
     % change hidden layer activation functions to ReLU  

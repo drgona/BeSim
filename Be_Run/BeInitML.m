@@ -103,10 +103,10 @@ outdata = BeSim(model, estim, ctrl, dist, refs, SimParam);
 %% Plot Results
 PlotParam.flagPlot = 1;     % plot 0 - no 1 - yes
 PlotParam.plotStates = 0;        % plot states
-PlotParam.plotDist = 0;        % plot disturbances
-PlotParam.plotEstim = 1;        % plot estimation
+PlotParam.plotDist = 1;        % plot disturbances
+PlotParam.plotEstim = 0;        % plot estimation
 PlotParam.plotCtrl = 1;        % plot control
-PlotParam.plotPrice = 1;        % plot price signal
+PlotParam.plotPrice = 0;        % plot price signal
 % PlotParam.Transitions = 1;      % pot dynamic transitions of Ax matrix
 % PlotParam.reduced = 0;   %  reduced paper plots formats 0 - no 1 - yes
 % PlotParam.zone = 2;     % choose zone if reduced
@@ -153,7 +153,7 @@ FeaturesParam.reduce.flagPlot = 1;
 
 % train ML agent
 MLagent = BeLearn(MLagent,traindata);
-
+save MLagent_TDNN.mat MLagent
 
 %% ====== MLagent Simulation ======
 
