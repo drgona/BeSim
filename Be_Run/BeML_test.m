@@ -35,7 +35,7 @@ ModelParam.Orders.range = [4, 7, 10, 15, 20, 30, 40, 100];    % vector of model 
 % ModelParam.Orders.range = [100, 200, 600];                  % vector of model orders for 'Infrax', 'HollandschHuys'
 ModelParam.Orders.choice = 'full';                          % model order selection for prediction, for selection of ROM use one element of ModelParam.Orders.range
 ModelParam.Orders.choice = 40; 
-ModelParam.off_free = 1;                                      % augmented model with unmeasured disturbances
+ModelParam.off_free = 0;                                      % augmented model with unmeasured disturbances
 ModelParam.reload = 0;                                        % if 1 reload ROM, if 0 load saved ROM
 
 % =========== 4, choose model analysis =================
@@ -67,11 +67,14 @@ DistParam.reload = 0;
 
 dist = BeDist(model, DistParam);        % construct a disturbances object  
 
+
 %% References 
 % comfort constraints, price profiles
 RefsParam.Price.variable = 0;       %1 =  variable price profile, 0 = fixed to 1
 
 refs = BeRefs(model, dist, RefsParam);     % construct a references object  
+
+return
 
 %%  estimator 
 EstimParam.LOPP.use = 0;      %  Luenberger observer via pole placement - Not implemented
