@@ -42,7 +42,7 @@ wb_pred = outdata.data.wb(1,1+(MLagent.numDelays-1):end-(outdata.ctrl.MPC.Ndp-ML
 
 %% ====== FEATURES elimination ======
 % elimination of disturbance variables
-[D_use, D_discard, MLagent.use_D] = FeatureReduce(D,outdata,dist,FeaturesParam.reduce);
+[D_use, D_discard, MLagent.use_D] = FeatureReduce(D,Y,wa,wb,outdata,dist,FeaturesParam.reduce);
 % [D_pred_use, D_pred_discard, MLagent.use_disturb] = FeatureSelect(D_pred,model,PrecisionParam,plotFlag,UseParam);
 
 % TODO: elimination of state variables
@@ -84,6 +84,10 @@ elseif MLagent.TDNN.use
     % features with laged predictions for D and w  
     traindata.features = [Y D_pred(:,MLagent.use_D)  wb_pred]; 
     traindata.targets = U; 
+    
+%     TODO: drop Y and wb instead: add 2 new features per output:  wb-y,  wa-y
+%     TODO: add aggregate X values ad features: average state temp per
+%     floor/zone - during evaluation will be obtained from KF
 end
 
 fprintf('*** Done.\n') 

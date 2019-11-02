@@ -12,7 +12,8 @@ if nargin < 2
 end
 
 % init
-Nsim = outdata.SimParam.run.Nsim; 
+% Nsim = outdata.SimParam.run.Nsim; 
+Nsim = length(outdata.data.Y);
 Time = (1:Nsim)*outdata.model.plant.Ts/3600/24;  % days
 
 
@@ -122,7 +123,7 @@ if outdata.estim.use && PlotParam.plotEstim
         
         axis tight
         grid on
-        ylabel('Temp [^{\circ}C]')
+        ylabel('Temp. [^{\circ}C]')
 %         legend('simulated','estimated')
         xlabel('time [days]')   
           
@@ -132,7 +133,7 @@ if outdata.estim.use && PlotParam.plotEstim
         title('Output estimation error')
         axis tight
         grid on
-        ylabel('Temp [^{\circ}C]')
+        ylabel('Temp. [^{\circ}C]')
         xlabel('time [days]')  
    
 %         % states - simulated vs estimated 
@@ -159,7 +160,7 @@ if outdata.estim.use && PlotParam.plotEstim
         axis tight
         grid on
         xlabel('time [days]')
-        ylabel('Temp [^{\circ}C]')
+        ylabel('Temp. [^{\circ}C]')
         
         subplot(2, 1, 2);
         plot(Time, outdata.data.Xe(:,1:end)+x_init-273.15,'linewidth', 2);
@@ -167,7 +168,7 @@ if outdata.estim.use && PlotParam.plotEstim
         axis tight
         grid on
         xlabel('time [days]')
-        ylabel('Temp [^{\circ}C]')
+        ylabel('Temp. [^{\circ}C]')
         
         
     if outdata.estim.MHE.use   % MHE variables 
@@ -220,7 +221,7 @@ if outdata.ctrl.use && PlotParam.plotCtrl
      plot(Time, outdata.data.Y-273.15, 'linewidth', 2);
      axis tight
      grid on
-     ylabel('Zone temperatures [\circC]','fontsize',22)  
+     ylabel('Temperatures [\circC]','fontsize',22)  
      set(gca,'fontsize',22)
      box on
      

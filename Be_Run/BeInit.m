@@ -29,8 +29,8 @@ addpath('../Be_Learn/')
 buildingType = 'Reno';  
 
 % =========== 2, choose model order =================
-ModelParam.Orders.range = [4, 7, 10, 15, 20, 30, 40, 100];    % vector of model orders 
-% ModelParam.Orders.range = [100, 200, 600];                  % vector of model orders 
+ModelParam.Orders.range = [4, 7, 10, 15, 20, 30, 40, 100];    % vector of model orders for 'Reno', 'Old', 'RenoLight'
+% ModelParam.Orders.range = [100, 200, 600];                  % vector of model orders for 'Infrax', 'HollandschHuys'
 ModelParam.Orders.choice = 'full';                            % model order selection for prediction
 ModelParam.off_free = 1;                                      % augmented model with unmeasured disturbances
 ModelParam.reload = 0;                                        % if 1 reload ROM, if 0 load saved ROM
@@ -49,7 +49,6 @@ ModelParam.analyze.frequency = false;                % frequency analysis - TODO
 model = BeModel(buildingType, ModelParam);      % construct a model object   
 
 
-% return
 %% Disturbacnes 
 % ambient temperature, solar radiation, internal heat gains
 DistParam.reload = 0;

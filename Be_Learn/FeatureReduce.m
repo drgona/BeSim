@@ -1,4 +1,4 @@
-function [Xreduced, Xdiscard, use_feature] = FeatureReduce(X,outdata,dist,ReduceParam)
+function [Dreduced, Ddiscard, use_feature] = FeatureReduce(D,Y,wa,wb,outdata,dist,ReduceParam)
 
 % [Xreduced, Xdiscard, use_feature] = FeatureSelect(X,model,PrecisionParam,ReduceParam.flagPlot,UseParam)
 % -----------INPUTS-------------------------------
@@ -17,7 +17,7 @@ function [Xreduced, Xdiscard, use_feature] = FeatureReduce(X,outdata,dist,Reduce
 %     otherwise, for more general data ReduceParam.model.use = false
 % ---------------------------------------------
 
-if nargin < 3
+if nargin < 7
 %   normalized  precisions on principal components and features  0 to 1
     % parameters for feature refuction function
     ReduceParam.PCA.use = 1;
@@ -29,12 +29,12 @@ if nargin < 3
     ReduceParam.flagPlot = 1;
 end
     
-nx = size(X,2); % number of features
+nx = size(D,2); % number of features
 
  
 %% Discard LINEARLY DEPENDENT COLUMNS
 if ReduceParam.lincols.use
-     [~,index_lincols]=licols(X);   
+     [~,index_lincols]=licols(D);   
      use_feature_lincols = ismember(1:nx,index_lincols); % index of choosen features from lincols
 else
      use_feature_lincols = ones(1,nx); % no features have been discarded
@@ -45,7 +45,7 @@ end
 % https://www.mathworks.com/matlabcentral/answers/49134-determining-variables-that-contribute-to-principal-components
  % http://www.mathworks.com/help/stats/pca.html
 if ReduceParam.PCA.use
-    [coeff,~,~,~,explained] = pca(X);  % Each column of coeff contains coefficients for one principal component.
+    [coeff,~,~,~,explained] = pca(D);  % Each column of coeff contains coefficients for one principal component.
     nu_pca = sum(explained > 100*(1-ReduceParam.PCA.component)); % number of relevant principal components
     var_weight = sum(abs(coeff(:, 1:nu_pca)')); % weight of the features
     var_weight = var_weight/max(var_weight);    % normalized weight of the features
@@ -98,8 +98,8 @@ end
 
 %% OUTPUTS 
 use_feature = use_feature_D_model + use_feature_PCA + use_feature_lincols > 2; % index of choosen features
-Xreduced = X(:,use_feature); % choosen features
-Xdiscard = X(:,not(use_feature)); % discarded features
+Dreduced = D(:,use_feature); % choosen features
+Ddiscard = D(:,not(use_feature)); % discarded features
 
 %% PLOTS     
 
@@ -110,15 +110,18 @@ if ReduceParam.flagPlot
 
             figure         
             subplot(2,2,1)
-            plot(Xreduced, 'linewidth', 2)
+            plot(Dreduced, 'linewidth', 2)
             title('Used features profiles')
             axis tight
             xlabel('samples []')
             set(gca,'fontsize',20)
             grid on
+            hold on
+            plot(Y, 'linewidth', 2)
+            plot(wb, 'linewidth', 2)
             
             subplot(2,2,2)
-            plot(Xdiscard, 'linewidth', 2)
+            plot(Ddiscard, 'linewidth', 2)
             title('Discarded features profiles')
             axis tight
             xlabel('samples []')

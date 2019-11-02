@@ -52,6 +52,7 @@ ModelParam.analyze.XinitOffset = -1;                  % initialization offset fo
 % =========== 4, construct model structue =================
 model = BeModel(buildingType, ModelParam);      % construct a model object   
 
+
 %% Constraints
 % TODO: state, input, algebraic equations...
 % const = BuiConstraints(model,ConstrParam)
@@ -171,16 +172,16 @@ FeaturesParam.reduce.flagPlot = 1;
 % generate training data {traindata} for a given agent from simulation data {outdata}
 [traindata, MLagent] = BeFeatures(outdataSampled, dist, MLagent, FeaturesParam);
 
-
 %% ====== MLagent training ======
 % train ML agent
-Meta_Epochs = 5;
-for jj = 1:Meta_Epochs
+for jj = 1:5
     MLagent = BeLearn(MLagent,traindata);
-%     save MLagent_TDNN2.mat MLagent
-%     pause(900)
+    save MLagent_TDNN2.mat MLagent
+    pause(900)
+% %  APPLY early stopping here
 end
 
+% TODO: train on batch of days
 
 %% ====== MLagent Test Set Simulation ======
 ctrl.use = 1;

@@ -96,6 +96,8 @@ if  strcmp(model.buildingType,'HollandschHuys')
 	X(:,1) = x_init;
 end
 
+% arbitraty offset for state initialization
+X(:,1) = X(:,1) + ones(model.plant.nx,1)*model.analyze.XinitOffset;
 
 if  not(ctrl.use)  % precomputed inputs and outputs
     U = ctrl.precomputed.U(:,SimStart:SimStop);
@@ -217,8 +219,7 @@ for k = 1:Nsim
             wb_prev = wb(:, k:k+(ctrl.MPC.Nrp-1));
             % preview of the price signal
             Price_prev = Price(:, k:k+(ctrl.MPC.Nrp-1));
-            
-            
+                       
 %             TODO:  adapt Dpreview wa_prev wb_prev
             if estim.use   % estimated states
                 if model.plant.nd == 0  %  no disturbnances option
@@ -231,8 +232,7 @@ for k = 1:Nsim
                      [opt_out, feasible, info1, info2] =  ctrl.MPC.optimizer{{x0, wa_prev, wb_prev, Price_prev}}; % optimizer with estimated states
                 else
                      [opt_out, feasible, info1, info2] =  ctrl.MPC.optimizer{{x0, Dpreview, wa_prev, wb_prev, Price_prev}}; % optimizer with measured states  
-                end
-                 
+                end                 
             end
             
 %             %     feasibility check
@@ -253,8 +253,6 @@ for k = 1:Nsim
 %             J(k) =  J_v(k)+J_u(k);               % overalll increments in objective
 %             %     yalmip objective function increments vector
 %             OBJ(k) = obj;      
-
-
         
         elseif ctrl.MLagent.use   % machine learning controller
 %             TODO: finish implementation of all ML ctrls
@@ -279,18 +277,29 @@ for k = 1:Nsim
 %                      uopt =  NN_TS_ctrl([yn; D(ctrl.MLagent.use_D, k+InputDelays);wb(1,k+InputDelays)],...                              
 %                      [ Y(:,k-InputDelays:k-1); D(ctrl.MLagent.use_D, k:k+(InputDelays-1));wb(1,k:k+(InputDelays-1))]);
 
+                    uopt(abs(uopt)<200) = 0;
+%                     control contraints
+                    uopt(uopt>model.pred.umax) = model.pred.umax(uopt>model.pred.umax);
+                    uopt(uopt<model.pred.umin) = model.pred.umin(uopt<model.pred.umin);
                     
-                    
+%                     block simultaneous heating and cooling
+                    if not(all(uopt < 0) || all(uopt > 0))                       
+                       if sum(abs(uopt)) < 1e3
+                          uopt = zeros(model.pred.nu,1);
+                       elseif sum(uopt) > 0
+                          uopt(uopt<0) = 0;
+                       else
+                          uopt(uopt>0) = 0;
+                       end
+                    end                   
                 else
                     uopt = zeros(model.pred.nu,1);
                 end
                 
             elseif ctrl.MLagent.RT.use
-    
+%     TODO:
                 
-            end
-
-     
+            end     
         end
     end  
    
@@ -406,32 +415,9 @@ for k = 1:Nsim
     
 %% Control action post-processing
 % TODO - heat flows to valve positions
-
 % Q = m*cp*p*(T_sup - T_return)
-% Q - 12 heat flows to zones computed by MPC
-% m - prescribed nominal mass flow
-% cp - thermal capcity of the water known
-% p - all valve postition in pipe system to be computed by post-processing
-% T_sup - supply water temperature to be measured
-% T_return - return temperature to be measured
-% % ALARM - CVUT used instead of T_return, T_concrete - why?
-
-% 1, select only heat flows to zones as controls
-% 2, compute necessary mass flows to individual zones based on given measurements
-% 3, compute valve positions based on the mass balance of flows in whole pipe system  
-% 4, consider variable mass flow rates
-% 5, automate the process based on pipe topology
-
-% problem: control input mismatch and measurements accuracy - minimized by
-% extra state observer or lower level controller?
-
-    
-    
+  
 %% ---------- Comfort evaluation ----------
-
-% move this to post-processing
-% adapt computations to vector format to avoid loops
-
 if  ctrl.use
     % VIOLATIONS of the thermal comfort zones of individual outputs
     va = zeros(model.plant.ny,1); vb = zeros(model.plant.ny,1); v = zeros(model.plant.ny,1);
@@ -480,8 +466,6 @@ end
 end
 
 %% ---------- Simulation Output Data  ------------
-% TODO: modify to be general
-
 Ts = model.plant.Ts;
 
 if  ctrl.use
@@ -625,7 +609,7 @@ if ctrl.use
 %     end
 end
 
-%  elapsed time of simulation
+% elapsed time of simulation
 outdata.info.cmp = etime(clock, start_t);
 
 %% Simulation results reports and plots
@@ -657,7 +641,6 @@ if SimParam.flagSave
     str = sprintf('../Data/outData%s_from%d_to%d.mat', model.buildingType, SimParam.run.start, SimParam.run.end);
     save(str,'outdata');
 end
-
 
 % PROFILE CPU load
 if SimParam.profile
