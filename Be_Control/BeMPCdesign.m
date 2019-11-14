@@ -174,9 +174,13 @@ end
      %   structure:  optimizer(constraints, objecttive, options, input_params, output_params)
 
     %  optimizer options
-    % options = sdpsettings('verbose', 1, 'warning', 1, 'beeponproblem', 1, 'solver','cplex');
-    options = sdpsettings('verbose', 1, 'solver','gurobi','gurobi.TimeLimit',5);
-    
+    try
+        options = sdpsettings('verbose', 1, 'solver','gurobi','gurobi.TimeLimit',5);
+        test = optimizer([],[],options,[],[]);
+        % options = sdpsettings('verbose', 1, 'warning', 1, 'beeponproblem', 1, 'solver','cplex');
+    catch
+        options = sdpsettings('verbose', 1, 'solver','quadprog');
+    end
 %   worst case optimization cpu time -  max time limit for solver options.gurobi.TimeLimit
 % http://www.gurobi.com/documentation/7.5/refman/timelimit.html
 

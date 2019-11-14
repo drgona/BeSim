@@ -96,8 +96,8 @@ if  strcmp(model.buildingType,'HollandschHuys')
 	X(:,1) = x_init;
 end
 
-% arbitraty offset for state initialization
-X(:,1) = X(:,1) + ones(model.plant.nx,1)*model.analyze.XinitOffset;
+% % arbitraty offset for state initialization
+% X(:,1) = X(:,1) + ones(model.plant.nx,1)*model.analyze.XinitOffset;
 
 if  not(ctrl.use)  % precomputed inputs and outputs
     U = ctrl.precomputed.U(:,SimStart:SimStop);

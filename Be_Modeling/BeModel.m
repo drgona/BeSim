@@ -46,7 +46,7 @@ model.analyze.nStepAhead.use = ModelParam.analyze.nStepAhead.use;
 model.analyze.nStepAhead.steps = ModelParam.analyze.nStepAhead.steps;
 model.analyze.HSV = ModelParam.analyze.HSV;
 model.analyze.frequency = ModelParam.analyze.frequency;
-model.analyze.XinitOffset = ModelParam.analyze.XinitOffset;   
+% model.analyze.XinitOffset = ModelParam.analyze.XinitOffset;   
 
 fprintf('\n------------------ Building Model -------------------\n');
 
