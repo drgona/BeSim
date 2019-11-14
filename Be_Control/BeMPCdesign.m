@@ -191,6 +191,10 @@ end
         mpc = optimizer(con, obj, options,  { x(:, 1), d_prev, wa_prev, wb_prev, price }, {u(:,1); obj} );
     end
     
+%     TODO: obtain, plot, and analyze dual variables
+% https://yalmip.github.io/command/dual/
+% https://groups.google.com/forum/#!topic/yalmip/wNtJhCueX3w
+    
     
 
 end
