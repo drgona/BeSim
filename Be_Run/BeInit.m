@@ -100,6 +100,7 @@ PlotParam.plotDist = 1;        % plot disturbances
 PlotParam.plotEstim = 1;        % plot estimation
 PlotParam.plotCtrl = 1;        % plot control
 PlotParam.plotPrice = 1;        % plot price signal
+PlotParam.plot3DStates = 1;          % 3D plots for high number of states
 % PlotParam.Transitions = 1;      % pot dynamic transitions of Ax matrix
 % PlotParam.reduced = 0;   %  reduced paper plots formats 0 - no 1 - yes
 % PlotParam.zone = 2;     % choose zone if reduced

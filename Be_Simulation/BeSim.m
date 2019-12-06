@@ -96,6 +96,11 @@ if  strcmp(model.buildingType,'HollandschHuys')
 	X(:,1) = x_init;
 end
 
+if  strcmp(model.buildingType,'Borehole')
+    % init states at ground temperature 
+	X(:,1) = -10.3*ones(190,1);
+end
+
 % % arbitraty offset for state initialization
 % X(:,1) = X(:,1) + ones(model.plant.nx,1)*model.analyze.XinitOffset;
 
