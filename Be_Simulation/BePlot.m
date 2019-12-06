@@ -9,6 +9,7 @@ if nargin < 2
     PlotParam.plotEstim = 0;        % plot estimation
     PlotParam.plotCtrl = 0;        % plot control
     PlotParam.plotPrice = 0;        % plot price signal
+    PlotParam.plot3DStates = 0;     % plot 3D states
 end
 
 % init
@@ -44,6 +45,25 @@ if PlotParam.plotStates
     xlabel('time [days]')
 end
 
+if PlotParam.plot3DStates
+    subplot(2,1,1)
+    ribbon(Time, transpose(outdata.data.X(:,1:end-1)+x_init))
+    shading flat
+    grid on
+    title('Simulated state trajectories 3D')
+    ylabel('time [days]')
+    zlabel('Temp [K]')
+    xlabel('states [index]')
+    set(gca,'fontsize',22)
+    subplot(2,1,2)
+    plot(Time,outdata.data.X(:,1:end-1)+x_init, 'linewidth', 2)
+    title('Simulated state trajectories 2D')
+    xlabel('time [days]')
+    ylabel('Temp [K]')
+    grid on
+    set(gca,'fontsize',22)
+end
+    
  %% DISTURBANCES - TODO: categorize disturbances based on magnitudes
 if PlotParam.plotDist
     
