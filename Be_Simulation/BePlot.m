@@ -16,6 +16,7 @@ end
 Nsim = length(outdata.data.Y);
 Time = (1:Nsim)*outdata.model.plant.Ts/3600/24;  % days
 
+font_use = 14;
 
 % preview setup
 if outdata.ctrl.MPC.use
@@ -216,13 +217,13 @@ if outdata.ctrl.use && PlotParam.plotCtrl
 %      OUTPUTS
      figure
      subplot(2, 1, 1); 
-     title('Indoor temperature','fontsize',24); 
+     title('Indoor temperature','fontsize',font_use+2); 
      hold on
      plot(Time, outdata.data.Y-273.15, 'linewidth', 2);
      axis tight
      grid on
-     ylabel('Temperatures [\circC]','fontsize',22)  
-     set(gca,'fontsize',22)
+     ylabel('Temperatures [\circC]','fontsize',font_use)  
+     set(gca,'fontsize',font_use)
      box on
      
 %      box on
@@ -248,15 +249,15 @@ if outdata.ctrl.use && PlotParam.plotCtrl
 
 %      INPUTS
     subplot(2, 1, 2); 
-    title('Heating','fontsize',24);   
+    title('Heating','fontsize',font_use+2);   
     hold on
     h = stairs(Time, outdata.data.U');
     set(h, 'linewidth', 2, 'linestyle', '-');
     axis tight
     grid on
-    ylabel('Heat flows [W]','fontsize',22)  
-    xlabel('time [days]','fontsize',22)  
-    set(gca,'fontsize',22)
+    ylabel('Heat flows [W]','fontsize',font_use)  
+    xlabel('time [days]','fontsize',font_use)  
+    set(gca,'fontsize',font_use)
     box on
     
     if outdata.ctrl.MPC.use
@@ -270,7 +271,7 @@ if outdata.ctrl.use && PlotParam.plotCtrl
         ylabel('Q value [-]')  
         xlabel('time [days]')  
         title('MPC objective values');   
-%         set(gca,'fontsize',22)
+        set(gca,'fontsize',font_use)
         box on 
          
         subplot(2, 1, 2); 
@@ -281,7 +282,7 @@ if outdata.ctrl.use && PlotParam.plotCtrl
         ylabel('Dual variables [-]')  
         xlabel('time [days]')  
         title('MPC dual variables values');  
-%         set(gca,'fontsize',22)
+        set(gca,'fontsize',font_use)
         box on
         
     end
