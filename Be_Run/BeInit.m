@@ -29,15 +29,15 @@ addpath('../Be_Learn/')
 buildingType = 'Reno';  
 
 % =========== 2, choose model order =================
-ModelParam.Orders.range = [4, 7, 10, 15, 20, 30, 40, 100];    % vector of model orders for 'Reno', 'Old', 'RenoLight'
-% ModelParam.Orders.range = [100, 200, 600];                  % vector of model orders for 'Infrax', 'HollandschHuys'
+ModelParam.Orders.range = [4, 7, 10, 15, 20, 30, 40, 100];    % suggested = model orders for 'Reno', 'Old', 'RenoLight'
+% ModelParam.Orders.range = [100, 200, 600];                  % suggested model orders for 'Infrax', 'HollandschHuys'
 ModelParam.Orders.choice = 'full';                            % model order selection for prediction
 ModelParam.off_free = 1;                                      % augmented model with unmeasured disturbances
 ModelParam.reload = 0;                                        % if 1 reload ROM, if 0 load saved ROM
 
 % =========== 4, choose model analysis =================
 ModelParam.analyze.SimSteps = 2*672; % Number of simulation steps (Ts = 900 s),  672 = one week
-ModelParam.analyze.openLoop.use = true;             %  open loop simulation   - TODO
+ModelParam.analyze.openLoop.use = false;             %  open loop simulation   - TODO
 ModelParam.analyze.openLoop.start = 1;              % starting day of the analysis
 ModelParam.analyze.openLoop.end = 7;                % ending day of the analysis
 ModelParam.analyze.nStepAhead.use = false;           % n-step ahead predicion error  - TODO
@@ -81,8 +81,8 @@ CtrlParam.MLagent.use = 0;
 ctrl = BeCtrl(model, CtrlParam);       % construct a controller object  
 
 %% Simulate
-SimParam.run.start = 1;
-SimParam.run.end = 7; 
+SimParam.run.start = 11;
+SimParam.run.end = 17; 
 SimParam.verbose = 1;
 SimParam.flagSave = 0;
 SimParam.comfortTol = 1e-1;
@@ -91,7 +91,6 @@ SimParam.profile = 0;  % profiler function for CPU evaluation
 
 % %  simulation file with embedded plotting file
 outdata = BeSim(model, estim, ctrl, dist, refs, SimParam);
-
 
 %% Plot Results
 PlotParam.flagPlot = 1;     % plot 0 - no 1 - yes

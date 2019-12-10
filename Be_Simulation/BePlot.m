@@ -259,6 +259,34 @@ if outdata.ctrl.use && PlotParam.plotCtrl
     set(gca,'fontsize',22)
     box on
     
+    if outdata.ctrl.MPC.use
+        %  MPC  Objective and Duals
+        figure
+        subplot(2, 1, 1); 
+        h = stairs(Time, outdata.data.OBJ);
+        set(h, 'linewidth', 2, 'linestyle', '-');
+        axis tight
+        grid on
+        ylabel('Q value [-]')  
+        xlabel('time [days]')  
+        title('MPC objective values');   
+%         set(gca,'fontsize',22)
+        box on 
+         
+        subplot(2, 1, 2); 
+        h = stairs(Time, outdata.data.DUALS');
+        set(h, 'linewidth', 2, 'linestyle', '-');
+        axis tight
+        grid on
+        ylabel('Dual variables [-]')  
+        xlabel('time [days]')  
+        title('MPC dual variables values');  
+%         set(gca,'fontsize',22)
+        box on
+        
+    end
+
+    
     %           box on
 % %         slight rotation to prevent misplotting
 %           ax = gca;

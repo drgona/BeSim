@@ -1,4 +1,4 @@
-function mpc = BeMPCdesign(model, MPCParam)
+function [mpc, constraints_info] = BeMPCdesign(model, MPCParam)
 
 if nargin == 0
    buildingType = 'Infrax';  
@@ -95,39 +95,6 @@ end
 %             u_traj(:,k) = u(:,k);
         end
 
-        
-%           %     state + output update equations
-%         if MPCParam.Condensing
-%             if k == 1
-%                 AB(:, (N-k)*nu+1:(N-k+1)*nu ) = model.pred.Bd;        %  input matrix evolution
-%                 AE(:, (N-k)*nd+1:(N-k+1)*nd ) =  model.pred.Ed;       %  disturbance matrix evolution
-%                 AG(:, (N-k)*1+1:(N-k+1)*1 ) =  model.pred.Gd;         %  initial conditions matrix evolution
-%                 con = con + [ y(:, k) == model.pred.Cd*x(:, k)  + model.pred.Dd*uk + model.pred.Fd*1 ];
-%             else
-%                 AExpX0 = model.pred.Ad * AExpX0;
-% %                 con = con + [ y(:, k) == model.pred.Cd*( AExpX0 + AB(:, (N-k+1)*nu+1 : end ) * reshape( u(:,1:k-1) , nu * (k-1) , 1) + ...
-% %                                                                  AE(:, (N-k+1)*nd+1 : end ) * reshape( d_prev(:,1:k-1) , nd * (k-1) , 1) + ...
-% %                                                                  AG(:, (N-k+1)*1+1 : end ) * ones(k-1,1) ) + ...
-% %                                                                  model.pred.Dd*uk  + model.pred.Fd*1 ];
-%                  con = con + [ y(:, k) == model.pred.Cd*( AExpX0 + AB(:, (N-k+1)*nu+1 : end ) * reshape( u_traj(:,1:k-1) , nu * (k-1) , 1) + ...
-%                                                                  AE(:, (N-k+1)*nd+1 : end ) * reshape( d_prev(:,1:k-1) , nd * (k-1) , 1) + ...
-%                                                                  AG(:, (N-k+1)*1+1 : end ) * ones(k-1,1) ) + ...
-%                                                                  model.pred.Dd*uk  + model.pred.Fd*1 ];
-% 
-%                 AB(:, (N-k)*nu+1:(N-k+1)*nu ) = model.pred.Ad* AB(:, (N-k+1)*nu+1:(N-k+2)*nu );
-%                 AE(:, (N-k)*nd+1:(N-k+1)*nd ) = model.pred.Ad* AE(:, (N-k+1)*nd+1:(N-k+2)*nd );
-%                 AG(:, (N-k)*1+1:(N-k+1)*1 ) = model.pred.Ad* AG(:, (N-k+1)*1+1:(N-k+2)*1 );
-%             end  
-%         else
-%             if nd == 0 % no disturbances formulation
-%                 con = con + [ x(:, k+1) == model.pred.Ad*x(:, k) + model.pred.Bd*uk + model.pred.Gd*1];
-%                 con = con + [ y(:, k) == model.pred.Cd*x(:, k)  + model.pred.Dd*uk + model.pred.Fd*1 ];
-%             else
-%                 con = con + [ x(:, k+1) == model.pred.Ad*x(:, k) + model.pred.Bd*uk + model.pred.Ed*Dpreview + model.pred.Gd*1];
-%                 con = con + [ y(:, k) == model.pred.Cd*x(:, k)  + model.pred.Dd*uk + model.pred.Fd*1 ];
-%             end
-%         end
-
         %     state + output update equations
         if MPCParam.Condensing
             if k == 1
@@ -179,22 +146,57 @@ end
         test = optimizer([],[],options,[],[]);
         % options = sdpsettings('verbose', 1, 'warning', 1, 'beeponproblem', 1, 'solver','cplex');
     catch
-        options = sdpsettings('verbose', 1, 'solver','quadprog');
+        options = sdpsettings('verbose', 1, 'solver','quadprog', 'savesolveroutput', 1);
     end
 %   worst case optimization cpu time -  max time limit for solver options.gurobi.TimeLimit
 % http://www.gurobi.com/documentation/7.5/refman/timelimit.html
 
-    % optimizer for dynamic comfort zone
-    if nd == 0  % no disturbances formulation
-        mpc = optimizer(con, obj, options,  { x(:, 1), wa_prev, wb_prev, price }, {u(:,1); obj} );
-    else
-        mpc = optimizer(con, obj, options,  { x(:, 1), d_prev, wa_prev, wb_prev, price }, {u(:,1); obj} );
-    end
-    
+%     if MPCParam.duals      
 %     TODO: obtain, plot, and analyze dual variables
 % https://yalmip.github.io/command/dual/
 % https://groups.google.com/forum/#!topic/yalmip/wNtJhCueX3w
+% TODO:  use optimize in the loop and call dual on indexed constraints
+
+%         mpc.con = con;
+%         mpc.obj =  obj;
+%         mpc.options = options;
+%         mpc.params = { x(:, 1), d_prev, wa_prev, wb_prev, price };
+%         mpc.out = {u(:,1); obj};
     
-    
+        %  examplary evaluation
+%         con = con + [mpc.params{1} == 20*ones(292,1)];
+%         con = con + [mpc.params{2} == ones(44,22)];
+%         con = con + [mpc.params{3} == 500*ones(6,22)];
+%         con = con + [mpc.params{4} == -500*ones(6,22)];
+%         con = con + [mpc.params{5} == ones(1,22)];
+% 
+%         con = con + [x(:, 1) == 20*ones(292,1)];
+%         con = con + [d_prev == ones(44,22)];
+%         con = con + [wa_prev == 500*ones(6,22)];
+%         con = con + [wb_prev == -500*ones(6,22)];
+%         con = con + [price == ones(1,22)];
+% 
+%         optimize(con,obj,options);
+
+
+     % optimizer for dynamic comfort zone
+     if nd == 0  % no disturbances formulation
+         mpc = optimizer(con, obj, options,  { x(:, 1), wa_prev, wb_prev, price }, {u(:,1); obj} );
+     else
+         mpc = optimizer(con, obj, options,  { x(:, 1), d_prev, wa_prev, wb_prev, price }, {u(:,1); obj} );
+     end    
+
+
+%      information about constraints size and type - useful for evaluating
+%      dual variables
+     constraints_info.con = con;
+     constraints_info.size = size(con);
+     constraints_info.i_length = NaN(length(con),1);
+     constraints_info.equality = is(con,'equality'); 
+        
+    for k = 1:length(con) 
+        constraints_info.i_length(k) = length(double(con(k)));       
+    end
+
 
 end

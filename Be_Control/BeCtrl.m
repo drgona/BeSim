@@ -84,7 +84,7 @@ end
    
     
     %  MPC optimizer synthesis   
-    controller.MPC.optimizer = BeMPCdesign(model, controller.MPC);
+    [controller.MPC.optimizer, controller.MPC.constraints_info] = BeMPCdesign(model, controller.MPC);
        
     fprintf('*** Done.\n')
     

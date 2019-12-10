@@ -73,16 +73,22 @@ Nsim = length(SimStart:SimStop);
 
 % preview setup
 if ctrl.MPC.use
-            N = ctrl.MPC.N;
-            Nrp = ctrl.MPC.Nrp;
+        N = ctrl.MPC.N;
+        Nrp = ctrl.MPC.Nrp;        
 elseif ctrl.MLagent.use
-            N = ctrl.MLagent.numDelays;
-            Nrp = ctrl.MLagent.numDelays;
+        N = ctrl.MLagent.numDelays;
+        Nrp = ctrl.MLagent.numDelays;
 else
-            N = 0;
-            Nrp = 0;
+        N = 0;
+        Nrp = 0;
 end
 
+% MPC info variables
+if ctrl.MPC.use
+    OBJ =  zeros(1,Nsim);            %  MPC objective function
+    constr_nr = sum(ctrl.MPC.constraints_info.i_length);  % total number of constraints
+    DUALS = zeros(constr_nr,Nsim);  %  MPC dual variables for constraints
+end
 
 X = zeros(model.plant.nx,Nsim+1);
 D = dist.d(SimStart:SimStop+N,:)';
@@ -170,11 +176,7 @@ PMV = zeros(model.plant.ny,Nsim);
 PMVViol =  zeros(model.plant.ny,Nsim); 
 PMVAboveViol =  zeros(model.plant.ny,Nsim); 
 PMVBelowViol =  zeros(model.plant.ny,Nsim); 
-%  MPC objective function vectors
-J = zeros(1,Nsim);     
-J_v =  zeros(1,Nsim);   
-J_u =  zeros(1,Nsim);   
-OBJ =  zeros(1,Nsim);
+
    
 
 %% ------ MAIN simulation loop ------
@@ -244,15 +246,12 @@ for k = 1:Nsim
                 error('infeasible')      
             else
                 uopt = opt_out{1};   % optimal control action
-                obj =  opt_out{2};   %objective function value     
+                obj =  opt_out{2};   % objective function value   
+                duals = info2{1};    % dual variables
             end           
             
-%             % Objective function value increments in each sim. step
-%             J_v(k) = vb'*Qsb*vb + va'*Qsa*va;      % violations increments in objective
-%             J_u(k) = uopt'*Qu*uopt;                % inputs increments in objective
-%             J(k) =  J_v(k)+J_u(k);               % overalll increments in objective
-%             %     yalmip objective function increments vector
-%             OBJ(k) = obj;      
+            OBJ(k) = obj;       % Objective function values
+            DUALS(:,k) = duals; % dual variables values
         
         elseif ctrl.MLagent.use   % machine learning controller
 %             TODO: finish implementation of all ML ctrls
@@ -600,13 +599,10 @@ if ctrl.use
     outdata.data.Price = Price(:,1:end-Nrp);       
     outdata.data.Cost = Price(:,1:end-Nrp).*U;   
     
-%     if ctrl.MPC.use
-%         % obj function
-%         outdata.data.J = J;
-%         outdata.data.J_v = J_v;
-%         outdata.data.J_u = J_u;
-%         outdata.data.OBJ = OBJ;
-%     end
+    if ctrl.MPC.use       
+        outdata.data.OBJ = OBJ; % obj function
+        outdata.data.DUALS = DUALS; % dual variables
+    end
 end
 
 % elapsed time of simulation
