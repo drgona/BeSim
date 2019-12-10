@@ -110,7 +110,7 @@ end
 
 %% Save Results
 SaveParam.path = ['../Data/Simulations/',buildingType]; % savepath
-SaveParam.save = true;                      % save or not
+SaveParam.save = false;                     % save or not
 SaveParam.data.states = false;              % X      
 SaveParam.data.outputs = true;              % Y    
 SaveParam.data.inputs = true;               % U   
