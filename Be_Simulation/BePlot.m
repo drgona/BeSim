@@ -261,30 +261,82 @@ if outdata.ctrl.use && PlotParam.plotCtrl
     box on
     
     if outdata.ctrl.MPC.use
+        
+        if strcmp(outdata.solver.MPC_options.solver,'+quadprog')
+           rows = 3;
+        else
+           rows  = 2;
+        end
+        
         %  MPC  Objective and Duals
         figure
-        subplot(2, 1, 1); 
-        h = stairs(Time, outdata.data.OBJ);
+        subplot(rows, 2, 1); 
+        h = stairs(Time, outdata.solver.OBJ);
         set(h, 'linewidth', 2, 'linestyle', '-');
         axis tight
         grid on
         ylabel('Q value [-]')  
         xlabel('time [days]')  
-        title('MPC objective values');   
+        title('MPC objective value');   
         set(gca,'fontsize',font_use)
         box on 
          
-        subplot(2, 1, 2); 
-        h = stairs(Time, outdata.data.DUALS');
+        subplot(rows, 2, 2); 
+        h = stairs(Time, outdata.solver.SolverTime);
+        set(h, 'linewidth', 2, 'linestyle', '-');
+        axis tight
+        grid on
+        ylabel('Time [s]')  
+        xlabel('time [days]')  
+        title('Solver Time');  
+        set(gca,'fontsize',font_use)
+        box on
+        
+        subplot(rows, 2, 3); 
+        h = stairs(Time, outdata.solver.DUALS');
         set(h, 'linewidth', 2, 'linestyle', '-');
         axis tight
         grid on
         ylabel('Dual variables [-]')  
         xlabel('time [days]')  
-        title('MPC dual variables values');  
+        title('MPC dual variables');  
         set(gca,'fontsize',font_use)
         box on
         
+        subplot(rows, 2, 4); 
+        h = stairs(Time, outdata.solver.PRIMALS');
+        set(h, 'linewidth', 2, 'linestyle', '-');
+        axis tight
+        grid on
+        ylabel('Primal variables [-]')  
+        xlabel('time [days]')  
+        title('MPC primal variables');  
+        set(gca,'fontsize',font_use)
+        box on
+        
+        if strcmp(outdata.solver.MPC_options.solver,'+quadprog')
+            subplot(3, 2, 5); 
+            h = stairs(Time, outdata.solver.INEQLIN');
+            set(h, 'linewidth', 2, 'linestyle', '-');
+            axis tight
+            grid on
+            ylabel('INEQLIN [-]')  
+            xlabel('time [days]')  
+            title('quadprog INEQLIN');  
+            set(gca,'fontsize',font_use)
+            box on
+
+            subplot(3, 2, 6); 
+            h = stairs(Time, outdata.solver.EQLIN');
+            set(h, 'linewidth', 2, 'linestyle', '-');
+            axis tight
+            grid on
+            ylabel('EQLIN [-]')  
+            xlabel('time [days]')  
+            title('quadprog EQLIN');  
+            set(gca,'fontsize',font_use)
+            box on
+        end      
     end
 
     

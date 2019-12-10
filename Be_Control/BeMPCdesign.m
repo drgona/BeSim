@@ -151,34 +151,6 @@ end
 %   worst case optimization cpu time -  max time limit for solver options.gurobi.TimeLimit
 % http://www.gurobi.com/documentation/7.5/refman/timelimit.html
 
-%     if MPCParam.duals      
-%     TODO: obtain, plot, and analyze dual variables
-% https://yalmip.github.io/command/dual/
-% https://groups.google.com/forum/#!topic/yalmip/wNtJhCueX3w
-% TODO:  use optimize in the loop and call dual on indexed constraints
-
-%         mpc.con = con;
-%         mpc.obj =  obj;
-%         mpc.options = options;
-%         mpc.params = { x(:, 1), d_prev, wa_prev, wb_prev, price };
-%         mpc.out = {u(:,1); obj};
-    
-        %  examplary evaluation
-%         con = con + [mpc.params{1} == 20*ones(292,1)];
-%         con = con + [mpc.params{2} == ones(44,22)];
-%         con = con + [mpc.params{3} == 500*ones(6,22)];
-%         con = con + [mpc.params{4} == -500*ones(6,22)];
-%         con = con + [mpc.params{5} == ones(1,22)];
-% 
-%         con = con + [x(:, 1) == 20*ones(292,1)];
-%         con = con + [d_prev == ones(44,22)];
-%         con = con + [wa_prev == 500*ones(6,22)];
-%         con = con + [wb_prev == -500*ones(6,22)];
-%         con = con + [price == ones(1,22)];
-% 
-%         optimize(con,obj,options);
-
-
      % optimizer for dynamic comfort zone
      if nd == 0  % no disturbances formulation
          mpc = optimizer(con, obj, options,  { x(:, 1), wa_prev, wb_prev, price }, {u(:,1); obj} );
@@ -186,9 +158,7 @@ end
          mpc = optimizer(con, obj, options,  { x(:, 1), d_prev, wa_prev, wb_prev, price }, {u(:,1); obj} );
      end    
 
-
-%      information about constraints size and type - useful for evaluating
-%      dual variables
+%      information about constraints size and type
      constraints_info.con = con;
      constraints_info.size = size(con);
      constraints_info.i_length = NaN(length(con),1);

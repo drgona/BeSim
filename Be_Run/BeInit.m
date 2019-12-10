@@ -107,6 +107,27 @@ PlotParam.plotPrice = 1;        % plot price signal
 if PlotParam.flagPlot
     BePlot(outdata,PlotParam)
 end
+
+%% Save Results
+SaveParam.path = ['../Data/Simulations/',buildingType]; % savepath
+SaveParam.save = true;                      % save or not
+SaveParam.data.states = false;              % X      
+SaveParam.data.outputs = true;              % Y    
+SaveParam.data.inputs = true;               % U   
+SaveParam.data.disturbances = true;         % D 
+SaveParam.data.references = false;          % WA, WB 
+SaveParam.solver.objective = true;          % objective values of the optimization problem
+SaveParam.solver.duals = true;              % dual variables of the optimization problem
+SaveParam.solver.primals = false;           % primal variables of the optimization problem
+SaveParam.solver.SolverTime = true;                % solvertime
+SaveParam.solver.iters = true;              % solver iterations
+SaveParam.solver.specifics = false;         % solver specific information
+
+if SaveParam.save
+    BeSave(outdata,SaveParam)
+end
+
+
  
  
  

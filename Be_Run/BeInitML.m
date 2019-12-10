@@ -94,7 +94,7 @@ ctrl = BeCtrl(model, CtrlParam);       % construct a controller object
 
 %% Simulate - MPC train set
 SimParam.run.start = 1;
-SimParam.run.end = 330; 
+SimParam.run.end = 2; 
 SimParam.verbose = 1;
 SimParam.flagSave = 0;
 SimParam.comfortTol = 1e-1;
@@ -125,26 +125,34 @@ end
 % machine learning approximations of MPC
 
 %% Extending MPC training dataset 
-% increasing state inititalization range for generalization purposes
-SampleParam.use = 1;   % use dataset extension 
-% Methods:
-SampleParam.StateRandom = 0; % 1, random sampling along the optimal trajectory - TODO
-SampleParam.StateInit = 1; % 2,  range of state initialization per day
-PlotParam.flagPlot = 0;     % plot 0 - no 1 - yes
-% extended dataset
-outdataSampled = BeSample(outdata,SampleParam,PlotParam);
-
-if true
-    % continue sampling of outdataSampled from a given day i and sample k
+ExtraSampling = false;
+if ExtraSampling
+    % increasing state inititalization range for generalization purposes
     SampleParam.use = 1;   % use dataset extension 
+    % Methods:
     SampleParam.StateRandom = 0; % 1, random sampling along the optimal trajectory - TODO
     SampleParam.StateInit = 1; % 2,  range of state initialization per day
     PlotParam.flagPlot = 0;     % plot 0 - no 1 - yes
-    SampleParam.continue.use = true;
-    SampleParam.continue.i = 123;
-    SampleParam.continue.k = 8;
-    outdataSampled.ctrl = ctrl;
-    outdataSampled = BeSample(outdataSampled,SampleParam,PlotParam);
+    SampleParam.continue.use = false;
+
+    % extended dataset
+    outdataSampled = BeSample(outdata,SampleParam,PlotParam);
+
+    if true
+        % continue sampling of outdataSampled from a given day i and sample k
+        SampleParam.use = 1;   % use dataset extension 
+        SampleParam.StateRandom = 0; % 1, random sampling along the optimal trajectory - TODO
+        SampleParam.StateInit = 1; % 2,  range of state initialization per day
+        PlotParam.flagPlot = 0;     % plot 0 - no 1 - yes
+        SampleParam.continue.use = true;
+        SampleParam.continue.i = 123;
+        SampleParam.continue.k = 8;
+        outdataSampled.ctrl = ctrl;
+        outdataSampled = BeSample(outdataSampled,SampleParam,PlotParam);
+    end
+
+else
+    outdataSampled = outdata;
 end
 
 %% ====== Machine Learning Agent ======

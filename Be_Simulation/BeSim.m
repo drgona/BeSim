@@ -62,9 +62,6 @@ SimStop = ceil(SimStop_sec/model.plant.Ts);
 % number of simulation steps for MPC
 Nsim = length(SimStart:SimStop);
 
-
-
-
 %% Initial values  
 
 % if not(exist('ctrl.MLagent'))
@@ -83,15 +80,13 @@ else
         Nrp = 0;
 end
 
-% MPC info variables
-if ctrl.MPC.use
-    OBJ =  zeros(1,Nsim);            %  MPC objective function
-    constr_nr = sum(ctrl.MPC.constraints_info.i_length);  % total number of constraints
-    DUALS = zeros(constr_nr,Nsim);  %  MPC dual variables for constraints
-end
-
+% state disturbacne trajectories
 X = zeros(model.plant.nx,Nsim+1);
 D = dist.d(SimStart:SimStop+N,:)';
+
+% diagnostics
+StepTime = zeros(1,Nsim); 
+MPCTime = zeros(1,Nsim); 
 
 % realisrtic states initialization for particular models
 if  strcmp(model.buildingType,'HollandschHuys')
@@ -167,6 +162,27 @@ if estim.use
 end
 
 
+% MPC info variables
+if ctrl.MPC.use
+    
+%     initialize MPC diagnostics vectors
+        if model.plant.nd == 0  %  no disturbnances option
+             [opt_out, feasible, info1, info2, info3, info4] =  ctrl.MPC.optimizer{{X(:,1), wa(:,1:Nrp), wb(:,1:Nrp), Price(:,1:N)}}; % optimizer with estimated states
+        else
+             [opt_out, feasible, info1, info2, info3, info4] =  ctrl.MPC.optimizer{{Xp(:, 1), D(:,1:N), wa(:,1:Nrp), wb(:,1:Nrp), Price(:,1:N)}}; % optimizer with estimated states          
+        end
+ 
+    OBJ =  zeros(1,Nsim);            %  MPC objective function
+%     constr_nr = sum(ctrl.MPC.constraints_info.i_length);  % total number of constraints
+    DUALS = zeros(length(info4.Dual),Nsim);  %  MPC dual variables for constraints
+    PRIMALS = zeros(length(info4.Primal) ,Nsim); 
+    
+    ITERS = nan(1,Nsim);  % number of iterations of the solver
+    INEQLIN = zeros(length(info4.solveroutput.lambda.ineqlin) ,Nsim);
+    EQLIN = zeros(length(info4.solveroutput.lambda.eqlin) ,Nsim);
+end
+
+
 %     violation vectors
 Viol = zeros(model.plant.ny,Nsim); 
 AboveViol = zeros(model.plant.ny,Nsim);
@@ -191,15 +207,12 @@ for k = 1:Nsim
     
 %     current states, inputs, outputs and disturnances
     x0 = X(:,k);         % current sim states    - initialized to 0 at k = 1
-    d0 = D(:,k);         % current disturbances  - from measurements    
-        
+    d0 = D(:,k);         % current disturbances  - from measurements     
     
 %     TODO: implement 3 cases: 
 % 1, plant simulation and control - all computed                 - DONE
 % 2, measured (fixed) u and y                                    - DONE
 % 3, measured (fixed) y - computed control and estimation        - TODO
-
-
     
 %%  CONTROL  
 % TODO standalone functions       
@@ -221,38 +234,44 @@ for k = 1:Nsim
             wb_prev = wb(:, k:k+(ctrl.MPC.Nrp-1));
             % preview of the price signal
             Price_prev = Price(:, k:k+(ctrl.MPC.Nrp-1));
-                       
-%             TODO:  adapt Dpreview wa_prev wb_prev
+                                        
             if estim.use   % estimated states
                 if model.plant.nd == 0  %  no disturbnances option
-                     [opt_out, feasible, info1, info2] =  ctrl.MPC.optimizer{{xp, wa_prev, wb_prev, Price_prev}}; % optimizer with estimated states
+                     [opt_out, feasible, info1, info2, info3, info4] =  ctrl.MPC.optimizer{{xp, wa_prev, wb_prev, Price_prev}}; % optimizer with estimated states
                 else
-                     [opt_out, feasible, info1, info2] =  ctrl.MPC.optimizer{{xp, Dpreview, wa_prev, wb_prev, Price_prev}}; % optimizer with estimated states
+                     [opt_out, feasible, info1, info2, info3, info4] =  ctrl.MPC.optimizer{{xp, Dpreview, wa_prev, wb_prev, Price_prev}}; % optimizer with estimated states
                 end
             else    % perfect state update
                 if model.plant.nd == 0  %  no disturbnances option
-                     [opt_out, feasible, info1, info2] =  ctrl.MPC.optimizer{{x0, wa_prev, wb_prev, Price_prev}}; % optimizer with estimated states
+                     [opt_out, feasible, info1, info2, info3, info4] =  ctrl.MPC.optimizer{{x0, wa_prev, wb_prev, Price_prev}}; % optimizer with estimated states
                 else
-                     [opt_out, feasible, info1, info2] =  ctrl.MPC.optimizer{{x0, Dpreview, wa_prev, wb_prev, Price_prev}}; % optimizer with measured states  
+                     [opt_out, feasible, info1, info2, info3, info4] =  ctrl.MPC.optimizer{{x0, Dpreview, wa_prev, wb_prev, Price_prev}}; % optimizer with measured states  
                 end                 
             end
+                      
+            MPC_options = ctrl.MPC.optimizer.options;
             
 %             %     feasibility check
-%             if feasible == 3 %    3 Maximum iterations exceeded
-% %                 uopt = does not change value
-%                 obj = 0;
             if ~ismember(feasible, [0 3 4 5])
                 k
                 error('infeasible')      
             else
                 uopt = opt_out{1};   % optimal control action
-                obj =  opt_out{2};   % objective function value   
-                duals = info2{1};    % dual variables
+                OBJ(k) =  opt_out{2};   % objective function value   
+%               DUALS(:,k) = info2{1};    % dual variables
+                DUALS(:,k) = info4.Dual; % dual variables values
+                PRIMALS(:,k) = info4.Primal; % primal variables values             
+                SolverTime(k) = info4.solvertime;  %  elapsed solver time of one MPC step
+                
+                if strcmp(MPC_options.solver,'+quadprog')
+                    ITERS(:,k) = info4.solveroutput.output.iterations;
+                    INEQLIN(:,k) = info4.solveroutput.lambda.ineqlin;
+                    EQLIN(:,k) = info4.solveroutput.lambda.eqlin;
+                end
+%                 info4.solveroutput.lambda
+                
             end           
-            
-            OBJ(k) = obj;       % Objective function values
-            DUALS(:,k) = duals; % dual variables values
-        
+                 
         elseif ctrl.MLagent.use   % machine learning controller
 %             TODO: finish implementation of all ML ctrls
             if ctrl.MLagent.TDNN.use    % Time delay neural network           
@@ -272,7 +291,7 @@ for k = 1:Nsim
                      uopt =  TDNN_ctrl([yn; D(ctrl.MLagent.use_D, k+InputDelays);wb(1,k+InputDelays)],...                              
                      [ Y(:,k-InputDelays:k-1); D(ctrl.MLagent.use_D, k:k+(InputDelays-1));wb(1,k:k+(InputDelays-1))]);
 
-% previous code - WORKING
+% previous code - Working
 %                      uopt =  NN_TS_ctrl([yn; D(ctrl.MLagent.use_D, k+InputDelays);wb(1,k+InputDelays)],...                              
 %                      [ Y(:,k-InputDelays:k-1); D(ctrl.MLagent.use_D, k:k+(InputDelays-1));wb(1,k:k+(InputDelays-1))]);
 
@@ -416,45 +435,46 @@ for k = 1:Nsim
 % TODO - heat flows to valve positions
 % Q = m*cp*p*(T_sup - T_return)
   
-%% ---------- Comfort evaluation ----------
-if  ctrl.use
-    % VIOLATIONS of the thermal comfort zones of individual outputs
-    va = zeros(model.plant.ny,1); vb = zeros(model.plant.ny,1); v = zeros(model.plant.ny,1);
-    % VIOLATIONS of the PMV zone of individual outputs
-    PMVva = zeros(model.plant.ny,1); PMVvb = zeros(model.plant.ny,1); PMVv = zeros(model.plant.ny,1);
-    
-    %     violation evaluation for j-th output
-    for j = 1:model.plant.ny
-        if yn(j) > wa(j,k) + SimParam.comfortTol    % above viol. condition
-            v(j) = yn(j) - wa(j,k);        % above viol. magnitude
-            va(j) = v(j);
-        elseif yn(j)  <  wb(j,k) - SimParam.comfortTol  % below viol. condition
-            v(j) = yn(j) - wb(j,k);           % below viol. magnitude
-            vb(j) = v(j);
+    %% ---------- Comfort evaluation ----------
+    if  ctrl.use
+        % VIOLATIONS of the thermal comfort zones of individual outputs
+        va = zeros(model.plant.ny,1); vb = zeros(model.plant.ny,1); v = zeros(model.plant.ny,1);
+        % VIOLATIONS of the PMV zone of individual outputs
+        PMVva = zeros(model.plant.ny,1); PMVvb = zeros(model.plant.ny,1); PMVv = zeros(model.plant.ny,1);
+
+        %     violation evaluation for j-th output
+        for j = 1:model.plant.ny
+            if yn(j) > wa(j,k) + SimParam.comfortTol    % above viol. condition
+                v(j) = yn(j) - wa(j,k);        % above viol. magnitude
+                va(j) = v(j);
+            elseif yn(j)  <  wb(j,k) - SimParam.comfortTol  % below viol. condition
+                v(j) = yn(j) - wb(j,k);           % below viol. magnitude
+                vb(j) = v(j);
+            end
+
+            % PMV index for each zone, with Tr = 29 deg C
+            PMV(j,k) = pmv_iso(yn(j)-273.15, 29);
+            if  PMV(j,k) > PMVub(k)    % above PMV viol. condition
+                PMVv(j) = PMV(j,k) - PMVub(k);        % above viol. magnitude
+                PMVva(j) = PMVv(j);
+            elseif  PMV(j,k)  <  PMVlb(k)  % below PMV viol. condition
+                PMVv(j) = PMV(j,k) - PMVlb(k);        % above viol. magnitude
+                PMVvb(j) = PMVv(j);
+            end
         end
-        
-        % PMV index for each zone, with Tr = 29 deg C
-        PMV(j,k) = pmv_iso(yn(j)-273.15, 29);
-        if  PMV(j,k) > PMVub(k)    % above PMV viol. condition
-            PMVv(j) = PMV(j,k) - PMVub(k);        % above viol. magnitude
-            PMVva(j) = PMVv(j);
-        elseif  PMV(j,k)  <  PMVlb(k)  % below PMV viol. condition
-            PMVv(j) = PMV(j,k) - PMVlb(k);        % above viol. magnitude
-            PMVvb(j) = PMVv(j);
-        end
+        %  comfort zone violations vectors
+        Viol(:,k) = v;
+        AboveViol(:,k) = va;
+        BelowViol(:,k) = vb;
+        % PMV violations vectors
+        PMVViol(:,k) =  PMVv;
+        PMVAboveViol(:,k) =  PMVva;
+        PMVBelowViol(:,k) =  PMVvb;
     end
-    %  comfort zone violations vectors
-    Viol(:,k) = v;
-    AboveViol(:,k) = va;
-    BelowViol(:,k) = vb;
-    % PMV violations vectors
-    PMVViol(:,k) =  PMVv;
-    PMVAboveViol(:,k) =  PMVva;
-    PMVBelowViol(:,k) =  PMVvb;
-end
-            
+           
 %     REMAINING simulation time computation
     step_time = etime(clock, start_t);                  %  elapsed time of one sim. step
+    StepTime(k) = step_time;
     av_step_time = step_time/k;                         % average_step_time
     rem_sim_time = av_step_time*(Nsim-k);           % remaining_sim_time
      
@@ -600,13 +620,23 @@ if ctrl.use
     outdata.data.Cost = Price(:,1:end-Nrp).*U;   
     
     if ctrl.MPC.use       
-        outdata.data.OBJ = OBJ; % obj function
-        outdata.data.DUALS = DUALS; % dual variables
+        outdata.solver.OBJ = OBJ; % obj function
+        outdata.solver.DUALS = DUALS; % dual variables
+        outdata.solver.PRIMALS = PRIMALS;  % primal variables
+        outdata.solver.SolverTime = SolverTime;  % solvertime
+        outdata.solver.MPC_options.solver = MPC_options.solver; % solver info
+        if strcmp(MPC_options.solver,'+quadprog')
+            outdata.solver.ITERS = ITERS;  % number of iterations
+            outdata.solver.INEQLIN = INEQLIN;  % inequalities
+            outdata.solver.EQLIN = EQLIN;     % equalities  
+        end
     end
 end
 
 % elapsed time of simulation
-outdata.info.cmp = etime(clock, start_t);
+outdata.info.SimTime = etime(clock, start_t);
+outdata.info.StepTime = StepTime;
+    
 
 %% Simulation results reports and plots
 
@@ -625,7 +655,7 @@ if SimParam.verbose
     end
     
         % compuation time
-        fprintf('*** Simulation Time: %.1f secs\n', outdata.info.cmp);
+        fprintf('*** Simulation Time: %.1f secs\n', outdata.info.SimTime);
     
 end
 % Simulation ends  

@@ -82,8 +82,10 @@ else    % USE dataset extension
             end
             % temporary save
 %             save outdataSampled2.mat outdataSampled i k
+
+            % TODO: comment if unused
             save('outdataSampled2.mat', 'outdataSampled', 'i', 'k', '-v7.3')
-            pause(120)  % cooling phase
+%             pause(120)  % cooling phase
         end
         % addinng forecast values for data structure compatibility
         outdataSampled.data.X = [outdataSampled.data.X outdataNew{i}{k}.data.X(:,end)];  
