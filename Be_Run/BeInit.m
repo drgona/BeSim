@@ -127,7 +127,20 @@ if SaveParam.save
     BeSave(outdata,SaveParam)
 end
 
+%% Diagnose MPC problem via Yalmip optimize
 
- 
- 
+[diagnostics, con, obj] = BeMPC_DualCheck(outdata, model)
+
+for k = 1:length(con) 
+        constraints_info.i_length(k) = length(double(con(k))); 
+        constraints_info.duals{k} = dual(con(k))';
+end 
+constraints_info.nr = sum(constraints_info.i_length);
+DUALS = cell2mat(constraints_info.duals);
+figure; plot(DUALS)
+
+
+
+
+
  
