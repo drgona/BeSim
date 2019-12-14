@@ -61,7 +61,7 @@ RefsParam.Price.variable = 0;       %1 =  variable price profile, 0 = fixed to 1
 
 refs = BeRefs(model, dist, RefsParam);     % construct a references object  
 
-%%  estimator 
+%% Estimator 
 EstimParam.SKF.use = 0;          % stationary KF
 EstimParam.TVKF.use = 1;         % time varying KF
 EstimParam.MHE.use = 0;          % moving horizon estimation via yalmip
@@ -70,7 +70,7 @@ EstimParam.use = 1;
 
 estim = BeEstim(model, EstimParam);      % construct an estimator object  
 
-%% controller 
+%% Controller 
 CtrlParam.use = 1;   % 0 for precomputed u,y    1 for closed loop control
 CtrlParam.MPC.use = 1;
 CtrlParam.MPC.Condensing = 1;
@@ -116,10 +116,10 @@ SaveParam.data.outputs = true;              % Y
 SaveParam.data.inputs = true;               % U   
 SaveParam.data.disturbances = true;         % D 
 SaveParam.data.references = false;          % WA, WB 
-SaveParam.solver.objective = true;          % objective values of the optimization problem
-SaveParam.solver.duals = true;              % dual variables of the optimization problem
-SaveParam.solver.primals = false;           % primal variables of the optimization problem
-SaveParam.solver.SolverTime = true;                % solvertime
+SaveParam.solver.objective = true;          % objective values of the QP optimization problem
+SaveParam.solver.duals = true;              % dual variables of the QP optimization problem
+SaveParam.solver.primals = false;           % primal variables of the QP optimization problem
+SaveParam.solver.SolverTime = true;         % solvertime
 SaveParam.solver.iters = true;              % solver iterations
 SaveParam.solver.specifics = false;         % solver specific information
 
@@ -127,17 +127,15 @@ if SaveParam.save
     BeSave(outdata,SaveParam)
 end
 
-%% Diagnose MPC problem via Yalmip optimize
+%% Diagnose the MPC problem via Yalmip optimize
+%     TODO: for loop over N-steps
 
-[diagnostics, con, obj] = BeMPC_DualCheck(outdata, model)
+diagnoseFlag = true;
+if diagnoseFlag
+    % solve single instance of the MPC problem via Yalmip optimize
+    [diagnostics, con, obj, optimize_con_info] = BeMPC_DualCheck(outdata, model)
+end
 
-for k = 1:length(con) 
-        constraints_info.i_length(k) = length(double(con(k))); 
-        constraints_info.duals{k} = dual(con(k))';
-end 
-constraints_info.nr = sum(constraints_info.i_length);
-DUALS = cell2mat(constraints_info.duals);
-figure; plot(DUALS)
 
 
 

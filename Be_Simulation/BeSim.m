@@ -258,7 +258,7 @@ for k = 1:Nsim
             else
                 uopt = opt_out{1};   % optimal control action
                 OBJ(k) =  opt_out{2};   % objective function value   
-%               DUALS(:,k) = info2{1};    % dual variables
+%                 DUALS(:,k) = info2{1};    % dual variables
                 DUALS(:,k) = info4.Dual; % dual variables values
                 PRIMALS(:,k) = info4.Primal; % primal variables values             
                 SolverTime(k) = info4.solvertime;  %  elapsed solver time of one MPC step
