@@ -92,13 +92,28 @@ SimParam.profile = 0;  % profiler function for CPU evaluation
 % %  simulation file with embedded plotting file
 outdata = BeSim(model, estim, ctrl, dist, refs, SimParam);
 
+
+%% Diagnose the MPC problem via Yalmip optimize
+
+diagnoseFlag = true;
+if diagnoseFlag
+    % solve single instance of the MPC problem via Yalmip optimize
+    [diagnostics, con, obj, outdata.optimize_con_info] = BeMPC_DualCheck(outdata, model)
+end
+
 %% Plot Results
-PlotParam.flagPlot = 1;     % plot 0 - no 1 - yes
-PlotParam.plotStates = 1;        % plot states
-PlotParam.plotDist = 1;        % plot disturbances
-PlotParam.plotEstim = 1;        % plot estimation
-PlotParam.plotCtrl = 1;        % plot control
-PlotParam.plotPrice = 1;        % plot price signal
+PlotParam.flagPlot = 1;          % plot 0 - no 1 - yes
+PlotParam.plotStates = 0;        % plot states
+PlotParam.plotStates3D = 0;      % ribbon plot states
+PlotParam.plotDist = 0;          % plot disturbances
+PlotParam.plotDist3D = 0;        % ribbon plot disturbances
+PlotParam.plotEstim = 0;         % plot estimation
+PlotParam.plotEstim3D = 0;       % ribbon plot estimation
+PlotParam.plotCtrl = 1;          % plot control
+PlotParam.plotPrimalDual = 1;          % plot primal and dual varibles
+PlotParam.plotPrimalDual3D = 1;        % ribbon plot primal and dual varibles
+PlotParam.plotDualActive = 1;     % activation of the dual varibles
+PlotParam.plotPrice = 0;          % plot price signal
 % PlotParam.Transitions = 1;      % pot dynamic transitions of Ax matrix
 % PlotParam.reduced = 0;   %  reduced paper plots formats 0 - no 1 - yes
 % PlotParam.zone = 2;     % choose zone if reduced
@@ -127,14 +142,6 @@ if SaveParam.save
     BeSave(outdata,SaveParam)
 end
 
-%% Diagnose the MPC problem via Yalmip optimize
-%     TODO: for loop over N-steps
-
-diagnoseFlag = true;
-if diagnoseFlag
-    % solve single instance of the MPC problem via Yalmip optimize
-    [diagnostics, con, obj, optimize_con_info] = BeMPC_DualCheck(outdata, model)
-end
 
 
 

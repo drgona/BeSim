@@ -45,6 +45,18 @@ if PlotParam.plotStates
     xlabel('time [days]')
 end
 
+if PlotParam.plotStates3D
+    figure
+    ribbon(Time', (outdata.data.X(:,1:end-1)+x_init)');
+    title('State trajectories 3D');
+    axis tight
+    shading flat
+    grid on
+    zlabel('Temp [K]')
+    ylabel('time [days]')
+    xlabel('states [-]')
+end
+
  %% DISTURBANCES - TODO: categorize disturbances based on magnitudes
 if PlotParam.plotDist
     
@@ -99,104 +111,114 @@ if PlotParam.plotDist
         ylabel('[-]')
         xlabel('time [days]')
     end
+end
+
+if PlotParam.plotDist3D
+    DistToPlot = outdata.data.D(:,1:end-N); 
+    D = DistToPlot(any(DistToPlot,2),:);  % removing zero rows
     
-   
+    figure
+    ribbon(Time', D');
+    title('Disturbance trajectories 3D');
+    axis tight
+    shading flat
+    grid on
+    zlabel('Disturbances [K,kW]')
+    ylabel('time [days]')
+    xlabel('disturbances [-]')
 end
 
 
 %%   ESTIMATOR
 
 % if not(PlotParam.only_zone)
-if outdata.estim.use && PlotParam.plotEstim
+if outdata.estim.use 
  
-        % outputs - simulated vs estimated
-        figure
-        subplot(2,1,1)
-        title('Simulated vs estimated outputs');
-        hold on
-        if  strcmp(outdata.model.buildingType,'HollandschHuys')
-               plot(Time, outdata.data.Y-273.15,'-' ,'linewidth', 2);
-               plot(Time, outdata.data.Ye-273.15, '--', 'linewidth', 2);
-        else
-               plot(Time, outdata.data.Y,'-' ,'linewidth', 2);
-               plot(Time, outdata.data.Ye, '--', 'linewidth', 2);
-        end
-        
-        axis tight
-        grid on
-        ylabel('Temp. [^{\circ}C]')
-%         legend('simulated','estimated')
-        xlabel('time [days]')   
-          
-        % output estimation error
-        subplot(2,1,2)
-        plot(Time,(outdata.data.Y-outdata.data.Ye),'linewidth', 2)
-        title('Output estimation error')
-        axis tight
-        grid on
-        ylabel('Temp. [^{\circ}C]')
-        xlabel('time [days]')  
-   
-%         % states - simulated vs estimated 
-%         figure
-%         subplot(2, 1, 1);
-%         plot(Time, outdata.data.X(:,1:end-1), 'linewidth', 2);
-%         title('states: simulated');
-%         axis tight
-%         grid on
-%         xlabel('time [days]')
-%         
-%         subplot(2, 1, 2);
-%         plot(Time, outdata.data.Xe(:,1:end),'linewidth', 2);
-%         title('states:  estimated');
-%         axis tight
-%         grid on
-%         xlabel('time [days]')
-        
-           % states - simulated vs estimated 
-        figure
-        subplot(2, 1, 1);
-        plot(Time, outdata.data.X(:,1:end-1)+x_init-273.15, 'linewidth', 2);
-        title('states: simulated');
-        axis tight
-        grid on
-        xlabel('time [days]')
-        ylabel('Temp. [^{\circ}C]')
-        
-        subplot(2, 1, 2);
-        plot(Time, outdata.data.Xe(:,1:end)+x_init-273.15,'linewidth', 2);
-        title('states:  estimated');
-        axis tight
-        grid on
-        xlabel('time [days]')
-        ylabel('Temp. [^{\circ}C]')
-        
-        
-    if outdata.estim.MHE.use   % MHE variables 
-        figure
-        subplot(2,1,1)
-        plot(Time, outdata.data.We,'linewidth', 2)
-        title('We')
-        grid on
-        subplot(2,1,2)
-        plot(Time, outdata.data.Ve,'linewidth', 2)
-        title('Ve')
-        grid on
-%         subplot(3,1,3)
-%         plot(Time(outdata.estim.MHE.N+1:end), outdata.data.Y(:,outdata.estim.MHE.N+1:end),'linewidth', 2)
-%         hold on
-%         plot(Time(outdata.estim.MHE.N+1:end), outdata.data.Yestim(:,outdata.estim.MHE.N+1:end),'--','linewidth', 2)
-%         title('Yestim')
-%         grid on
+    if PlotParam.plotEstim
+            % outputs - simulated vs estimated
+            figure
+            subplot(2,1,1)
+            title('Simulated vs estimated outputs');
+            hold on
+            if  strcmp(outdata.model.buildingType,'HollandschHuys')
+                   plot(Time, outdata.data.Y-273.15,'-' ,'linewidth', 2);
+                   plot(Time, outdata.data.Ye-273.15, '--', 'linewidth', 2);
+            else
+                   plot(Time, outdata.data.Y,'-' ,'linewidth', 2);
+                   plot(Time, outdata.data.Ye, '--', 'linewidth', 2);
+            end
 
+            axis tight
+            grid on
+            ylabel('Temp. [^{\circ}C]')
+    %         legend('simulated','estimated')
+            xlabel('time [days]')   
+
+            % output estimation error
+            subplot(2,1,2)
+            plot(Time,(outdata.data.Y-outdata.data.Ye),'linewidth', 2)
+            title('Output estimation error')
+            axis tight
+            grid on
+            ylabel('Temp. [^{\circ}C]')
+            xlabel('time [days]')  
+
+               % states - simulated vs estimated 
+            figure
+            subplot(2, 1, 1);
+            plot(Time, outdata.data.X(:,1:end-1)+x_init-273.15, 'linewidth', 2);
+            title('states: simulated');
+            axis tight
+            grid on
+            xlabel('time [days]')
+            ylabel('Temp. [^{\circ}C]')
+
+            subplot(2, 1, 2);
+            plot(Time, outdata.data.Xe(:,1:end)+x_init-273.15,'linewidth', 2);
+            title('states:  estimated');
+            axis tight
+            grid on
+            xlabel('time [days]')
+            ylabel('Temp. [^{\circ}C]')
+
+        if outdata.estim.MHE.use   % MHE variables 
+            figure
+            subplot(2,1,1)
+            plot(Time, outdata.data.We,'linewidth', 2)
+            title('We')
+            grid on
+            subplot(2,1,2)
+            plot(Time, outdata.data.Ve,'linewidth', 2)
+            title('Ve')
+            grid on
+    %         subplot(3,1,3)
+    %         plot(Time(outdata.estim.MHE.N+1:end), outdata.data.Y(:,outdata.estim.MHE.N+1:end),'linewidth', 2)
+    %         hold on
+    %         plot(Time(outdata.estim.MHE.N+1:end), outdata.data.Yestim(:,outdata.estim.MHE.N+1:end),'--','linewidth', 2)
+    %         title('Yestim')
+    %         grid on
+        end
     end
+    
+    if PlotParam.plotEstim3D
+        figure
+        ribbon(Time', outdata.data.Xe');
+        title('State estimates trajectories 3D');
+        axis tight
+        shading flat
+        grid on
+        zlabel('State estimates [K]')
+        ylabel('time [days]')
+        xlabel('states [-]')
+    end
+    
         
 end
 % end
   
 %%   CONTROL
 
-if outdata.ctrl.use && PlotParam.plotCtrl
+if outdata.ctrl.use 
     
 %     TODO implement objective function plotting
 %      if outdata.ctrl.MPC.use  % mpc
@@ -214,52 +236,44 @@ if outdata.ctrl.use && PlotParam.plotCtrl
 %      end  
     
      
-%      OUTPUTS
-     figure
-     subplot(2, 1, 1); 
-     title('Indoor temperature','fontsize',font_use+2); 
-     hold on
-     plot(Time, outdata.data.Y-273.15, 'linewidth', 2);
-     axis tight
-     grid on
-     ylabel('Temperatures [\circC]','fontsize',font_use)  
-     set(gca,'fontsize',font_use)
-     box on
-     
-%      box on
-% %         slight rotation to prevent misplotting
-%      ax = gca;
-%      ax.XTickLabelRotation=1; 
+    if PlotParam.plotCtrl
+    %      OUTPUTS
+         figure
+         subplot(2, 1, 1); 
+         title('Indoor temperature','fontsize',font_use+2); 
+         hold on
+         plot(Time, outdata.data.Y-273.15, 'linewidth', 2);
+         axis tight
+         grid on
+         ylabel('Temperatures [\circC]','fontsize',font_use)  
+         set(gca,'fontsize',font_use)
+         box on
+    % %         slight rotation to prevent misplotting
+    %      ax = gca;
+    %      ax.XTickLabelRotation=1; 
 
+         if outdata.ctrl.use
+             Rmin = mean(outdata.data.wb(:,1:end-Nrp),1);
+             Rmax = mean(outdata.data.wa(:,1:end-Nrp),1);
+    %          R = outdata.data.R;
+             stairs(Time, Rmin-273.15, 'k--', 'linewidth', 2);
+             stairs(Time, Rmax-273.15, 'k--', 'linewidth', 2);
+         end
 
-% TODO IMPLEMENT - comfort bounds
-     if outdata.ctrl.use
-         %      TODO: unify References for all controllers for plotting
-%          Rmin = outdata.data.wb(1,1:end-N);
-%          Rmax = outdata.data.wa(1,1:end-N);
-         
-         Rmin = mean(outdata.data.wb(:,1:end-Nrp),1);
-         Rmax = mean(outdata.data.wa(:,1:end-Nrp),1);
-         
-%          R = outdata.data.R;
-  
-         stairs(Time, Rmin-273.15, 'k--', 'linewidth', 2);
-         stairs(Time, Rmax-273.15, 'k--', 'linewidth', 2);
-     end
-
-%      INPUTS
-    subplot(2, 1, 2); 
-    title('Heating','fontsize',font_use+2);   
-    hold on
-    h = stairs(Time, outdata.data.U');
-    set(h, 'linewidth', 2, 'linestyle', '-');
-    axis tight
-    grid on
-    ylabel('Heat flows [W]','fontsize',font_use)  
-    xlabel('time [days]','fontsize',font_use)  
-    set(gca,'fontsize',font_use)
-    box on
-    
+    %      INPUTS
+        subplot(2, 1, 2); 
+        title('Heating','fontsize',font_use+2);   
+        hold on
+        h = stairs(Time, outdata.data.U');
+        set(h, 'linewidth', 2, 'linestyle', '-');
+        axis tight
+        grid on
+        ylabel('Heat flows [W]','fontsize',font_use)  
+        xlabel('time [days]','fontsize',font_use)  
+        set(gca,'fontsize',font_use)
+        box on
+    end
+       
     if outdata.ctrl.MPC.use
         
         if strcmp(outdata.solver.MPC_options.solver,'+quadprog')
@@ -268,75 +282,135 @@ if outdata.ctrl.use && PlotParam.plotCtrl
            rows  = 2;
         end
         
-        %  MPC  Objective and Duals
-        figure
-        subplot(rows, 2, 1); 
-        h = stairs(Time, outdata.solver.OBJ);
-        set(h, 'linewidth', 2, 'linestyle', '-');
-        axis tight
-        grid on
-        ylabel('Q value [-]')  
-        xlabel('time [days]')  
-        title('MPC objective value');   
-        set(gca,'fontsize',font_use)
-        box on 
-         
-        subplot(rows, 2, 2); 
-        h = stairs(Time, outdata.solver.SolverTime);
-        set(h, 'linewidth', 2, 'linestyle', '-');
-        axis tight
-        grid on
-        ylabel('Time [s]')  
-        xlabel('time [days]')  
-        title('Solver Time');  
-        set(gca,'fontsize',font_use)
-        box on
-        
-        subplot(rows, 2, 3); 
-        h = stairs(Time, outdata.solver.DUALS');
-        set(h, 'linewidth', 2, 'linestyle', '-');
-        axis tight
-        grid on
-        ylabel('Dual variables [-]')  
-        xlabel('time [days]')  
-        title('MPC dual variables');  
-        set(gca,'fontsize',font_use)
-        box on
-        
-        subplot(rows, 2, 4); 
-        h = stairs(Time, outdata.solver.PRIMALS');
-        set(h, 'linewidth', 2, 'linestyle', '-');
-        axis tight
-        grid on
-        ylabel('Primal variables [-]')  
-        xlabel('time [days]')  
-        title('MPC primal variables');  
-        set(gca,'fontsize',font_use)
-        box on
-        
-        if strcmp(outdata.solver.MPC_options.solver,'+quadprog')
-            subplot(3, 2, 5); 
-            h = stairs(Time, outdata.solver.INEQLIN');
+        if PlotParam.plotPrimalDual
+            %  MPC  Objective and Duals
+            figure
+            subplot(rows, 2, 1); 
+            h = stairs(Time, outdata.solver.OBJ);
             set(h, 'linewidth', 2, 'linestyle', '-');
             axis tight
             grid on
-            ylabel('INEQLIN [-]')  
+            ylabel('Q value [-]')  
             xlabel('time [days]')  
-            title('quadprog INEQLIN');  
+            title('MPC objective value');   
+            set(gca,'fontsize',font_use)
+            box on 
+
+            subplot(rows, 2, 2); 
+            h = stairs(Time, outdata.solver.SolverTime);
+            set(h, 'linewidth', 2, 'linestyle', '-');
+            axis tight
+            grid on
+            ylabel('Time [s]')  
+            xlabel('time [days]')  
+            title('Solver Time');  
             set(gca,'fontsize',font_use)
             box on
 
-            subplot(3, 2, 6); 
-            h = stairs(Time, outdata.solver.EQLIN');
+            subplot(rows, 2, 3); 
+            h = stairs(Time, outdata.solver.DUALS');
             set(h, 'linewidth', 2, 'linestyle', '-');
             axis tight
             grid on
-            ylabel('EQLIN [-]')  
+            ylabel('Dual variables [-]')  
             xlabel('time [days]')  
-            title('quadprog EQLIN');  
+            title('MPC dual variables');  
             set(gca,'fontsize',font_use)
             box on
-        end      
+
+            subplot(rows, 2, 4); 
+            h = stairs(Time, outdata.solver.PRIMALS');
+            set(h, 'linewidth', 2, 'linestyle', '-');
+            axis tight
+            grid on
+            ylabel('Primal variables [-]')  
+            xlabel('time [days]')  
+            title('MPC primal variables');  
+            set(gca,'fontsize',font_use)
+            box on
+
+            if strcmp(outdata.solver.MPC_options.solver,'+quadprog')
+                subplot(3, 2, 5); 
+                h = stairs(Time, outdata.solver.INEQLIN');
+                set(h, 'linewidth', 2, 'linestyle', '-');
+                axis tight
+                grid on
+                ylabel('INEQLIN [-]')  
+                xlabel('time [days]')  
+                title('quadprog INEQLIN');  
+                set(gca,'fontsize',font_use)
+                box on
+
+                subplot(3, 2, 6); 
+                h = stairs(Time, outdata.solver.EQLIN');
+                set(h, 'linewidth', 2, 'linestyle', '-');
+                axis tight
+                grid on
+                ylabel('EQLIN [-]')  
+                xlabel('time [days]')  
+                title('quadprog EQLIN');  
+                set(gca,'fontsize',font_use)
+                box on
+            end              
+        end
+
+        if PlotParam.plotPrimalDual3D 
+            figure
+%           3D duals
+            subplot(2, 1, 1); 
+            ribbon(Time', outdata.solver.DUALS');
+%             set(h, 'linewidth', 2, 'linestyle', '-');
+%             shading flat
+            axis tight
+            grid on
+            xlabel('Dual variables [-]')  
+            ylabel('time [days]')  
+            title('MPC dual variables 3D');  
+            set(gca,'fontsize',font_use)
+            shading(gca,'flat')
+            box on
+
+            subplot(2, 1, 2); 
+            ribbon(Time', outdata.solver.PRIMALS');
+            shading flat
+%             set(h, 'linewidth', 2, 'linestyle', '-');
+            axis tight
+            grid on
+            xlabel('Primal variables [-]')  
+            ylabel('time [days]')  
+            title('MPC primal variables 3D');  
+            set(gca,'fontsize',font_use)
+            box on               
+        end  
+        
+        if PlotParam.plotDualActive
+            tol = 0.01;
+            DUAL_active = outdata.solver.DUALS>tol;
+            DUAL_active_ineq = zeros(size(DUAL_active));
+            DUAL_active_eq = zeros(size(DUAL_active));
+            DUAL_active_eq(1:size(outdata.solver.EQLIN,1),:) =  (DUAL_active(1:size(outdata.solver.EQLIN,1),:) + 1) == 2;
+            DUAL_active_ineq(size(outdata.solver.EQLIN,1)+1:end,:) =  (DUAL_active(size(outdata.solver.EQLIN,1)+1:end,:) +1) ==2;
+            
+%             DUAL_active_ineq = (DUAL_active + outdata.optimize_con_info.INDEX') ==2;
+%             DUAL_active_eq = (DUAL_active + (outdata.optimize_con_info.INDEX ~=1)') ==2;
+                
+            figure
+            spy(DUAL_active_ineq)
+            hold on
+            spy(DUAL_active_eq,'r')
+            title('MPC dual variables activation');  
+            ylabel('Dual variables [-]')  
+            xlabel('time [steps]') 
+            legend('ineq','eq')      
+            
+            figure
+            imagesc(outdata.solver.DUALS)
+            title('MPC dual variables  heat map');  
+            ylabel('Dual variables [-]')  
+            xlabel('time [steps]') 
+            colorbar
+            
+        end
     end
 
     
