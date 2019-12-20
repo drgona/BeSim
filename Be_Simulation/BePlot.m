@@ -403,6 +403,25 @@ if outdata.ctrl.use
             xlabel('time [steps]') 
             legend('ineq','eq')      
             
+ 
+%       Labels_idx:            
+%       'SSM_single' =  1 
+%       'y_zone' = 2
+%       'u_box' = 3        
+%       'nonnegative_slacks' = 4  
+
+            colours = {'r','b','g','m','c','k'};           
+            Legend=cell(length(outdata.con_info.Label_types),1);
+            figure
+            hold on
+            for k = 1:length(outdata.con_info.Label_types)
+                temp = zeros(size(DUAL_active));
+                temp(outdata.con_info.Labels_idx==k,:) = DUAL_active(outdata.con_info.Labels_idx==k,:);
+                spy(temp,colours{k})
+                Legend{k} = outdata.con_info.Label_types{k};
+            end
+            legend(Legend)               
+            
             figure
             imagesc(outdata.solver.DUALS)
             title('MPC dual variables  heat map');  

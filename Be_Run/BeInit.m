@@ -98,7 +98,7 @@ outdata = BeSim(model, estim, ctrl, dist, refs, SimParam);
 diagnoseFlag = true;
 if diagnoseFlag
     % solve single instance of the MPC problem via Yalmip optimize
-    [diagnostics, con, obj, outdata.optimize_con_info] = BeMPC_DualCheck(outdata, model)
+    [diagnostics, con, obj, outdata.con_info] = BeMPC_DualCheck(outdata, model)
 end
 
 %% Plot Results
