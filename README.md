@@ -81,14 +81,13 @@ Office        |  Belgium      | 'Infrax'         | 2232         | 1262          
 Borehole      |  Belgium      | 'Borehole '      | -            | 190            | 1               | 1                   | 0
 
 ## Author
-Email: jan.drgona@kuleuven.be 
+Email: jan.drgona@pnnl.gov
 
-[Ján Drgoňa](https://www.kuleuven.be/wieiswie/en/person/00107194)  
+[Ján Drgoňa](https://www.linkedin.com/in/drgona/)  
 postdoctoral researcher  
-KU Leuven  
-Department of Mechanical Engineering  
-Division of Applied Mechanics and Energy Conversion (TME)  
-Celestijnenlaan 300A, BE-3001 Leuven (Heverlee), Belgium  
+Pacific Northwest National Laboratory 
+Optimization and Control Group
+Richland, WA, USA 
 
 ## Acknowledgement
 
