@@ -84,9 +84,12 @@ Borehole      |  Belgium      | 'Borehole '      | -            | 190           
 Email: jan.drgona@pnnl.gov
 
 [Ján Drgoňa](https://www.linkedin.com/in/drgona/)  
-postdoctoral researcher  \\
+postdoctoral researcher 
+
 Pacific Northwest National Laboratory 
+
 Optimization and Control Group
+
 Richland, WA, USA 
 
 ## Acknowledgement
