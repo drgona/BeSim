@@ -26,7 +26,7 @@ addpath('../Be_Learn/')
 % ModelIdentifier for residential houses with radiators:   'Reno', 'Old', 'RenoLight'
 % ModelIdentifier for office buildings with TABS:          'Infrax', 'HollandschHuys'
 % ModelIdentifier for borehole:                            'Borehole'  - % TODO: missing disturbances precomputed file for borehole 
-buildingType = 'Reno';  
+buildingType = 'HollandschHuys';  
 
 % =========== 2, choose model order =================
 ModelParam.Orders.range = [4, 7, 10, 15, 20, 30, 40, 100];    % suggested = model orders for 'Reno', 'Old', 'RenoLight'
@@ -94,11 +94,15 @@ outdata = BeSim(model, estim, ctrl, dist, refs, SimParam);
 
 
 %% Diagnose the MPC problem via Yalmip optimize
-
-diagnoseFlag = true;
-if diagnoseFlag
+DiagnoseParam.diagnoseFlag = true;
+DiagnoseParam.Duals.plotCheck = 0;
+DiagnoseParam.Reduce.lincols.use = 1;
+DiagnoseParam.Reduce.PCA.use = 0;
+DiagnoseParam.Reduce.PCA.component = 0.999;   % principal component weight threshold
+DiagnoseParam.Reduce.PCA.feature = 0.999;     % PCA features weight threshold
+if DiagnoseParam.diagnoseFlag
     % solve single instance of the MPC problem via Yalmip optimize
-    [diagnostics, con, obj, outdata.con_info] = BeMPC_DualCheck(outdata, model)
+    [diagnostics, con, obj, outdata.con_info] = BeMPC_DualCheck(outdata, model, DiagnoseParam);
 end
 
 %% Plot Results

@@ -420,7 +420,10 @@ if outdata.ctrl.use
                 spy(temp,colours{k})
                 Legend{k} = outdata.con_info.Label_types{k};
             end
-            legend(Legend)               
+            legend(Legend)   
+            title('MPC dual variables constraints types');  
+            ylabel('Dual variables [-]')  
+            xlabel('time [steps]') 
             
             figure
             imagesc(outdata.solver.DUALS)
@@ -428,6 +431,25 @@ if outdata.ctrl.use
             ylabel('Dual variables [-]')  
             xlabel('time [steps]') 
             colorbar
+            
+%             if duals reduced
+            if (outdata.con_info.DiagnoseParam.Reduce.lincols.use || outdata.con_info.DiagnoseParam.Reduce.PCA.use)               
+                Duals_reduced = zeros(size(DUAL_active));
+                Duals_discarded = zeros(size(DUAL_active));
+                Duals_reduced(outdata.con_info.use_duals,:) = outdata.solver.DUALS(outdata.con_info.use_duals,:); % choosen features (duals)
+                Duals_discarded(not(outdata.con_info.use_duals),:) = outdata.solver.DUALS(not(outdata.con_info.use_duals),:); % discarded features (duals)                            
+                figure
+                spy(Duals_reduced>tol)
+                hold on
+                spy(Duals_discarded>tol,'r')
+                title('MPC dual variables dim. reduction');  
+                ylabel('Dual variables [-]')  
+                xlabel('time [steps]') 
+                legend('duals reduced','duals discarded')      
+            
+                
+            end
+            
             
         end
     end
