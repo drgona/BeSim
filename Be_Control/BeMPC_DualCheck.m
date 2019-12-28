@@ -256,11 +256,19 @@ DiagnoseParam.Reduce.PCA.component = 0.999;   % principal component weight thres
 DiagnoseParam.Reduce.PCA.feature = 0.999;      % PCA features weight threshold
  
 if DiagnoseParam.Reduce.PCA.use
-    [coeff,~,~,~,explained] = pca(outdata.solver.DUALS');  % Each column of coeff contains coefficients for one principal component.
+    [coeff,~,~,~,explained] = pca(outdata.solver.DUALS');  
+    % coeff - Each column contains coefficients for one principal component
+    con_info.dual_PCA_coeff = coeff; % All principal coefficients of the dual variables
+    % explained - returns a vector containing the percentage of the total variance explained by each  principal component 
+    con_info.dual_PCA_explained = explained; %  importance of principal components
+
     nu_pca = sum(explained > 100*(1-DiagnoseParam.Reduce.PCA.component)); % number of relevant principal components
+    con_info.dual_PCA_coeff_select = coeff(:, 1:nu_pca); % selected principal coefficients of the dual variables
+      
     var_weight = sum(abs(coeff(:, 1:nu_pca)')); % weight of the features
     var_weight = var_weight/max(var_weight);    % normalized weight of the features
     con_info.PCA_idx = var_weight >= 1-DiagnoseParam.Reduce.PCA.feature; % indexdes of choosen features from PCA
+    
 else
     con_info.PCA_idx = ones(1,nx); % no features have been discarded
 end
@@ -269,6 +277,7 @@ con_info.use_duals = con_info.PCA_idx + con_info.lincols_idx == 2; % index of ch
 % con_info.Duals_reduced = outdata.solver.DUALS(use_feature,:); % choosen features (duals)
 % con_info.Duals_discarded = outdata.solver.DUALS(not(use_feature),:); % discarded features (duals)
 
-
+con_info.PrincipalDual = (con_info.dual_PCA_coeff_select'*outdata.solver.DUALS)'; %  lower dimensional projection of the dual variables
+con_info.ReconstructedDual = con_info.PrincipalDual*con_info.dual_PCA_coeff_select';       % full dimensional reconstruction of the dual variables
 
 end

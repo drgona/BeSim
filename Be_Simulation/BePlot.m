@@ -382,7 +382,7 @@ if outdata.ctrl.use
             set(gca,'fontsize',font_use)
             box on               
         end  
-        
+              
         if PlotParam.plotDualActive
             tol = 0.01;
             DUAL_active = outdata.solver.DUALS>tol;
@@ -445,13 +445,108 @@ if outdata.ctrl.use
                 title('MPC dual variables dim. reduction');  
                 ylabel('Dual variables [-]')  
                 xlabel('time [steps]') 
-                legend('duals reduced','duals discarded')      
-            
-                
-            end
-            
-            
+                legend('duals reduced','duals discarded')                               
+            end           
         end
+        
+        
+        if PlotParam.plotPCA_Dual
+%             X = U*S*V;
+%           principal components of PCA reduced dual variables 
+
+%             PrincipalDual = (outdata.con_info.dual_PCA_coeff_select'*outdata.solver.DUALS)'; %  lower dimensional projection of the dual variables
+%             ReconstructedDual = PrincipalDual*outdata.con_info.dual_PCA_coeff_select';       % full dimensional reconstruction of the dual variables
+                        
+            PrincipalDual = outdata.con_info.PrincipalDual; %  lower dimensional projection of the dual variables
+            ReconstructedDual = outdata.con_info.ReconstructedDual;       % full dimensional reconstruction of the dual variables
+            
+            figure
+%           3D duals
+            subplot(2, 2, 1); 
+            plot(Time',PrincipalDual);
+%             set(h, 'linewidth', 2, 'linestyle', '-');
+%             shading flat
+            axis tight
+            grid on
+            xlabel('Principal Dual variables [-]')  
+            ylabel('time [days]')  
+            title('PCA reduced dual variables');  
+            set(gca,'fontsize',font_use)
+            shading(gca,'flat')
+            box on
+
+            subplot(2, 2, 2); 
+            ribbon(Time', PrincipalDual);
+            shading flat
+%             set(h, 'linewidth', 2, 'linestyle', '-');
+            axis tight
+            grid on
+            xlabel('Principal Dual variables [-]')  
+            ylabel('time [days]')  
+            title('PCA reduced dual variables 3D');  
+            set(gca,'fontsize',font_use)
+            box on 
+            
+              subplot(2, 2, 3); 
+            plot(Time',ReconstructedDual);
+%             set(h, 'linewidth', 2, 'linestyle', '-');
+%             shading flat
+            axis tight
+            grid on
+            xlabel('Reconstructed Dual variables [-]')  
+            ylabel('time [days]')  
+            title('PCA Reconstructed dual variables');  
+            set(gca,'fontsize',font_use)
+            shading(gca,'flat')
+            box on
+
+            subplot(2, 2, 4); 
+            ribbon(Time', ReconstructedDual);
+            shading flat
+%             set(h, 'linewidth', 2, 'linestyle', '-');
+            axis tight
+            grid on
+            xlabel('Reconstructed Dual variables [-]')  
+            ylabel('time [days]')  
+            title('PCA Reconstructed dual variables 3D');  
+            set(gca,'fontsize',font_use)
+            box on        
+            
+            
+%       heat maps of principal components of PCA reduced dual variables 
+            figure      
+            subplot(2, 1, 1); 
+            imagesc(PrincipalDual')
+            title('PCA reduced dual variables  heat map');  
+            ylabel('Principal Dual variables [-]')  
+            xlabel('time [steps]') 
+            colorbar
+            subplot(2, 1, 2);           
+            imagesc(ReconstructedDual')
+            title('PCA Reconstructed dual variables  heat map');  
+            ylabel('Reconstructed Dual variables [-]')  
+            xlabel('time [steps]') 
+            colorbar
+
+            
+%        activation of principal components of PCA reduced dual variables             
+            tol = 1;
+            PrincipalDUAL_active = PrincipalDual'>tol;
+            ReconstructedDUAL_active = ReconstructedDual'>tol;
+
+            figure
+            spy(PrincipalDUAL_active)
+            title('PCA reduced dual variables activation');  
+            ylabel('Principal Dual variables [-]')  
+            xlabel('time [steps]')            
+            
+            figure
+            spy(ReconstructedDUAL_active)
+            title('PCA Reconstructed dual variables activation');  
+            ylabel('Reconstructed Dual variables [-]')  
+            xlabel('time [steps]')            
+            
+        end      
     end
 
     

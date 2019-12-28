@@ -26,7 +26,7 @@ addpath('../Be_Learn/')
 % ModelIdentifier for residential houses with radiators:   'Reno', 'Old', 'RenoLight'
 % ModelIdentifier for office buildings with TABS:          'Infrax', 'HollandschHuys'
 % ModelIdentifier for borehole:                            'Borehole'  - % TODO: missing disturbances precomputed file for borehole 
-buildingType = 'HollandschHuys';  
+buildingType = 'Reno';  
 
 % =========== 2, choose model order =================
 ModelParam.Orders.range = [4, 7, 10, 15, 20, 30, 40, 100];    % suggested = model orders for 'Reno', 'Old', 'RenoLight'
@@ -97,7 +97,7 @@ outdata = BeSim(model, estim, ctrl, dist, refs, SimParam);
 DiagnoseParam.diagnoseFlag = true;
 DiagnoseParam.Duals.plotCheck = 0;
 DiagnoseParam.Reduce.lincols.use = 1;
-DiagnoseParam.Reduce.PCA.use = 0;
+DiagnoseParam.Reduce.PCA.use = 1;
 DiagnoseParam.Reduce.PCA.component = 0.999;   % principal component weight threshold
 DiagnoseParam.Reduce.PCA.feature = 0.999;     % PCA features weight threshold
 if DiagnoseParam.diagnoseFlag
@@ -117,6 +117,7 @@ PlotParam.plotCtrl = 1;          % plot control
 PlotParam.plotPrimalDual = 1;          % plot primal and dual varibles
 PlotParam.plotPrimalDual3D = 1;        % ribbon plot primal and dual varibles
 PlotParam.plotDualActive = 1;     % activation of the dual varibles
+PlotParam.plotPCA_Dual = 1;        % principal components of PCA reduced dual variables 
 PlotParam.plotPrice = 0;          % plot price signal
 % PlotParam.Transitions = 1;      % pot dynamic transitions of Ax matrix
 % PlotParam.reduced = 0;   %  reduced paper plots formats 0 - no 1 - yes
@@ -129,15 +130,16 @@ end
 
 %% Save Results
 SaveParam.path = ['../Data/Simulations/',buildingType]; % savepath
-SaveParam.save = false;                     % save or not
-SaveParam.data.states = false;              % X      
+SaveParam.save = true;                     % save or not
+SaveParam.data.states = true;              % X      
 SaveParam.data.outputs = true;              % Y    
 SaveParam.data.inputs = true;               % U   
 SaveParam.data.disturbances = true;         % D 
-SaveParam.data.references = false;          % WA, WB 
+SaveParam.data.references = true;          % WA, WB 
 SaveParam.solver.objective = true;          % objective values of the QP optimization problem
 SaveParam.solver.duals = true;              % dual variables of the QP optimization problem
-SaveParam.solver.primals = false;           % primal variables of the QP optimization problem
+SaveParam.solver.primals = true;           % primal variables of the QP optimization problem
+SaveParam.solver.PCA_duals = true;            % save principal components of PCA reduced dual variables 
 SaveParam.solver.SolverTime = true;         % solvertime
 SaveParam.solver.iters = true;              % solver iterations
 SaveParam.solver.specifics = false;         % solver specific information

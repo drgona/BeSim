@@ -30,6 +30,9 @@ if SaveParam.save
     if SaveParam.solver.primals
         T.primals = outdata.solver.PRIMALS';   
     end
+    if SaveParam.solver.PCA_duals
+         T.PrincipalDual = outdata.con_info.PrincipalDual;         
+    end
     if SaveParam.solver.SolverTime
         T.SolverTime = outdata.solver.SolverTime';   
     end
@@ -40,10 +43,11 @@ if SaveParam.save
         T.SolverINEQLIN = outdata.solver.INEQLIN';   
         T.SolverEQLIN = outdata.solver.EQLIN';  
     end
+
     
 %     save csv
     writetable(T,[SaveParam.path '/Order_',outdata.model.Orders.choice,...
-        '_Days_',int2str(outdata.SimParam.run.start),'_',int2str(outdata.SimParam.run.end),'.csv'],'Delimiter',',')
+        '_Days_',int2str(outdata.SimParam.run.start),'_',int2str(outdata.SimParam.run.end),'_',outdata.model.buildingType,'.csv'],'Delimiter',',')
     
 end                    
 
