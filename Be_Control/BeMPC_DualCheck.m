@@ -270,11 +270,14 @@ if DiagnoseParam.Reduce.PCA.normalize
          max_dual = max(max(outdata.solver.DUALS(con_info.Labels_idx == i,:)));
          con_info.DUALS_normalized(con_info.Labels_idx == i,:) = (outdata.solver.DUALS(con_info.Labels_idx == i,:) - min_dual)/(max_dual - min_dual);
     end
+    pca_DUALS = con_info.DUALS_normalized';
+else
+    pca_DUALS = outdata.solver.DUALS';
 end
 
 if DiagnoseParam.Reduce.PCA.use
 %     [coeff,~,~,~,explained] = pca(outdata.solver.DUALS');  
-    [coeff,~,~,~,explained] = pca(con_info.DUALS_normalized');  
+    [coeff,~,~,~,explained] = pca(pca_DUALS);  
     % coeff - Each column contains coefficients for one principal component
     con_info.dual_PCA_coeff = coeff; % All principal coefficients of the dual variables
     % explained - returns a vector containing the percentage of the total variance explained by each  principal component 

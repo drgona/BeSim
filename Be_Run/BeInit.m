@@ -98,7 +98,7 @@ DiagnoseParam.diagnoseFlag = true;
 DiagnoseParam.Duals.plotCheck = 0;
 DiagnoseParam.Reduce.lincols.use = 1;
 DiagnoseParam.Reduce.PCA.use = 1;
-DiagnoseParam.Reduce.PCA.normalize = 1;             % normalize constraints based on types
+DiagnoseParam.Reduce.PCA.normalize = 0;             % normalize constraints based on types
 DiagnoseParam.Reduce.PCA.component = 0.999999999;   % principal component weight threshold
 DiagnoseParam.Reduce.PCA.feature = 0.999999999;     % PCA features weight threshold
 if DiagnoseParam.diagnoseFlag
