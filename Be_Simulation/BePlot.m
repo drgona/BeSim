@@ -384,7 +384,7 @@ if outdata.ctrl.use
         end  
               
         if PlotParam.plotDualActive
-            tol = 0.01;
+            tol = 0.1;
             DUAL_active = outdata.solver.DUALS>tol;
             DUAL_active_ineq = zeros(size(DUAL_active));
             DUAL_active_eq = zeros(size(DUAL_active));
@@ -450,6 +450,14 @@ if outdata.ctrl.use
         end
         
         
+        figure
+        spy(outdata.con_info.ActiveSets')
+        title('Active sets');  
+        ylabel('Dual variables [-]')  
+        xlabel('time [steps]') 
+        
+        
+        
         if PlotParam.plotPCA_Dual
 %             X = U*S*V;
 %           principal components of PCA reduced dual variables 
@@ -512,6 +520,44 @@ if outdata.ctrl.use
             set(gca,'fontsize',font_use)
             box on        
             
+            figure    
+            subplot(3, 1, 1); 
+            plot(Time', outdata.solver.DUALS'-ReconstructedDual);
+            shading flat
+%             set(h, 'linewidth', 2, 'linestyle', '-');
+            axis tight
+            grid on
+            ylabel('Residuals [-]')  
+            xlabel('time [days]')  
+            title('Residuals of Reconstructed Dual variables');  
+            set(gca,'fontsize',font_use)
+            box on 
+            
+            subplot(3, 1, 2); 
+            ribbon(Time', outdata.solver.DUALS'-ReconstructedDual);
+            shading flat
+%             set(h, 'linewidth', 2, 'linestyle', '-');
+            axis tight
+            grid on
+            xlabel('Residuals [-]')  
+            ylabel('time [days]')  
+            title('Residuals of Reconstructed Dual variables 3D');  
+            set(gca,'fontsize',font_use)
+            box on 
+            
+            subplot(3, 1, 3); 
+            imagesc(outdata.solver.DUALS'-ReconstructedDual);
+            shading flat
+%             set(h, 'linewidth', 2, 'linestyle', '-');
+            axis tight
+            grid on
+            xlabel('Residuals [-]')  
+            ylabel('time [days]')  
+            title('Residuals of Reconstructed Dual variables - heat map');  
+            set(gca,'fontsize',font_use)
+            box on 
+            colorbar
+            
             
 %       heat maps of principal components of PCA reduced dual variables 
             figure      
@@ -530,7 +576,7 @@ if outdata.ctrl.use
 
             
 %        activation of principal components of PCA reduced dual variables             
-            tol = 1;
+            tol = 5;
             PrincipalDUAL_active = PrincipalDual'>tol;
             ReconstructedDUAL_active = ReconstructedDual'>tol;
 

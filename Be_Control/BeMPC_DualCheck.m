@@ -237,6 +237,8 @@ end
 %% Dimensionality reduction
 con_info.DiagnoseParam = DiagnoseParam;
 nx = size(outdata.solver.DUALS',2); % number of features (duals)
+% TODO: regularize based on constrsaints type, or physical units and
+% objective weighths
 
 %% Discard LINEARLY DEPENDENT COLUMNS
 %Extract a linearly independent set of columns of a given matrix X
@@ -252,11 +254,27 @@ end
 % https://www.mathworks.com/matlabcentral/answers/49134-determining-variables-that-contribute-to-principal-components
  % http://www.mathworks.com/help/stats/pca.html
  
-DiagnoseParam.Reduce.PCA.component = 0.999;   % principal component weight threshold
-DiagnoseParam.Reduce.PCA.feature = 0.999;      % PCA features weight threshold
+% DiagnoseParam.Reduce.PCA.component = 0.999;   % principal component weight threshold
+% DiagnoseParam.Reduce.PCA.feature = 0.999;      % PCA features weight threshold
  
+if DiagnoseParam.Reduce.PCA.normalize
+    % uniform min-max scaling
+%     min_dual = min(min(outdata.solver.DUALS));
+%     max_dual = max(max(outdata.solver.DUALS));
+%     MinMaxDual = (outdata.solver.DUALS' - min_dual)/(max_dual - min_dual);
+
+    Labels_unique = unique(con_info.Labels_idx);
+    con_info.DUALS_normalized = zeros(size(outdata.solver.DUALS));
+    for i = 1:length(Labels_unique)       
+         min_dual = min(min(outdata.solver.DUALS(con_info.Labels_idx == i,:)));
+         max_dual = max(max(outdata.solver.DUALS(con_info.Labels_idx == i,:)));
+         con_info.DUALS_normalized(con_info.Labels_idx == i,:) = (outdata.solver.DUALS(con_info.Labels_idx == i,:) - min_dual)/(max_dual - min_dual);
+    end
+end
+
 if DiagnoseParam.Reduce.PCA.use
-    [coeff,~,~,~,explained] = pca(outdata.solver.DUALS');  
+%     [coeff,~,~,~,explained] = pca(outdata.solver.DUALS');  
+    [coeff,~,~,~,explained] = pca(con_info.DUALS_normalized');  
     % coeff - Each column contains coefficients for one principal component
     con_info.dual_PCA_coeff = coeff; % All principal coefficients of the dual variables
     % explained - returns a vector containing the percentage of the total variance explained by each  principal component 
@@ -279,5 +297,20 @@ con_info.use_duals = con_info.PCA_idx + con_info.lincols_idx == 2; % index of ch
 
 con_info.PrincipalDual = (con_info.dual_PCA_coeff_select'*outdata.solver.DUALS)'; %  lower dimensional projection of the dual variables
 con_info.ReconstructedDual = con_info.PrincipalDual*con_info.dual_PCA_coeff_select';       % full dimensional reconstruction of the dual variables
+
+% active constraints
+tol = 0.1;
+con_info.DUAL_active = outdata.solver.DUALS>tol;
+
+% enfocrcing equality constraints always active
+DUAL_active_ineq = zeros(size(con_info.DUAL_active));
+DUAL_active_ineq(1:size(outdata.solver.EQLIN,1),:) = 1;
+DUAL_active_ineq(size(outdata.solver.EQLIN,1)+1:end,:) =  (con_info.DUAL_active(size(outdata.solver.EQLIN,1)+1:end,:) +1) ==2;
+
+% active sets = unique combinations of active contraints 
+[con_info.ActiveSets,con_info.ActiveSets_ia,con_info.ActiveSets_ic] = unique(DUAL_active_ineq','rows'); 
+% [con_info.ActiveSets,con_info.ActiveSets_ia,con_info.ActiveSets_ic] = unique(con_info.DUAL_active','rows'); 
+% % ia - index to con_info.DUAL_active', Dual_active_unique = Dual_active(ia,:).
+% % ic - index to con_info.DUAL_active_unique,  Dual_active = Dual_active_unique(ic,:).
 
 end
