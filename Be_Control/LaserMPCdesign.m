@@ -1,4 +1,4 @@
-function [mpc, constraints_info] = BeMPCdesign(model, MPCParam)
+function [mpc, constraints_info] = LaserMPCdesign(model, MPCParam)
 % MPC design function using Yalmip
 
 if nargin == 0
@@ -149,7 +149,6 @@ end
         % options = sdpsettings('verbose', 1, 'warning', 1, 'beeponproblem', 1, 'solver','cplex');
     catch
         options = sdpsettings('verbose', 1, 'solver','quadprog', 'savesolveroutput', 1);
-        fprintf('Quadprog used instead \n');
     end
 %   worst case optimization cpu time -  max time limit for solver options.gurobi.TimeLimit
 % http://www.gurobi.com/documentation/7.5/refman/timelimit.html

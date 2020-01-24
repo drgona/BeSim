@@ -72,8 +72,10 @@ estim = BeEstim(model, EstimParam);      % construct an estimator object
 
 %% Controller 
 CtrlParam.use = 1;   % 0 for precomputed u,y    1 for closed loop control
-CtrlParam.MPC.use = 1;
+CtrlParam.MPC.use = 0;
 CtrlParam.MPC.Condensing = 1;
+CtrlParam.LaserMPC.use = 1;
+CtrlParam.LaserMPC.Condensing = 1;
 CtrlParam.RBC.use = 0;
 CtrlParam.PID.use = 0;
 CtrlParam.MLagent.use = 0;
@@ -94,7 +96,7 @@ outdata = BeSim(model, estim, ctrl, dist, refs, SimParam);
 
 
 %% Diagnose the MPC problem via Yalmip optimize
-DiagnoseParam.diagnoseFlag = true;
+DiagnoseParam.diagnoseFlag = false;
 DiagnoseParam.Duals.plotCheck = 0;
 DiagnoseParam.Reduce.lincols.use = 1;
 DiagnoseParam.Reduce.PCA.use = 1;
@@ -107,19 +109,28 @@ if DiagnoseParam.diagnoseFlag
 end
 
 %% Plot Results
-PlotParam.flagPlot = 1;          % plot 0 - no 1 - yes
-PlotParam.plotStates = 0;        % plot states
+PlotParam.flagPlot = true;          % plot 0 - no 1 - yes
+PlotParam.plotStates = 1;        % plot states
 PlotParam.plotStates3D = 0;      % ribbon plot states
 PlotParam.plotDist = 0;          % plot disturbances
 PlotParam.plotDist3D = 0;        % ribbon plot disturbances
 PlotParam.plotEstim = 0;         % plot estimation
 PlotParam.plotEstim3D = 0;       % ribbon plot estimation
 PlotParam.plotCtrl = 1;          % plot control
-PlotParam.plotPrimalDual = 1;          % plot primal and dual varibles
-PlotParam.plotPrimalDual3D = 1;        % ribbon plot primal and dual varibles
-PlotParam.plotDualActive = 1;     % activation of the dual varibles
-PlotParam.plotPCA_Dual = 1;        % principal components of PCA reduced dual variables 
 PlotParam.plotPrice = 0;          % plot price signal
+if DiagnoseParam.diagnoseFlag
+    PlotParam.plotPrimalDual = 1;          % plot primal and dual varibles
+    PlotParam.plotPrimalDual3D = 1;        % ribbon plot primal and dual varibles
+    PlotParam.plotDualActive = 1;     % activation of the dual varibles
+    PlotParam.plotPCA_Dual = 1;        % principal components of PCA reduced dual variables   
+    PlotParam.plotActiveSet = 1;         % plot active sets
+else
+    PlotParam.plotPrimalDual = 0;          % plot primal and dual varibles
+    PlotParam.plotPrimalDual3D = 0;        % ribbon plot primal and dual varibles
+    PlotParam.plotDualActive = 0;     % activation of the dual varibles
+    PlotParam.plotPCA_Dual = 0;        % principal components of PCA reduced dual variables 
+    PlotParam.plotActiveSet = 0;     % plot active sets
+end
 % PlotParam.Transitions = 1;      % pot dynamic transitions of Ax matrix
 % PlotParam.reduced = 0;   %  reduced paper plots formats 0 - no 1 - yes
 % PlotParam.zone = 2;     % choose zone if reduced
@@ -131,7 +142,7 @@ end
 
 %% Save Results
 SaveParam.path = ['../Data/Simulations/',buildingType]; % savepath
-SaveParam.save = true;                     % save or not
+SaveParam.save = false;                     % save or not
 SaveParam.data.states = true;              % X      
 SaveParam.data.outputs = true;              % Y    
 SaveParam.data.inputs = true;               % U   

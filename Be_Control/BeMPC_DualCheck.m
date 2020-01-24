@@ -16,11 +16,27 @@ function [diagnostics, con, obj, con_info] = BeMPC_DualCheck(outdata, model, Dia
     nd = model.pred.nd;
     nu = model.pred.nu;
 
-    % horizons   
-    N = outdata.ctrl.MPC.N;   %  prediction horizon
-    Nc = outdata.ctrl.MPC.Nc; %  control horizon
-    Nrp = outdata.ctrl.MPC.Nrp; % reference preview horizon
-    Ndp = outdata.ctrl.MPC.Ndp; % disturbacne preview horizon
+    if outdata.ctrl.MPC.use
+        % horizons   
+        N = outdata.ctrl.MPC.N;   %  prediction horizon
+        Nc = outdata.ctrl.MPC.Nc; %  control horizon
+        Nrp = outdata.ctrl.MPC.Nrp; % reference preview horizon
+        Ndp = outdata.ctrl.MPC.Ndp; % disturbacne preview horizon
+        % weight diagonal matrices 
+        Qsb = outdata.ctrl.MPC.Qsb;
+        Qsa = outdata.ctrl.MPC.Qsa;
+        Qu = outdata.ctrl.MPC.Qu;
+    elseif outdata.ctrl.LaserMPC.use
+        % horizons   
+        N = outdata.ctrl.LaserMPC.N;   %  prediction horizon
+        Nc = outdata.ctrl.LaserMPC.Nc; %  control horizon
+        Nrp = outdata.ctrl.LaserMPC.Nrp; % reference preview horizon
+        Ndp = outdata.ctrl.LaserMPC.Ndp; % disturbacne preview horizon
+        % weight diagonal matrices 
+        Qsb = outdata.ctrl.LaserMPC.Qsb;
+        Qsa = outdata.ctrl.LaserMPC.Qsa;
+        Qu = outdata.ctrl.LaserMPC.Qu;
+    end
 
     % variables
     x = sdpvar(nx, N+1, 'full'); % states of the building
@@ -28,10 +44,7 @@ function [diagnostics, con, obj, con_info] = BeMPC_DualCheck(outdata, model, Dia
     y = sdpvar(ny, N, 'full'); % output = indoor temperatures [degC]
     s = sdpvar(ny, N, 'full'); %  general slack
 
-    % weight diagonal matrices 
-    Qsb = outdata.ctrl.MPC.Qsb;
-    Qsa = outdata.ctrl.MPC.Qsa;
-    Qu = outdata.ctrl.MPC.Qu;
+  
 
     
 %% MPC data from simiulations

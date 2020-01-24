@@ -1,4 +1,4 @@
-function [mpc, constraints_info] = BeMPCdesign(model, MPCParam)
+function [mpc, constraints_info] = LaserMPCdesign(model, MPCParam)
 % MPC design function using Yalmip
 
 if nargin == 0
@@ -22,6 +22,12 @@ if nargin < 2
    MPCParam.Qsb = 1e6*eye(model.pred.ny);
    MPCParam.Qsa = 1e6*eye(model.pred.ny);
    MPCParam.Qu = 1e0*eye(model.pred.nu);
+% % dimensionality of relaxed constraints
+%    MPCParam.RelaxConDim = 0;
+% dimensionality of relaxed constraints types based on unique labels
+   MPCParam.RelaxConTagsDim = 3;
+%    % use tags for different constraints types
+%    MPCParam.RelaxConTags = {};
 end
 
     %% MPC parameters
@@ -50,12 +56,18 @@ end
     % variable energy price profile
     price = sdpvar(1, Nrp, 'full');
     
-%     u_traj = sdpvar(nu, Nc, 'full');
-    
+%     binary parameter for relaxing inactive constraints
+    delta = binvar(MPCParam.RelaxConTagsDim,N, 'full' );
+        
     % weight diagonal matrices 
     Qsb = MPCParam.Qsb;
     Qsa = MPCParam.Qsa;
     Qu = MPCParam.Qu;
+    
+%     big-M numbers for constraints relaxation
+    M = 1e6;
+    m = -1e6;
+    
 
     %% MPC problem formulation
     %  objective function+ constraints init
@@ -126,11 +138,14 @@ end
         end
 
         %         % comfort zone with  violation penalty - dynamic comfort zone
-            con = con + [ (wb-s(:,k)<= y(:,k) <=wa+s(:,k)):['y_zone_k=',int2str(k)] ];
+%             con = con + [ (wb-s(:,k)<= y(:,k) <=wa+s(:,k)):['y_zone_k=',int2str(k)] ];
+            con = con + [ ( wb-s(:,k) + m*delta(1,k) <= y(:,k) <= wa+s(:,k) + M*delta(1,k) ):['y_zone_k=',int2str(k)] ];
             %   input constraints
-            con = con + [ (model.pred.umin <= uk <= model.pred.umax):['u_box_k=',int2str(k)] ];
+%             con = con + [ (model.pred.umin <= uk <= model.pred.umax):['u_box_k=',int2str(k)] ];
+            con = con + [ (model.pred.umin + m*delta(2,k) <= uk <= model.pred.umax + M*delta(2,k)):['u_box_k=',int2str(k)] ];
         % %       slack constraints 
-         con = con + [ (0*ones(model.pred.ny,1)<=s(:,k)):['nonnegative_slacks_k=',int2str(k)] ];
+%          con = con + [ (0*ones(model.pred.ny,1)<=s(:,k)):['nonnegative_slacks_k=',int2str(k)] ];
+         con = con + [ ((0+m*delta(3,k))*ones(model.pred.ny,1)<=s(:,k)):['nonnegative_slacks_k=',int2str(k)] ];
          
     %   -------------  OBJECTIVE FUNCTION  -------------
         %    % quadratic objective function withouth states constr.  penalisation
@@ -156,9 +171,9 @@ end
 
      % optimizer for dynamic comfort zone
      if nd == 0  % no disturbances formulation
-         mpc = optimizer(con, obj, options,  { x(:, 1), wa_prev, wb_prev, price }, {u(:,1); obj} );
+         mpc = optimizer(con, obj, options,  { x(:, 1), wa_prev, wb_prev, price, delta }, {u(:,1); obj} );
      else
-         mpc = optimizer(con, obj, options,  { x(:, 1), d_prev, wa_prev, wb_prev, price }, {u(:,1); obj} );
+         mpc = optimizer(con, obj, options,  { x(:, 1), d_prev, wa_prev, wb_prev, price, delta }, {u(:,1); obj} );
      end    
 
 %      information about constraints size and type

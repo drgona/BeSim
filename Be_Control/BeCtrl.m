@@ -14,6 +14,8 @@ if nargin < 2
 %    CtrlParam.precomputed = 1;
    CtrlParam.MPC.use = 0;
    CtrlParam.MPC.Condensing = 1;
+   CtrlParam.LaserMPC.use = 0;
+   CtrlParam.LaserMPC.Condensing = 1;
    CtrlParam.RBC.use = 0;
    CtrlParam.PID.use = 0;
    CtrlParam.MLagent.use = 0;
@@ -24,6 +26,8 @@ controller.use = CtrlParam.use;
 % controller.precomputed.use = CtrlParam.precomputed;
 controller.MPC.use =    CtrlParam.MPC.use;
 controller.MPC.Condensing =    CtrlParam.MPC.Condensing;
+controller.LaserMPC.use =    CtrlParam.LaserMPC.use;
+controller.LaserMPC.Condensing =    CtrlParam.LaserMPC.Condensing;
 controller.RBC.use =    CtrlParam.RBC.use;
 controller.PID.use =    CtrlParam.PID.use;
 controller.MLagent.use =    CtrlParam.MLagent.use;
@@ -57,7 +61,6 @@ if not(controller.use)    % precomputed inputs and outputs or real measurements
     
 elseif CtrlParam.MPC.use  
     fprintf('*** Create MPC controller ... \n')
-
    
 if  strcmp(model.buildingType,'HollandschHuys')    
      % horizons
@@ -79,19 +82,47 @@ else
     controller.MPC.Qsb = 1e8*eye(model.pred.ny);
     controller.MPC.Qsa = 1e8*eye(model.pred.ny);
     controller.MPC.Qu = 1e0*eye(model.pred.nu);
-end
-
-   
-    
+end   
     %  MPC optimizer synthesis   
     [controller.MPC.optimizer, controller.MPC.constraints_info] = BeMPCdesign(model, controller.MPC);
-       
     fprintf('*** Done.\n')
+    
+elseif CtrlParam.LaserMPC.use  
+    fprintf('*** Create MPC controller ... \n')
+
+   
+if  strcmp(model.buildingType,'HollandschHuys')    
+     % horizons
+    controller.LaserMPC.N = 32;
+    controller.LaserMPC.Nc = 32;
+    controller.LaserMPC.Nrp = 32;
+    controller.LaserMPC.Ndp = 32;
+    % weight diagonal matrices 
+    controller.LaserMPC.Qsb = 1e10*eye(model.pred.ny);
+    controller.LaserMPC.Qsa = 1e10*eye(model.pred.ny);
+    controller.LaserMPC.Qu = 1e0*eye(model.pred.nu);
+else 
+     % horizons
+    controller.LaserMPC.N = 22;
+    controller.LaserMPC.Nc = 22;
+    controller.LaserMPC.Nrp = 22;
+    controller.LaserMPC.Ndp = 22;
+    % weight diagonal matrices 
+    controller.LaserMPC.Qsb = 1e8*eye(model.pred.ny);
+    controller.LaserMPC.Qsa = 1e8*eye(model.pred.ny);
+    controller.LaserMPC.Qu = 1e0*eye(model.pred.nu);
+end   
+    controller.LaserMPC.RelaxConTagsDim = 3;  % this will be a variable for a generic MPC formulation
+    %  MPC optimizer synthesis   
+    [controller.LaserMPC.optimizer, controller.LaserMPC.constraints_info] = LaserMPCdesign(model, controller.LaserMPC);
+       
+    fprintf('*** Done.\n')    
+    
     
     
 elseif CtrlParam.PID.use  
     fprintf('*** Create PID controller ... \n')
-    
+%     TODO
     
     
     fprintf('*** Done.\n')
@@ -99,7 +130,7 @@ elseif CtrlParam.PID.use
     
 elseif CtrlParam.RBC.use      %% RBC heat curve controller
     fprintf('*** Create RBC controller ... \n')
-    
+%     TODO
     controller.RBC.w = 0.5; %  on off thermostat width of the switching zone zone
     controller.RBC.zone = 2; % zone = choose location of the on-off thermostat (output)   
     

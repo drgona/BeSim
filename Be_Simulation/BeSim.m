@@ -21,6 +21,8 @@ if nargin < 3   % controller
    CtrlParam.precomputed = 1;
    CtrlParam.MPC.use = 0;
    CtrlParam.MPC.Condensing = 1;
+   CtrlParam.LaserMPC.use = 0;
+   CtrlParam.LaserMPC.Condensing = 1;
    CtrlParam.RBC.use = 0;
    CtrlParam.PID.use = 0;
    ctrl = BeCtrl(model, CtrlParam);
@@ -69,9 +71,12 @@ Nsim = length(SimStart:SimStop);
 % end
 
 % preview setup
-if ctrl.MPC.use
+if ctrl.MPC.use 
         N = ctrl.MPC.N;
-        Nrp = ctrl.MPC.Nrp;        
+        Nrp = ctrl.MPC.Nrp;   
+elseif ctrl.LaserMPC.use
+        N = ctrl.LaserMPC.N;
+        Nrp = ctrl.LaserMPC.Nrp;           
 elseif ctrl.MLagent.use
         N = ctrl.MLagent.numDelays;
         Nrp = ctrl.MLagent.numDelays;
@@ -162,9 +167,8 @@ if estim.use
 end
 
 
-% MPC info variables
+% initialize MPC 
 if ctrl.MPC.use
-    
 %     initialize MPC diagnostics vectors
         if model.plant.nd == 0  %  no disturbnances option
              [opt_out, feasible, info1, info2, info3, info4] =  ctrl.MPC.optimizer{{X(:,1), wa(:,1:Nrp), wb(:,1:Nrp), Price(:,1:N)}}; % optimizer with estimated states
@@ -172,6 +176,21 @@ if ctrl.MPC.use
              [opt_out, feasible, info1, info2, info3, info4] =  ctrl.MPC.optimizer{{Xp(:, 1), D(:,1:N), wa(:,1:Nrp), wb(:,1:Nrp), Price(:,1:N)}}; % optimizer with estimated states          
         end
  
+end
+
+% initialize Laser MPC 
+if ctrl.LaserMPC.use 
+%     initialize active set flags, 0 = active constrains, 1 = inactive constraint
+        Delta = zeros(ctrl.LaserMPC.RelaxConTagsDim,Nsim+N);
+%     initialize Laser MPC diagnostics vectors
+        if model.plant.nd == 0  %  no disturbnances option
+             [opt_out, feasible, info1, info2, info3, info4] =  ctrl.LaserMPC.optimizer{{X(:,1), wa(:,1:Nrp), wb(:,1:Nrp), Price(:,1:N), Delta(:,1:N)}}; % optimizer with estimated states
+        else
+             [opt_out, feasible, info1, info2, info3, info4] =  ctrl.LaserMPC.optimizer{{Xp(:, 1), D(:,1:N), wa(:,1:Nrp), wb(:,1:Nrp), Price(:,1:N), Delta(:,1:N)}}; % optimizer with estimated states          
+        end
+end
+
+if ctrl.MPC.use || ctrl.LaserMPC.use
     OBJ =  zeros(1,Nsim);            %  MPC objective function
 %     constr_nr = sum(ctrl.MPC.constraints_info.i_length);  % total number of constraints
     DUALS = zeros(length(info4.Dual),Nsim);  %  MPC dual variables for constraints
@@ -179,7 +198,7 @@ if ctrl.MPC.use
     
     ITERS = nan(1,Nsim);  % number of iterations of the solver
     INEQLIN = zeros(length(info4.solveroutput.lambda.ineqlin) ,Nsim);
-    EQLIN = zeros(length(info4.solveroutput.lambda.eqlin) ,Nsim);
+    EQLIN = zeros(length(info4.solveroutput.lambda.eqlin) ,Nsim);  
 end
 
 
@@ -225,31 +244,62 @@ for k = 1:Nsim
         elseif ctrl.PID.use
 %             TODO - implementation
             
-        elseif ctrl.MPC.use          
-%             TODO: predictions as standalone function
-            % preview of disturbance signals on the prediction horizon
-            Dpreview = D(:, k:k+(ctrl.MPC.Ndp-1));   
-            % preview of thresholds on the prediction horizon - Dynamic comfort zone
-            wa_prev = wa(:, k:k+(ctrl.MPC.Nrp-1));
-            wb_prev = wb(:, k:k+(ctrl.MPC.Nrp-1));
-            % preview of the price signal
-            Price_prev = Price(:, k:k+(ctrl.MPC.Nrp-1));
-                                        
-            if estim.use   % estimated states
-                if model.plant.nd == 0  %  no disturbnances option
-                     [opt_out, feasible, info1, info2, info3, info4] =  ctrl.MPC.optimizer{{xp, wa_prev, wb_prev, Price_prev}}; % optimizer with estimated states
-                else
-                     [opt_out, feasible, info1, info2, info3, info4] =  ctrl.MPC.optimizer{{xp, Dpreview, wa_prev, wb_prev, Price_prev}}; % optimizer with estimated states
+        elseif ctrl.MPC.use || ctrl.LaserMPC.use       
+            
+            if ctrl.MPC.use
+    %             TODO: predictions as standalone function
+                % preview of disturbance signals on the prediction horizon
+                Dpreview = D(:, k:k+(ctrl.MPC.Ndp-1));   
+                % preview of thresholds on the prediction horizon - Dynamic comfort zone
+                wa_prev = wa(:, k:k+(ctrl.MPC.Nrp-1));
+                wb_prev = wb(:, k:k+(ctrl.MPC.Nrp-1));
+                % preview of the price signal
+                Price_prev = Price(:, k:k+(ctrl.MPC.Nrp-1));
+                if estim.use   % estimated states
+                    if model.plant.nd == 0  %  no disturbnances option
+                         [opt_out, feasible, info1, info2, info3, info4] =  ctrl.MPC.optimizer{{xp, wa_prev, wb_prev, Price_prev}}; % optimizer with estimated states
+                    else
+                         [opt_out, feasible, info1, info2, info3, info4] =  ctrl.MPC.optimizer{{xp, Dpreview, wa_prev, wb_prev, Price_prev}}; % optimizer with estimated states
+                    end
+                else    % perfect state update
+                    if model.plant.nd == 0  %  no disturbnances option
+                         [opt_out, feasible, info1, info2, info3, info4] =  ctrl.MPC.optimizer{{x0, wa_prev, wb_prev, Price_prev}}; % optimizer with estimated states
+                    else
+                         [opt_out, feasible, info1, info2, info3, info4] =  ctrl.MPC.optimizer{{x0, Dpreview, wa_prev, wb_prev, Price_prev}}; % optimizer with measured states  
+                    end                 
                 end
-            else    % perfect state update
-                if model.plant.nd == 0  %  no disturbnances option
-                     [opt_out, feasible, info1, info2, info3, info4] =  ctrl.MPC.optimizer{{x0, wa_prev, wb_prev, Price_prev}}; % optimizer with estimated states
-                else
-                     [opt_out, feasible, info1, info2, info3, info4] =  ctrl.MPC.optimizer{{x0, Dpreview, wa_prev, wb_prev, Price_prev}}; % optimizer with measured states  
-                end                 
+
+                MPC_options = ctrl.MPC.optimizer.options;
+                
+            elseif ctrl.LaserMPC.use   
+                % preview of disturbance signals on the prediction horizon
+                Dpreview = D(:, k:k+(ctrl.LaserMPC.Ndp-1));   
+                % preview of thresholds on the prediction horizon - Dynamic comfort zone
+                wa_prev = wa(:, k:k+(ctrl.LaserMPC.Nrp-1));
+                wb_prev = wb(:, k:k+(ctrl.LaserMPC.Nrp-1));
+                % preview of the price signal
+                Price_prev = Price(:, k:k+(ctrl.LaserMPC.Nrp-1));
+                % preview of estimated active sets - TODO: add ML model
+                % here mapping MPC params to active sets
+                Delta_prev = Delta(:, k:k+(ctrl.LaserMPC.N-1));
+                
+                if estim.use   % estimated states
+                    if model.plant.nd == 0  %  no disturbnances option
+                         [opt_out, feasible, info1, info2, info3, info4] =  ctrl.LaserMPC.optimizer{{xp, wa_prev, wb_prev, Price_prev, Delta_prev}}; % optimizer with estimated states
+                    else
+                         [opt_out, feasible, info1, info2, info3, info4] =  ctrl.LaserMPC.optimizer{{xp, Dpreview, wa_prev, wb_prev, Price_prev, Delta_prev}}; % optimizer with estimated states
+                    end
+                else    % perfect state update
+                    if model.plant.nd == 0  %  no disturbnances option
+                         [opt_out, feasible, info1, info2, info3, info4] =  ctrl.LaserMPC.optimizer{{x0, wa_prev, wb_prev, Price_prev}}; % optimizer with estimated states
+                    else
+                         [opt_out, feasible, info1, info2, info3, info4] =  ctrl.LaserMPC.optimizer{{x0, Dpreview, wa_prev, wb_prev, Price_prev}}; % optimizer with measured states  
+                    end                 
+                end
+
+                MPC_options = ctrl.LaserMPC.optimizer.options;
             end
-                      
-            MPC_options = ctrl.MPC.optimizer.options;
+                
             
 %             %     feasibility check
             if ~ismember(feasible, [0 3 4 5])
@@ -261,15 +311,13 @@ for k = 1:Nsim
 %                 DUALS(:,k) = info2{1};    % dual variables
                 DUALS(:,k) = info4.Dual; % dual variables values
                 PRIMALS(:,k) = info4.Primal; % primal variables values             
-                SolverTime(k) = info4.solvertime;  %  elapsed solver time of one MPC step
-                
+                SolverTime(k) = info4.solvertime;  %  elapsed solver time of one MPC step               
                 if strcmp(MPC_options.solver,'+quadprog')
                     ITERS(:,k) = info4.solveroutput.output.iterations;
                     INEQLIN(:,k) = info4.solveroutput.lambda.ineqlin;
                     EQLIN(:,k) = info4.solveroutput.lambda.eqlin;
                 end
-%                 info4.solveroutput.lambda
-                
+%                 info4.solveroutput.lambda              
             end           
                  
         elseif ctrl.MLagent.use   % machine learning controller
@@ -619,7 +667,7 @@ if ctrl.use
     outdata.data.Price = Price(:,1:end-Nrp);       
     outdata.data.Cost = Price(:,1:end-Nrp).*U;   
     
-    if ctrl.MPC.use       
+    if ctrl.MPC.use || ctrl.LaserMPC.use   
         outdata.solver.OBJ = OBJ; % obj function
         outdata.solver.DUALS = DUALS; % dual variables
         outdata.solver.PRIMALS = PRIMALS;  % primal variables

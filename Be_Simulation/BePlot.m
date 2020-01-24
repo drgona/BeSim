@@ -22,6 +22,9 @@ font_use = 14;
 if outdata.ctrl.MPC.use
     N = outdata.ctrl.MPC.N;
     Nrp = outdata.ctrl.MPC.Nrp;
+elseif outdata.ctrl.LaserMPC.use
+    N = outdata.ctrl.LaserMPC.N;
+    Nrp = outdata.ctrl.LaserMPC.Nrp;    
 elseif outdata.ctrl.MLagent.use
     N = outdata.ctrl.MLagent.numDelays;
     Nrp = N;
@@ -274,7 +277,7 @@ if outdata.ctrl.use
         box on
     end
        
-    if outdata.ctrl.MPC.use
+    if outdata.ctrl.MPC.use || outdata.ctrl.LaserMPC.use
         
         if strcmp(outdata.solver.MPC_options.solver,'+quadprog')
            rows = 3;
@@ -450,14 +453,14 @@ if outdata.ctrl.use
         end
         
         
-        figure
-        spy(outdata.con_info.ActiveSets')
-        title('Active sets');  
-        ylabel('Dual variables [-]')  
-        xlabel('time [steps]') 
-        
-        
-        
+        if PlotParam.plotActiveSet
+             figure
+            spy(outdata.con_info.ActiveSets')
+            title('Active sets');  
+            ylabel('Dual variables [-]')  
+            xlabel('Active sets [-]')           
+        end
+           
         if PlotParam.plotPCA_Dual
 %             X = U*S*V;
 %           principal components of PCA reduced dual variables 
