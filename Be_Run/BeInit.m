@@ -72,9 +72,9 @@ estim = BeEstim(model, EstimParam);      % construct an estimator object
 
 %% Controller 
 CtrlParam.use = 1;   % 0 for precomputed u,y    1 for closed loop control
-CtrlParam.MPC.use = 0;
+CtrlParam.MPC.use = 1;
 CtrlParam.MPC.Condensing = 1;
-CtrlParam.LaserMPC.use = 1;
+CtrlParam.LaserMPC.use = 0;
 CtrlParam.LaserMPC.Condensing = 1;
 CtrlParam.RBC.use = 0;
 CtrlParam.PID.use = 0;
@@ -142,7 +142,7 @@ end
 
 %% Save Results
 SaveParam.path = ['../Data/Simulations/',buildingType]; % savepath
-SaveParam.save = false;                     % save or not
+SaveParam.save = true;                     % save or not
 SaveParam.data.states = true;              % X      
 SaveParam.data.outputs = true;              % Y    
 SaveParam.data.inputs = true;               % U   
@@ -156,7 +156,7 @@ SaveParam.solver.SolverTime = true;         % solvertime
 SaveParam.solver.iters = true;              % solver iterations
 SaveParam.solver.specifics = false;         % solver specific information
 
-if SaveParam.save
+if SaveParam.save && DiagnoseParam.diagnoseFlag
     BeSave(outdata,SaveParam)
 end
 

@@ -3,7 +3,7 @@ function BeSave(outdata,SaveParam)
 %  rows = simulation steps
 %  columns = selected variables 
 
-if SaveParam.save
+if SaveParam.save && outdata.ctrl.MPC.use
     T = table;
     if SaveParam.data.states
         T.states = outdata.data.X(:,1:end-1)';
