@@ -31,7 +31,7 @@ if SaveParam.save && outdata.ctrl.MPC.use
         T.primals = outdata.solver.PRIMALS';   
     end
     if SaveParam.solver.PCA_duals
-         T.PrincipalDual = outdata.con_info.PrincipalDual;         
+        T.PrincipalDual = outdata.con_info.PrincipalDual;         
     end
     if SaveParam.solver.SolverTime
         T.SolverTime = outdata.solver.SolverTime';   
@@ -43,11 +43,17 @@ if SaveParam.save && outdata.ctrl.MPC.use
         T.SolverINEQLIN = outdata.solver.INEQLIN';   
         T.SolverEQLIN = outdata.solver.EQLIN';  
     end
-
-    
+  
 %     save csv
-    writetable(T,[SaveParam.path '/Order_',outdata.model.Orders.choice,...
+    writetable(T,[SaveParam.path '/Dataset_Order_',outdata.model.Orders.choice,...
         '_Days_',int2str(outdata.SimParam.run.start),'_',int2str(outdata.SimParam.run.end),'_',outdata.model.buildingType,'.csv'],'Delimiter',',')
+    
+    if SaveParam.data.ActiveSets
+        T_AS = table;
+        T_AS.ActiveSets = outdata.con_info.ActiveSets';
+        writetable(T_AS,[SaveParam.path '/ActiveSets_Order_',outdata.model.Orders.choice,...
+        '_Days_',int2str(outdata.SimParam.run.start),'_',int2str(outdata.SimParam.run.end),'_',outdata.model.buildingType,'.csv'],'Delimiter',',')
+    end
     
 end                    
 

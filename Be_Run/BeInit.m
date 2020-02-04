@@ -83,8 +83,10 @@ CtrlParam.MLagent.use = 0;
 ctrl = BeCtrl(model, CtrlParam);       % construct a controller object  
 
 %% Simulate
-SimParam.run.start = 11;
-SimParam.run.end = 17; 
+% SimParam.run.start = 11;
+% SimParam.run.end = 17; 
+SimParam.run.start = 1;
+SimParam.run.end = 365; 
 SimParam.verbose = 1;
 SimParam.flagSave = 0;
 SimParam.comfortTol = 1e-1;
@@ -96,7 +98,7 @@ outdata = BeSim(model, estim, ctrl, dist, refs, SimParam);
 
 
 %% Diagnose the MPC problem via Yalmip optimize
-DiagnoseParam.diagnoseFlag = false;
+DiagnoseParam.diagnoseFlag = true;
 DiagnoseParam.Duals.plotCheck = 0;
 DiagnoseParam.Reduce.lincols.use = 1;
 DiagnoseParam.Reduce.PCA.use = 1;
@@ -152,6 +154,7 @@ SaveParam.solver.objective = true;          % objective values of the QP optimiz
 SaveParam.solver.duals = true;              % dual variables of the QP optimization problem
 SaveParam.solver.primals = true;           % primal variables of the QP optimization problem
 SaveParam.solver.PCA_duals = true;            % save principal components of PCA reduced dual variables 
+SaveParam.data.ActiveSets = true;           % save active sets = uniqe combinations of active constraints
 SaveParam.solver.SolverTime = true;         % solvertime
 SaveParam.solver.iters = true;              % solver iterations
 SaveParam.solver.specifics = false;         % solver specific information
