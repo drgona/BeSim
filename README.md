@@ -22,7 +22,7 @@ Matlab toolbox for quick design and simulation of advanced building climate cont
 ## Prerequisities
 - Matlab: developed and tested on R2017a and R2017b
 - [Yalmip](https://yalmip.github.io/) mathematical modeling and optimization toolbox (BeSim's backbone)
-- Advanced optimization solver, e.g. [Gurobi](http://www.gurobi.com/) (solution of implicit MPC and MHE problems)
+- Optimization solver, e.g. Quadprog or commercial solver such as [Gurobi](http://www.gurobi.com/) (solution of implicit MPC and MHE problems)
 - Matlab toolboxes: Deep Learning, Machine learning (approximate MPC functionality)
 
 ## Getting Started - Demos
