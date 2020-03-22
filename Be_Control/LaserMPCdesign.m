@@ -2,13 +2,23 @@ function [mpc, constraints_info] = LaserMPCdesign(model, MPCParam)
 % MPC design function using Yalmip
 
 if nargin == 0
-   buildingType = 'Infrax';  
-   ModelOrders.range = [100, 200, 600]; % add any reduced order model you wish to have
-   ModelOrders.choice = 200;            % insert model order or 'full' for full order SSM 
-   ModelOrders.off_free = 0;            %  augmented model
-   reload = 0;
-%    construct the model
-   model = BeModel(buildingType, ModelOrders, reload); 
+      buildingType = 'Reno';  
+   ModelParam.Orders.range = [4, 7, 10, 15, 20, 30, 40, 100];    % suggested = model orders for 'Reno', 'Old', 'RenoLight'
+   ModelParam.Orders.choice = 'full';                            % model order selection for prediction
+   ModelParam.off_free = 1;                                      % augmented model with unmeasured disturbances
+   ModelParam.reload = 0;     
+   
+   ModelParam.analyze.SimSteps = 2*672; % Number of simulation steps (Ts = 900 s),  672 = one week
+   ModelParam.analyze.openLoop.use = false;             %  open loop simulation   - TODO
+   ModelParam.analyze.openLoop.start = 1;              % starting day of the analysis
+   ModelParam.analyze.openLoop.end = 7;                % ending day of the analysis
+   ModelParam.analyze.nStepAhead.use = false;           % n-step ahead predicion error  - TODO
+   ModelParam.analyze.nStepAhead.steps = [1, 10, 40];  % x*Ts  
+   ModelParam.analyze.HSV = false;                      %  hankel singular values of ROM
+   ModelParam.analyze.frequency = false;    
+   
+    %    construct the model
+   model = BeModel(buildingType, ModelParam); 
 end
 if nargin < 2
    MPCParam.use = 0;

@@ -26,7 +26,7 @@ addpath('../Be_Learn/')
 % ModelIdentifier for residential houses with radiators:   'Reno', 'Old', 'RenoLight'
 % ModelIdentifier for office buildings with TABS:          'Infrax', 'HollandschHuys'
 % ModelIdentifier for borehole:                            'Borehole'  - % TODO: missing disturbances precomputed file for borehole 
-buildingType = 'Reno';  
+buildingType = 'HollandschHuys';  
 
 % =========== 2, choose model order =================
 ModelParam.Orders.range = [4, 7, 10, 15, 20, 30, 40, 100];    % suggested = model orders for 'Reno', 'Old', 'RenoLight'
@@ -83,10 +83,10 @@ CtrlParam.MLagent.use = 0;
 ctrl = BeCtrl(model, CtrlParam);       % construct a controller object  
 
 %% Simulate
-% SimParam.run.start = 11;
-% SimParam.run.end = 17; 
-SimParam.run.start = 1;
-SimParam.run.end = 365; 
+SimParam.run.start = 11;
+SimParam.run.end = 12; 
+% SimParam.run.start = 1;
+% SimParam.run.end = 364; 
 SimParam.verbose = 1;
 SimParam.flagSave = 0;
 SimParam.comfortTol = 1e-1;
@@ -111,7 +111,7 @@ if DiagnoseParam.diagnoseFlag
 end
 
 %% Plot Results
-PlotParam.flagPlot = true;          % plot 0 - no 1 - yes
+PlotParam.flagPlot = false;          % plot 0 - no 1 - yes
 PlotParam.plotStates = 1;        % plot states
 PlotParam.plotStates3D = 0;      % ribbon plot states
 PlotParam.plotDist = 0;          % plot disturbances

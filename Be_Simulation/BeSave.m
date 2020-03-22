@@ -44,9 +44,15 @@ if SaveParam.save && outdata.ctrl.MPC.use
         T.SolverEQLIN = outdata.solver.EQLIN';  
     end
   
-%     save csv
+%     save dataset to csv
     writetable(T,[SaveParam.path '/Dataset_Order_',outdata.model.Orders.choice,...
         '_Days_',int2str(outdata.SimParam.run.start),'_',int2str(outdata.SimParam.run.end),'_',outdata.model.buildingType,'.csv'],'Delimiter',',')
+    
+%     save constraints labels to csv       
+    T2 = table;
+    T2.con_Labels = outdata.con_info.Labels_idx;   
+    writetable(T2,[SaveParam.path '/Labels_Order_',outdata.model.Orders.choice,...
+        '_',outdata.model.buildingType,'.csv'],'Delimiter',',')
     
     if SaveParam.data.ActiveSets
         T_AS = table;
