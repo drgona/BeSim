@@ -6,8 +6,6 @@ Matlab toolbox for quick design and simulation of advanced building climate cont
 - Automated construction and tuning of model predictive control (MPC) and state estimation algorithms
 - Closed-loop simulation, plotting, and performance analysis
 - [Approximate MPC via machine learning](https://www.sciencedirect.com/science/article/pii/S0306261918302903) (deep lerarning in particular)
-- FMI interface for Modelica emulator models (comming soon)
-- Interface with reinforement learning toolbox from Matlab 2019a (comming soon)
 - For quick start and more details check out the presentation about algorithms and tools behind [BeSim](https://www.researchgate.net/publication/328171184_Tools_and_Techniques_for_Advanced_Model_Predictive_Building_Control)
 
 ## Installation
