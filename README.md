@@ -120,3 +120,4 @@ Finally, later stages of this work partially emerged from the [IBPSA Project 1](
 
 4. Picard D., Drgoňa J., Kvasnica M., Helsen L. (2017). Impact of the controller model complexity on model predictive control performance for buildings. Energy and Buildings, 152, 739-751. 
 
+5. Drgoňa J., Picard D., Helsen L. (2020). Cloud-based implementation of white-box model predictive control for a GEOTABS office building: A field test demonstration. Journal of Process Control, 88, 63-77. 
