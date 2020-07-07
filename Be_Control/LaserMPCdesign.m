@@ -136,11 +136,11 @@ end
         end
 
         %         % comfort zone with  violation penalty - dynamic comfort zone
-            con = con + [ (wb-s(:,k)<= y(:,k) <=wa+s(:,k)):['y_zone_k=',int2str(k)] ];
+        con = con + [ (wb-s(:,k)<= y(:,k) <=wa+s(:,k)):['y_zone_k=',int2str(k)] ];
             %   input constraints
-            con = con + [ (model.pred.umin <= uk <= model.pred.umax):['u_box_k=',int2str(k)] ];
+        con = con + [ (model.pred.umin <= uk <= model.pred.umax):['u_box_k=',int2str(k)] ];
         % %       slack constraints 
-         con = con + [ (0*ones(model.pred.ny,1)<=s(:,k)):['nonnegative_slacks_k=',int2str(k)] ];
+        con = con + [ (0*ones(model.pred.ny,1)<=s(:,k)):['nonnegative_slacks_k=',int2str(k)] ];
          
     %   -------------  OBJECTIVE FUNCTION  -------------
         %    % quadratic objective function withouth states constr.  penalisation

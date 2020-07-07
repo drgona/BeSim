@@ -26,13 +26,13 @@ addpath('../Be_Learn/')
 % ModelIdentifier for residential houses with radiators:   'Reno', 'Old', 'RenoLight'
 % ModelIdentifier for office buildings with TABS:          'Infrax', 'HollandschHuys'
 % ModelIdentifier for borehole:                            'Borehole'  - % TODO: missing disturbances precomputed file for borehole 
-buildingType = 'HollandschHuys';  
+buildingType = 'Reno';  
 
 % =========== 2, choose model order =================
 ModelParam.Orders.range = [4, 7, 10, 15, 20, 30, 40, 100];    % suggested = model orders for 'Reno', 'Old', 'RenoLight'
 % ModelParam.Orders.range = [100, 200, 600];                  % suggested model orders for 'Infrax', 'HollandschHuys'
-ModelParam.Orders.choice = 'full';                            % model order selection for prediction
-ModelParam.off_free = 1;                                      % augmented model with unmeasured disturbances
+ModelParam.Orders.choice = 40;                            % model order selection for prediction
+ModelParam.off_free = 0;                                      % augmented model with unmeasured disturbances
 ModelParam.reload = 0;                                        % if 1 reload ROM, if 0 load saved ROM
 
 % =========== 4, choose model analysis =================
@@ -57,7 +57,7 @@ dist = BeDist(model, DistParam);        % construct a disturbances object
 
 %% References 
 % comfort constraints, price profiles
-RefsParam.Price.variable = 0;       %1 =  variable price profile, 0 = fixed to 1
+RefsParam.Price.variable = 1;       %1 =  variable price profile, 0 = fixed to 1
 
 refs = BeRefs(model, dist, RefsParam);     % construct a references object  
 
@@ -98,7 +98,7 @@ outdata = BeSim(model, estim, ctrl, dist, refs, SimParam);
 
 
 %% Diagnose the MPC problem via Yalmip optimize
-DiagnoseParam.diagnoseFlag = true;
+DiagnoseParam.diagnoseFlag = 0;
 DiagnoseParam.Duals.plotCheck = 0;
 DiagnoseParam.Reduce.lincols.use = 1;
 DiagnoseParam.Reduce.PCA.use = 1;
@@ -111,7 +111,7 @@ if DiagnoseParam.diagnoseFlag
 end
 
 %% Plot Results
-PlotParam.flagPlot = false;          % plot 0 - no 1 - yes
+PlotParam.flagPlot = true;          % plot 0 - no 1 - yes
 PlotParam.plotStates = 1;        % plot states
 PlotParam.plotStates3D = 0;      % ribbon plot states
 PlotParam.plotDist = 0;          % plot disturbances
@@ -119,7 +119,7 @@ PlotParam.plotDist3D = 0;        % ribbon plot disturbances
 PlotParam.plotEstim = 0;         % plot estimation
 PlotParam.plotEstim3D = 0;       % ribbon plot estimation
 PlotParam.plotCtrl = 1;          % plot control
-PlotParam.plotPrice = 0;          % plot price signal
+PlotParam.plotPrice = 1;          % plot price signal
 if DiagnoseParam.diagnoseFlag
     PlotParam.plotPrimalDual = 1;          % plot primal and dual varibles
     PlotParam.plotPrimalDual3D = 1;        % ribbon plot primal and dual varibles
