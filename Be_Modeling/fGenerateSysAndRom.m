@@ -25,5 +25,5 @@ function [sys_dExt, rom, redinfo] = fGenerateSysAndRom(path_ssm, Ts, x0_value, o
     for i = 1:length(orders)
         [rom{i}, redinfo] = reduce(sys_dExt, orders(i));
     end
-
+%     https://www.mathworks.com/help/robust/ref/reduce.html
 end

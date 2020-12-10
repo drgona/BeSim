@@ -26,14 +26,14 @@ addpath('../Be_Learn/')
 % ModelIdentifier for residential houses with radiators:   'Reno', 'Old', 'RenoLight'
 % ModelIdentifier for office buildings with TABS:          'Infrax', 'HollandschHuys'
 % ModelIdentifier for borehole:                            'Borehole'  - % TODO: missing disturbances precomputed file for borehole 
-buildingType = 'Reno';  
+buildingType = 'Old';  
 
 % =========== 2, choose model order =================
 ModelParam.Orders.range = [4, 7, 10, 15, 20, 30, 40, 100];    % suggested = model orders for 'Reno', 'Old', 'RenoLight'
 % ModelParam.Orders.range = [100, 200, 600];                  % suggested model orders for 'Infrax', 'HollandschHuys'
 ModelParam.Orders.choice = 40;                            % model order selection for prediction
 ModelParam.off_free = 0;                                      % augmented model with unmeasured disturbances
-ModelParam.reload = 0;                                        % if 1 reload ROM, if 0 load saved ROM
+ModelParam.reload = 0;                                        % if 1 perform ROM, if 0 load saved ROM
 
 % =========== 4, choose model analysis =================
 ModelParam.analyze.SimSteps = 2*672; % Number of simulation steps (Ts = 900 s),  672 = one week
